@@ -83,7 +83,7 @@ body.night-background {
 
     width: 4px;
 
-    height: 160px;
+    height: 130px; /* 끈 길이 중간으로 조정 */
 
     margin: 0 auto;
 
@@ -125,7 +125,7 @@ body.night-background {
 
 .pull-chain.pulled .chain {
 
-    height: 175px; /* 늘어난 길이에 맞춰 조정 */
+    height: 145px; /* 당겼을 때 길이 중간으로 조정 */
 
 }
 
