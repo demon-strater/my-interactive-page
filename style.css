@@ -139,7 +139,7 @@ body.night-background {
 }
 
 .pull-chain .chain {
-    transition: height 0.15s ease-out, color 0.15s ease-out;
+    transition: all 0.1s ease-out;
 }
 .pull-chain .handle {
     transition: transform 0.15s ease-out, background-color 0.15s ease-out;
