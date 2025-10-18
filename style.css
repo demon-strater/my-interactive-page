@@ -167,10 +167,10 @@ body.night-background {
     }
 
     .chain {
-        height: 80px; /* Further shortened chain for mobile */
+        height: 55px; /* Further shortened chain for mobile */
     }
 
     .pull-chain.pulled .chain {
-        height: 95px; /* Adjusted pulled length */
+        height: 70px; /* Adjusted pulled length */
     }
 }
