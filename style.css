@@ -97,6 +97,9 @@ body.night-background {
 
     color: #fff; /* Default color for night */
 
+    /* Force hardware acceleration to fix potential mobile rendering bug */
+    transform: translateZ(0);
+
 }
 
 
