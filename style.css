@@ -87,15 +87,9 @@ body.night-background {
 
     margin: 0 auto;
 
-    /* Beaded chain effect */
-
-    background-image: radial-gradient(circle, currentColor 2px, transparent 2px);
-
-    background-size: 4px 8px; /* Ball size and spacing */
-
+    /* Beaded chain effect - Color is now handled by classes */
+    background-size: 4px 8px;
     background-repeat: repeat-y;
-
-    color: #fff; /* Default color for night */
 
     /* Force hardware acceleration to fix potential mobile rendering bug */
     transform: translateZ(0);
@@ -110,8 +104,7 @@ body.night-background {
 
     height: 15px;
 
-    background-color: #fff;
-
+    /* Color is now handled by classes */
     border-radius: 50%;
 
     margin: 0 auto;
@@ -139,24 +132,10 @@ body.night-background {
 }
 
 .pull-chain .chain {
-    transition: height 0.15s ease-out, color 0.15s ease-out;
+    transition: height 0.15s ease-out;
 }
 .pull-chain .handle {
-    transition: transform 0.15s ease-out, background-color 0.15s ease-out;
-}
-
-
-
-/* 끈이 검정색일 때 */
-
-.pull-chain.black-cord .chain {
-
-    color: #333;
-
-}
-
-.pull-chain.black-cord .handle {
-    background-color: #333; /* 어두운 색 */
+    transition: transform 0.15s ease-out;
 }
 
 /* Mobile adjustments */
@@ -191,5 +170,4 @@ body.night-background {
     .pull-chain.black-cord .handle {
         background-color: #333;
     }
-}
 }
