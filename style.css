@@ -1,0 +1,158 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    /* 기본 배경 (낮): 그라데이션 강화 + 구름 + 오른쪽 위 하늘색 */
+    background-image: linear-gradient(to bottom right, #B0E0E6, #E0FFFF, #B0E0E6), /* 하늘색과 흰색 그라데이션 */
+                          radial-gradient(circle at top right, rgba(0,191,255,0.4) 0%, transparent 40%), /* 오른쪽 위 진한 하늘색 */
+                          radial-gradient(circle at 10% 90%, rgba(255,255,255,0.15) 0%, transparent 40%),
+                          radial-gradient(circle at 90% 10%, rgba(255,255,255,0.15) 0%, transparent 40%),
+                          radial-gradient(circle at 40% 60%, rgba(255,255,255,0.1) 0%, transparent 35%),
+                          radial-gradient(circle at 70% 30%, rgba(255,255,255,0.1) 0%, transparent 35%);
+    background-attachment: fixed;
+    background-size: 100% 100%;
+    transition: background 8s ease-in-out; /* 배경 전환 시간 8초로 변경 (조금 더 느리게) */
+}
+
+/* 밤 배경 클래스 */
+body.night-background {
+    /* 밤: 남색 계열 그라데이션 + 별 */
+    background-image: linear-gradient(to bottom right, #000033, #000055, #000077, #000099), /* 남색 계열 그라데이션 */
+                          radial-gradient(circle at 10% 10%, rgba(255,255,255,0.3) 1px, transparent 1%),
+                          radial-gradient(circle at 90% 50%, rgba(255,255,255,0.2) 1px, transparent 1%),
+                          radial-gradient(circle at 50% 90%, rgba(255,255,255,0.25) 1px, transparent 1%),
+                          radial-gradient(circle at 30% 40%, rgba(255,255,255,0.2) 1px, transparent 1%),
+                          radial-gradient(circle at 70% 70%, rgba(255,255,255,0.3) 1px, transparent 1%),
+                          radial-gradient(circle at 20% 60%, rgba(255,255,255,0.2) 1px, transparent 1%),
+                          radial-gradient(circle at 80% 30%, rgba(255,255,255,0.25) 1px, transparent 1%),
+                          radial-gradient(circle at 45% 15%, rgba(255,255,255,0.15) 1px, transparent 1%),
+                          radial-gradient(circle at 60% 85%, rgba(255,255,255,0.15) 1px, transparent 1%);
+    background-attachment: fixed;
+    background-size: 100% 100%;
+}
+
+.glass-panel {
+    width: 500px; /* 크기 추가 확대 */
+    padding: 30px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    text-align: center;
+}
+
+.album-art-container {
+    width: 100%;
+    padding-top: 100%;
+    position: relative;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+}
+
+.scene {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-size: cover;
+    background-position: center;
+    transition: opacity 0.5s ease-in-out; /* 사진 전환 효과 (더 자연스럽고 빠르게) */
+}
+
+#morningScene { background-image: url('image/morning.png'); opacity: 1; }
+#nightScene { background-image: url('image/night.png'); opacity: 0; }
+
+/* 풀 체인 스위치 스타일 */
+.pull-chain {
+    position: absolute;
+    top: 0;
+    right: 60px; /* 왼쪽으로 조금 당김 */
+    cursor: pointer;
+}
+
+
+
+.chain {
+
+    width: 4px;
+
+    height: 160px;
+
+    margin: 0 auto;
+
+    /* Beaded chain effect */
+
+    background-image: radial-gradient(circle, currentColor 2px, transparent 2px);
+
+    background-size: 4px 8px; /* Ball size and spacing */
+
+    background-repeat: repeat-y;
+
+    color: #fff; /* Default color for night */
+
+}
+
+
+
+.handle {
+
+    width: 15px;
+
+    height: 15px;
+
+    background-color: #fff;
+
+    border-radius: 50%;
+
+    margin: 0 auto;
+
+    transform: translateX(-5.5px);
+
+    box-shadow: 0 2px 4px rgba(0,0,0,0.25); /* Add shadow for depth */
+
+}
+
+
+
+/* 당겨지는 애니메이션 효과 */
+
+.pull-chain.pulled .chain {
+
+    height: 175px; /* 늘어난 길이에 맞춰 조정 */
+
+}
+
+.pull-chain.pulled .handle {
+
+    transform: translate(-5.5px, 15px);
+
+}
+
+.pull-chain .chain, .pull-chain .handle {
+
+    transition: all 0.15s ease-out; /* A bit smoother */
+
+}
+
+
+
+/* 끈이 검정색일 때 */
+
+.pull-chain.black-cord .chain {
+
+    color: #333;
+
+}
+
+.pull-chain.black-cord .handle {
+
+    background-color: #333; /* 어두운 색 */
+
+}
