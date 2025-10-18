@@ -67,7 +67,7 @@ body.night-background {
 }
 
 #morningScene { background-image: url('image/morning.png'); opacity: 1; }
-#nightScene { background-image: url('image/night.png'); opacity: 0; }
+#nightScene { background-image: url('image/midnight.png'); opacity: 0; }
 
 /* 풀 체인 스위치 스타일 */
 .pull-chain {
@@ -152,7 +152,25 @@ body.night-background {
 }
 
 .pull-chain.black-cord .handle {
-
     background-color: #333; /* 어두운 색 */
+}
 
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .glass-panel {
+        width: 90vw;
+        padding: 20px;
+    }
+
+    .pull-chain {
+        right: 30px;
+    }
+
+    .chain {
+        height: 80px; /* Further shortened chain for mobile */
+    }
+
+    .pull-chain.pulled .chain {
+        height: 95px; /* Adjusted pulled length */
+    }
 }
