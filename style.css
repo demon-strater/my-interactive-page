@@ -135,10 +135,11 @@ body.night-background {
 
 }
 
-.pull-chain .chain, .pull-chain .handle {
-
-    transition: all 0.15s ease-out; /* A bit smoother */
-
+.pull-chain .chain {
+    transition: height 0.15s ease-out, color 0.15s ease-out;
+}
+.pull-chain .handle {
+    transition: transform 0.15s ease-out, background-color 0.15s ease-out;
 }
 
 
@@ -167,10 +168,10 @@ body.night-background {
     }
 
     .chain {
-        height: 55px; /* Further shortened chain for mobile */
+        height: 120px; /* 모바일 끈 길이 조정 */
     }
 
     .pull-chain.pulled .chain {
-        height: 70px; /* Adjusted pulled length */
+        height: 135px; /* 모바일 당겼을 때 길이 조정 */
     }
 }
