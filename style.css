@@ -158,37 +158,3 @@ body.night-background {
 .pull-chain.black-cord .handle {
     background-color: #333; /* 어두운 색 */
 }
-
-/* Mobile adjustments */
-@media (max-width: 768px) {
-    .glass-panel {
-        width: 90vw;
-        padding: 20px;
-    }
-
-    .pull-chain {
-        right: 30px;
-    }
-
-    .chain {
-        height: 120px; /* 모바일 끈 길이 조정 */
-    }
-
-    .pull-chain.pulled .chain {
-        height: 135px; /* 모바일 당겼을 때 길이 조정 */
-    }
-
-    /* --- Mobile Color Bug Fix --- */
-    .pull-chain .chain {
-        color: #fff;
-    }
-    .pull-chain.black-cord .chain {
-        color: #333;
-    }
-    .pull-chain .handle {
-        background-color: #fff;
-    }
-    .pull-chain.black-cord .handle {
-        background-color: #333;
-    }
-}
