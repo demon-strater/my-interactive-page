@@ -269,6 +269,7 @@ body.night-background .site-header {
         margin-right: auto;
         padding: 10px; /* Reduced padding */
         gap: 10px; /* Reduced gap */
+        margin-top: 40px;
     }
 
     .track-info {
@@ -286,11 +287,11 @@ body.night-background .site-header {
         width: 100%;
         flex-wrap: wrap; /* Allow items to wrap */
         gap: 10px;
-        margin-top: 0;
+        margin-top: 20px;
     }
 
     .glass-panel {
-        width: 60vw; /* Reduced panel size */
+        width: 65vw; /* Reduced panel size */
         max-width: 400px;
         padding: 20px;
     }
