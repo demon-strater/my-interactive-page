@@ -290,19 +290,24 @@ body.night-background .site-header {
     }
 
     .glass-panel {
-        width: 70vw; /* Reduced panel size */
+        width: 60vw; /* Reduced panel size */
         max-width: 400px;
         padding: 20px;
     }
 
     .nav-arrow {
-        width: 40px;
-        height: 40px;
+        width: 35px;
+        height: 35px;
         font-size: 20px;
     }
 
     .pull-chain {
         top: 5px;
-        right: 20px;
+        right: 5%;
+        z-index: 30;
+    }
+
+    .chain {
+        height: 100px;
     }
 }
