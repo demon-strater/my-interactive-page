@@ -228,10 +228,13 @@ body.night-background .site-header {
 /* Responsive Styles for Mobile */
 @media (max-width: 768px) {
     body {
-        gap: 20px; /* Reduce gap for smaller screens */
-        padding: 10px;
+        flex-direction: column;
+        align-items: center; /* Center the content column */
         justify-content: flex-start; /* Align content to the top */
-        padding-top: 30px;
+        gap: 20px; /* Reduce gap for smaller screens */
+        padding: 30px 10px; /* Adjust padding */
+        height: auto; /* Allow body to grow */
+        overflow-y: auto; /* Allow scrolling */
     }
 
     .site-header {
