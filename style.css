@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&display=swap');
 
 body {
     margin: 0;
@@ -8,21 +8,25 @@ body {
     align-items: center;
     height: 100vh;
     overflow: hidden;
-    /* 기본 배경 (낮): 그라데이션 강화 + 구름 + 오른쪽 위 하늘색 */
+    padding: 20px;
+    box-sizing: border-box;
+    transition: background 8s ease-in-out;
+    background-attachment: fixed;
+    background-size: 100% 100%;
+}
+
+/* Day Background */
+body {
     background-image: linear-gradient(to bottom right, #B0E0E6, #E0FFFF, #B0E0E6), /* 하늘색과 흰색 그라데이션 */
                           radial-gradient(circle at top right, rgba(0,191,255,0.4) 0%, transparent 40%), /* 오른쪽 위 진한 하늘색 */
                           radial-gradient(circle at 10% 90%, rgba(255,255,255,0.15) 0%, transparent 40%),
                           radial-gradient(circle at 90% 10%, rgba(255,255,255,0.15) 0%, transparent 40%),
                           radial-gradient(circle at 40% 60%, rgba(255,255,255,0.1) 0%, transparent 35%),
                           radial-gradient(circle at 70% 30%, rgba(255,255,255,0.1) 0%, transparent 35%);
-    background-attachment: fixed;
-    background-size: 100% 100%;
-    transition: background 8s ease-in-out; /* 배경 전환 시간 8초로 변경 (조금 더 느리게) */
 }
 
-/* 밤 배경 클래스 */
+/* Night Background */
 body.night-background {
-    /* 밤: 남색 계열 그라데이션 + 별 */
     background-image: linear-gradient(to bottom right, #000033, #000055, #000077, #000099), /* 남색 계열 그라데이션 */
                           radial-gradient(circle at 10% 10%, rgba(255,255,255,0.3) 1px, transparent 1%),
                           radial-gradient(circle at 90% 50%, rgba(255,255,255,0.2) 1px, transparent 1%),
@@ -33,12 +37,104 @@ body.night-background {
                           radial-gradient(circle at 80% 30%, rgba(255,255,255,0.25) 1px, transparent 1%),
                           radial-gradient(circle at 45% 15%, rgba(255,255,255,0.15) 1px, transparent 1%),
                           radial-gradient(circle at 60% 85%, rgba(255,255,255,0.15) 1px, transparent 1%);
-    background-attachment: fixed;
-    background-size: 100% 100%;
+}
+
+.site-header {
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    text-align: left;
+    color: #333; /* Default day color */
+    transition: color 0.8s ease-in-out;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+    z-index: 20; /* Ensure header is above other elements */
+}
+
+body.night-background .site-header {
+    color: #fff; /* Night color */
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.site-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem; /* Reduced title size */
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: 1px;
+}
+
+.site-header p {
+    font-family: 'Poppins', sans-serif; /* Keep description font simple */
+    font-size: 0.95rem; /* Increased paragraph size */
+    font-weight: 300;
+    margin: 10px 0 0 0; /* Reduced top margin */
+    line-height: 1.7;
+    max-width: 450px; /* Limit width for readability */
+}
+
+/* Music Player */
+.music-player {
+    position: absolute;
+    left: 40px;
+    top: 50%; /* Center vertically */
+    transform: translateY(-50%); /* Fine-tune vertical centering */
+    padding: 20px;
+    width: 200px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    z-index: 20;
+}
+
+.track-info {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #fff; /* Default to white, will be updated by JS if needed */
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.player-button {
+    width: 50px;
+    height: 50px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 20px;
+    color: white;
+    padding: 0;
+    padding-left: 4px; /* Optically center the play icon */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.player-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+
+.main-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px; /* Space between arrows and panel */
+    position: relative; /* For pull-chain positioning */
+    margin-top: 50px; /* Push content down */
 }
 
 .glass-panel {
-    width: 500px; /* 크기 추가 확대 */
+    width: 500px;
     padding: 30px;
     border-radius: 20px;
     background: rgba(255, 255, 255, 0.1);
@@ -63,98 +159,128 @@ body.night-background {
     top: 0; left: 0; right: 0; bottom: 0;
     background-size: cover;
     background-position: center;
-    transition: opacity 0.5s ease-in-out; /* 사진 전환 효과 (더 자연스럽고 빠르게) */
+    transition: opacity 0.5s ease-in-out;
 }
 
-#morningScene { background-image: url('image/morning.png'); opacity: 1; }
-#nightScene { background-image: url('image/midnight.png'); opacity: 0; }
+#morningScene { background-image: url('image/morning.png'); opacity: 0; }
+#nightScene { background-image: url('image/night.png'); opacity: 0; }
+#vincentMorningScene { background-image: url('image/vincent morning.png'); opacity: 0; }
+#vincentNightScene { background-image: url('image/vincent night.jpg'); opacity: 0; }
 
-/* 풀 체인 스위치 스타일 */
+.nav-arrow {
+    width: 50px;
+    height: 50px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    color: white;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.nav-arrow:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
 .pull-chain {
     position: absolute;
-    top: 0;
-    right: 60px; /* 왼쪽으로 조금 당김 */
+    top: -5px; 
+    right: 273px; 
     cursor: pointer;
+    z-index: 10;
 }
-
-
 
 .chain {
-
     width: 4px;
-
-    height: 145px; /* 끈 길이 재조정 */
-
+    height: 145px;
     margin: 0 auto;
-
-    /* Beaded chain effect */
-
     background-image: radial-gradient(circle, currentColor 2px, transparent 2px);
-
-    background-size: 4px 8px; /* Ball size and spacing */
-
+    background-size: 4px 8px;
     background-repeat: repeat-y;
-
-    color: #fff; /* Default color for night */
-
-    /* Force hardware acceleration to fix potential mobile rendering bug */
+    color: #fff;
     transform: translateZ(0);
-
-}
-
-
-
-.handle {
-
-    width: 15px;
-
-    height: 15px;
-
-    background-color: #fff;
-
-    border-radius: 50%;
-
-    margin: 0 auto;
-
-    transform: translateX(-5.5px);
-
-    box-shadow: 0 2px 4px rgba(0,0,0,0.25); /* Add shadow for depth */
-
-}
-
-
-
-/* 당겨지는 애니메이션 효과 */
-
-.pull-chain.pulled .chain {
-
-    height: 160px; /* 당겼을 때 길이 재조정 */
-
-}
-
-.pull-chain.pulled .handle {
-
-    transform: translate(-5.5px, 15px);
-
-}
-
-.pull-chain .chain {
     transition: all 0.1s ease-out;
 }
-.pull-chain .handle {
+
+.handle {
+    width: 15px;
+    height: 15px;
+    background-color: #fff;
+    border-radius: 50%;
+    margin: 0 auto;
+    transform: translateX(-5.5px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.25);
     transition: transform 0.15s ease-out, background-color 0.15s ease-out;
 }
 
+.pull-chain.pulled .chain { height: 160px; }
+.pull-chain.pulled .handle { transform: translate(-5.5px, 15px); }
 
+.pull-chain.black-cord .chain { color: #333; }
+.pull-chain.black-cord .handle { background-color: #333; }
 
-/* 끈이 검정색일 때 */
+/* Responsive Styles for Mobile */
+@media (max-width: 768px) {
+    body {
+        gap: 20px; /* Reduce gap for smaller screens */
+        padding: 10px;
+        justify-content: flex-start; /* Align content to the top */
+        padding-top: 30px;
+    }
 
-.pull-chain.black-cord .chain {
+    .site-header {
+        position: static; /* Bring header into the document flow */
+        text-align: center;
+        width: 90%;
+        left: auto;
+        top: auto;
+    }
 
-    color: #333;
+    .site-header h1 {
+        font-size: 2rem;
+    }
 
-}
+    .site-header p {
+        font-size: 0.8rem;
+    }
 
-.pull-chain.black-cord .handle {
-    background-color: #333; /* 어두운 색 */
+    .music-player {
+        position: static; /* Bring player into the document flow */
+        order: 3; /* Place it after the main container */
+        width: 180px;
+        top: auto;
+        left: auto;
+        transform: none; /* Reset transform */
+    }
+
+    .main-container {
+        order: 2; /* Keep it in the middle */
+        width: 100%;
+        flex-wrap: wrap; /* Allow items to wrap */
+        gap: 10px;
+        margin-top: 0;
+    }
+
+    .glass-panel {
+        width: 80vw; /* Make panel responsive */
+        max-width: 400px;
+        padding: 20px;
+    }
+
+    .nav-arrow {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    .pull-chain {
+        top: 10px;
+        right: 10px;
+    }
 }
