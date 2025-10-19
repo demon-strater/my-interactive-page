@@ -231,8 +231,8 @@ body.night-background .site-header {
         flex-direction: column;
         align-items: center; /* Center the content column */
         justify-content: flex-start; /* Align content to the top */
-        gap: 20px; /* Reduce gap for smaller screens */
-        padding: 30px 10px; /* Adjust padding */
+        gap: 15px; /* Reduced gap */
+        padding: 20px 10px; /* Adjust padding */
         height: auto; /* Allow body to grow */
         overflow-y: auto; /* Allow scrolling */
     }
@@ -243,6 +243,8 @@ body.night-background .site-header {
         width: 90%;
         left: auto;
         top: auto;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .site-header h1 {
@@ -251,6 +253,9 @@ body.night-background .site-header {
 
     .site-header p {
         font-size: 0.8rem;
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .music-player {
@@ -260,6 +265,20 @@ body.night-background .site-header {
         top: auto;
         left: auto;
         transform: none; /* Reset transform */
+        margin-left: auto;
+        margin-right: auto;
+        padding: 10px; /* Reduced padding */
+        gap: 10px; /* Reduced gap */
+    }
+
+    .track-info {
+        font-size: 0.9rem; /* Reduced font size */
+    }
+
+    .player-button {
+        width: 40px; /* Reduced size */
+        height: 40px; /* Reduced size */
+        font-size: 18px; /* Reduced font size */
     }
 
     .main-container {
@@ -271,7 +290,7 @@ body.night-background .site-header {
     }
 
     .glass-panel {
-        width: 80vw; /* Make panel responsive */
+        width: 70vw; /* Reduced panel size */
         max-width: 400px;
         padding: 20px;
     }
@@ -283,7 +302,7 @@ body.night-background .site-header {
     }
 
     .pull-chain {
-        top: 10px;
-        right: 10px;
+        top: 5px;
+        right: 20px;
     }
 }
