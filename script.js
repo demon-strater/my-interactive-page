@@ -3,98 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const pullChain = document.getElementById('pullChain');
     const leftArrow = document.getElementById('leftArrow');
     const rightArrow = document.getElementById('rightArrow');
-    const body = document.body;
-    const playPauseBtn = document.getElementById('playPauseBtn');
-    const trackInfo = document.getElementById('trackInfo');
-
-    const scenes = {
-        morning: document.getElementById('morningScene'),
-        night: document.getElementById('nightScene'),
-        vincentMorning: document.getElementById('vincentMorningScene'),
-        vincentNight: document.getElementById('vincentNightScene')
-    };
-
-    // Audio objects
-    const clickSound = new Audio('music/swich.mp3');
-    clickSound.volume = 0.5;
-    clickSound.load();
-
-    const morningMusic = new Audio('music/morning music.mp3');
-    morningMusic.loop = true;
-    morningMusic.volume = 0.4;
-    morningMusic.load();
-
-    const nightMusic = new Audio('music/night music.mp3');
-    nightMusic.loop = true;
-    nightMusic.volume = 0.4;
-    nightMusic.load();
-
-    const plingSound = new Audio('music/Pling.mp3');
-    plingSound.volume = 0.6;
-    plingSound.load();
-
-    // State variables
-    const imageSets = [
-        { morning: scenes.morning, night: scenes.night },
-        { morning: scenes.vincentMorning, night: scenes.vincentNight }
-    ];
-    let currentSetIndex = 0;
-    let isNight = false;
-    let isMusicPlaying = false;
-
-    // --- Functions ---
-
-    function playClickSound() {
-        clickSound.currentTime = 0;
-        clickSound.play().catch(e => console.error("Audio play failed:", e));
-    }
-
-    function playPlingSound() {
-        plingSound.currentTime = 0;
-        plingSound.play().catch(e => console.error("Pling sound play failed:", e));
-    }
-
-    function managePlayback() {
-        const activeTrack = isNight ? nightMusic : morningMusic;
-        const inactiveTrack = isNight ? morningMusic : nightMusic;
-
-        inactiveTrack.pause();
-        inactiveTrack.currentTime = 0;
-
-        if (isMusicPlaying) {
-            activeTrack.play().catch(e => console.error("Music play failed:", e));
-            playPauseBtn.innerHTML = '❚❚';
-            playPauseBtn.style.paddingLeft = '0px'; // Reset padding for pause icon
-        } else {
-            activeTrack.pause();
-            playPauseBtn.innerHTML = '▶';
-            playPauseBtn.style.paddingLeft = '4px'; // Re-apply padding for play icon
-        }
-    }
-
-    function updateTrackInfo() {
-        const trackName = isNight ? "Night Music" : "Morning Music";
-        const color = isNight ? "#fff" : "#333";
-        trackInfo.textContent = trackName;
-        trackInfo.style.color = color;
-        playPauseBtn.style.color = color;
-    }
-
-    function updateScenes() {
-        // Hide all scenes first
-        for (const key in scenes) {
-            scenes[key].style.opacity = 0;
-        }
-
-        const currentSet = imageSets[currentSetIndex];
-
-        if (isNight) {
-            currentSet.morning.style.opacity = 0;
-            currentSet.night.style.opacity = 1;document.addEventListener('DOMContentLoaded', () => {
-    // Get all DOM elements
-    const pullChain = document.getElementById('pullChain');
-    const leftArrow = document.getElementById('leftArrow');
-    const rightArrow = document.getElementById('rightArrow');
     const glassPanel = document.querySelector('.glass-panel');
     const body = document.body;
     const playPauseBtn = document.getElementById('playPauseBtn');
@@ -245,3 +153,4 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Initial State ---
     updateScenes();
 });
+
