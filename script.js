@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const body = document.body;
     const playPauseBtn = document.getElementById('playPauseBtn');
     const trackInfo = document.getElementById('trackInfo');
+    const albumArtContainer = document.querySelector('.album-art-container');
 
     const scenes = {
         morning: document.getElementById('morningScene'),
@@ -141,12 +142,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let touchEndX = 0;
     const swipeThreshold = 50; // Minimum distance for a swipe
 
-    glassPanel.addEventListener('touchstart', function(event) {
-        touchStartX = event.changedTouches[0].screenX;
+    albumArtContainer.addEventListener('touchstart', function(event) {
+        touchStartX = event.changedTouches[0].pageX;
     }, { passive: true });
 
-    glassPanel.addEventListener('touchend', function(event) {
-        touchEndX = event.changedTouches[0].screenX;
+    albumArtContainer.addEventListener('touchend', function(event) {
+        touchEndX = event.changedTouches[0].pageX;
         handleSwipe();
     });
 
@@ -159,6 +160,11 @@ document.addEventListener('DOMContentLoaded', () => {
             goLeft();
         }
     }
+
+    // --- Initial State ---
+    updateScenes();
+});
+
 
     // --- Initial State ---
     updateScenes();
