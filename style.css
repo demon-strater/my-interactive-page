@@ -57,7 +57,7 @@ body.night-background .site-header {
 
 .site-header h1 {
     font-family: 'Playfair Display', serif;
-    font-size: 3rem; /* Reduced title size */
+    font-size: 3.8rem; /* Increased title size */
     font-weight: 700;
     margin: 0;
     letter-spacing: 1px;
@@ -65,7 +65,7 @@ body.night-background .site-header {
 
 .site-header p {
     font-family: 'Poppins', sans-serif; /* Keep description font simple */
-    font-size: 0.95rem; /* Increased paragraph size */
+    font-size: 1.05rem; /* Increased paragraph size */
     font-weight: 300;
     margin: 10px 0 0 0; /* Reduced top margin */
     line-height: 1.7;
@@ -248,11 +248,11 @@ body.night-background .site-header {
     }
 
     .site-header h1 {
-        font-size: 2rem;
+        font-size: 2.6rem;
     }
 
     .site-header p {
-        font-size: 0.6rem;
+        font-size: 0.85rem;
         text-align: center;
         margin-left: auto;
         margin-right: auto;
@@ -291,7 +291,7 @@ body.night-background .site-header {
     }
 
     .glass-panel {
-        width: 65vw; /* Reduced panel size */
+        width: 85vw; /* 확대된 panel size */
         max-width: 400px;
         padding: 20px;
     }
