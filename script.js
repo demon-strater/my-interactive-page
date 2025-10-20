@@ -108,14 +108,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function goLeft() {
         playPlingSound();
         currentSetIndex = (currentSetIndex - 1 + imageSets.length) % imageSets.length;
-        isNight = false;
         updateScenes();
     }
 
     function goRight() {
         playPlingSound();
         currentSetIndex = (currentSetIndex + 1) % imageSets.length;
-        isNight = false;
         updateScenes();
     }
 
@@ -138,17 +136,29 @@ document.addEventListener('DOMContentLoaded', () => {
     leftArrow.addEventListener('click', goLeft);
     rightArrow.addEventListener('click', goRight);
 
-    // Swipe listener
-    const listener = SwipeListener(glassPanel);
-    glassPanel.addEventListener('swipe', function (e) {
-        const directions = e.detail.directions;
-        if (directions.left) {
+    // Manual Swipe Detection
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const swipeThreshold = 50; // Minimum distance for a swipe
+
+    glassPanel.addEventListener('touchstart', function(event) {
+        touchStartX = event.changedTouches[0].screenX;
+    }, { passive: true });
+
+    glassPanel.addEventListener('touchend', function(event) {
+        touchEndX = event.changedTouches[0].screenX;
+        handleSwipe();
+    });
+
+    function handleSwipe() {
+        if (touchEndX < touchStartX - swipeThreshold) {
+            // Swiped left
             goRight();
-        }
-        if (directions.right) {
+        } else if (touchEndX > touchStartX + swipeThreshold) {
+            // Swiped right
             goLeft();
         }
-    });
+    }
 
     // --- Initial State ---
     updateScenes();
