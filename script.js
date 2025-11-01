@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
         vincentNight: document.getElementById('vincentNightScene')
     };
 
+    // test comment
+
     // Audio objects
     const clickSound = new Audio('music/swich.mp3');
     clickSound.volume = 0.5;
@@ -160,11 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
             goLeft();
         }
     }
-
-    // --- Initial State ---
-    updateScenes();
-});
-
 
     // --- Initial State ---
     updateScenes();
