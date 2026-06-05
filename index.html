@@ -3,45 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Glassmorphism Photo Switch</title>
-    <link rel="stylesheet" href="style.css"> 
+    <title>Interaction Library</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="view-hub">
+    <section class="hub-screen" id="hubScreen" aria-label="Interaction hub">
+        <main class="clock-hub timeline-hub" aria-label="Scrollable clock timeline of interaction sites">
+            <header class="hub-header">
+                <p>Interactive Archive</p>
+                <h1>Interaction Library</h1>
+            </header>
 
-    <header class="site-header">
-        <h1>IMPRESSIONISM</h1>
-        <p>
-            인상주의는 색채·색조·질감 자체에 관심을 두는 미술 사조이며, <br>
-            인상파 화가들은 빛과 함께 시시각각으로 움직이는 색채의 <br>
-            변화 속에서 자연을 묘사합니다.
-        </p>
-    </header>
+            <section class="clock-stage timeline-clock" aria-label="Current interaction hour">
+                <div class="clock-face" aria-hidden="true">
+                    <span class="clock-hand hour-hand"></span>
+                    <span class="clock-hand minute-hand" id="timelineHand"></span>
+                    <span class="clock-pin"></span>
+                </div>
+                <div class="clock-readout">
+                    <span id="featureHour">01</span>
+                    <strong id="featureTitle">IMPRESSIONISM</strong>
+                    <small id="featureMeta">Music gallery</small>
+                </div>
+            </section>
 
-    <div class="music-player" id="musicPlayer">
-        <div class="track-info" id="trackInfo">-</div>
-        <div class="controls">
-            <button id="playPauseBtn" class="player-button">▶</button>
+            <section class="timeline-rail" aria-label="Scroll interaction cards">
+                <div class="timeline-track" id="timelineTrack">
+                    <button class="timeline-card active" type="button" data-hour="1" data-site="impressionism">
+                        <span class="card-hour">01</span>
+                        <strong>IMPRESSIONISM</strong>
+                        <small>Music gallery</small>
+                    </button>
+                    <button class="timeline-card" type="button" data-hour="2">
+                        <span class="card-hour">02</span>
+                        <strong>LIGHT STUDY</strong>
+                        <small>Light and opacity</small>
+                    </button>
+                    <button class="timeline-card" type="button" data-hour="3">
+                        <span class="card-hour">03</span>
+                        <strong>SOUND LOOP</strong>
+                        <small>Reactive audio sketch</small>
+                    </button>
+                    <button class="timeline-card" type="button" data-hour="4">
+                        <span class="card-hour">04</span>
+                        <strong>MEMORY GRID</strong>
+                        <small>Pattern recall</small>
+                    </button>
+                    <button class="timeline-card" type="button" data-hour="5">
+                        <span class="card-hour">05</span>
+                        <strong>MOTION TYPE</strong>
+                        <small>Kinetic typography</small>
+                    </button>
+                    <button class="timeline-card" type="button" data-hour="6">
+                        <span class="card-hour">06</span>
+                        <strong>COLOR FIELD</strong>
+                        <small>Chromatic controls</small>
+                    </button>
+                    <button class="timeline-card" type="button" data-hour="7">
+                        <span class="card-hour">07</span>
+                        <strong>TEXTURE MAP</strong>
+                        <small>Surface explorer</small>
+                    </button>
+                    <button class="timeline-card" type="button" data-hour="8">
+                        <span class="card-hour">08</span>
+                        <strong>TYPE CLOCK</strong>
+                        <small>Temporal letterforms</small>
+                    </button>
+                    <button class="timeline-card" type="button" data-hour="9">
+                        <span class="card-hour">09</span>
+                        <strong>SHADOW ROOM</strong>
+                        <small>Depth and contrast</small>
+                    </button>
+                    <button class="timeline-card" type="button" data-hour="10">
+                        <span class="card-hour">10</span>
+                        <strong>NOISE BLOOM</strong>
+                        <small>Generated particles</small>
+                    </button>
+                    <button class="timeline-card" type="button" data-hour="11">
+                        <span class="card-hour">11</span>
+                        <strong>WAVE INDEX</strong>
+                        <small>Rhythm interface</small>
+                    </button>
+                    <button class="timeline-card" type="button" data-hour="12">
+                        <span class="card-hour">12</span>
+                        <strong>ORBIT NOTES</strong>
+                        <small>Circular navigation</small>
+                    </button>
+                </div>
+            </section>
+        </main>
+    </section>
+
+    <div class="site-transition" id="siteTransition" aria-hidden="true">
+        <div class="transition-ripple"></div>
+        <div class="transition-panel" id="transitionPanel">
+            <span class="transition-hour" id="transitionHour">01</span>
+            <strong id="transitionTitle">IMPRESSIONISM</strong>
+            <small id="transitionMeta">Music gallery</small>
         </div>
     </div>
 
-    <div class="main-container">
-        <div class="nav-arrow left-arrow" id="leftArrow">&#9664;</div>
-        <div class="glass-panel">
-            <div class="album-art-container">
-                <div class="scene" id="morningScene"></div>
-                <div class="scene" id="nightScene"></div>
-                <div class="scene" id="vincentMorningScene"></div>
-                <div class="scene" id="vincentNightScene"></div>
-            </div>
-        </div>
-        <div class="nav-arrow right-arrow" id="rightArrow">&#9654;</div>
-    </div>
+    <section class="interaction-screen" id="interactionScreen" aria-label="Impressionism interaction">
+        <button class="back-button" id="backToShelf" type="button">Back to Clock</button>
 
-    <!-- 풀 체인 스위치 -->
-    <div class="pull-chain" id="pullChain">
-        <div class="chain"></div>
-        <div class="handle"></div>
-    </div>
+        <header class="site-header">
+            <h1>IMPRESSIONISM</h1>
+        </header>
+
+        <main class="main-container" aria-label="Impressionism music player">
+            <button class="nav-arrow left-arrow" id="leftArrow" aria-label="Previous artwork">&#9664;</button>
+            <section class="player-shell">
+                <div class="album-art-container" aria-label="Current artwork">
+                    <div class="scene" id="morningScene"></div>
+                    <div class="scene" id="nightScene"></div>
+                    <div class="scene" id="vincentMorningScene"></div>
+                    <div class="scene" id="vincentNightScene"></div>
+                    <div class="album-overlay">
+                        <span class="album-tag" id="albumTag">Morning</span>
+                    </div>
+                </div>
+
+                <div class="music-player" id="musicPlayer">
+                    <div class="now-playing">
+                        <div>
+                            <h2 class="track-title" id="trackTitle">Morning Music</h2>
+                            <p class="track-info" id="trackInfo">Impressionism Study</p>
+                        </div>
+                        <button id="playPauseBtn" class="player-button" aria-label="Play">&#9654;</button>
+                    </div>
+
+                    <div class="progress-panel" aria-hidden="true">
+                        <div class="time-row">
+                            <span id="currentTime">0:00</span>
+                            <span id="durationTime">0:00</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                    </div>
+
+                    <div class="playlist">
+                        <button class="playlist-item active" data-track="morning" type="button">
+                            <span>Morning</span>
+                        </button>
+                        <button class="playlist-item" data-track="night" type="button">
+                            <span>Night</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+            <button class="nav-arrow right-arrow" id="rightArrow" aria-label="Next artwork">&#9654;</button>
+        </main>
+
+        <button class="pull-chain" id="pullChain" aria-label="Switch day and night">
+            <span class="chain"></span>
+            <span class="handle"></span>
+        </button>
+    </section>
 
     <script src="script.js"></script>
 </body>
