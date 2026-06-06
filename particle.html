@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>particle</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@900&display=swap');
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
+            overflow: hidden;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        canvas {
+            position: fixed;
+            inset: 0;
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .fallback-title {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(253, 230, 138, 0.86);
+            font-size: clamp(3rem, 14vw, 11rem);
+            line-height: 0.9;
+            pointer-events: none;
+            text-transform: uppercase;
+            text-shadow: 0 0 42px rgba(245, 158, 11, 0.24);
+        }
+
+        #ui-container {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            z-index: 10;
+        }
+
+        .hint-text {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 11px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            pointer-events: none;
+            animation: pulse 3s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 0.2;
+                transform: translateY(0);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: translateY(-2px);
+            }
+        }
+
+        input[type="text"] {
+            width: 280px;
+            padding: 15px 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            outline: none;
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.02);
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            font-size: 16px;
+            text-align: center;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            color: #f1f5f9;
+            background-color: rgba(255, 255, 255, 0.04);
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        #bakeBtn.active {
+            border-color: rgba(255, 255, 255, 0.5);
+            color: #fff;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.15);
+        }
+
+        @media (max-width: 560px) {
+            #ui-container {
+                bottom: 30px;
+                width: calc(100% - 32px);
+            }
+
+            input[type="text"] {
+                width: min(280px, 100%);
+            }
+
+            .btn-group {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="fallback-title" id="fallbackTitle">particle</div>
+    <div id="ui-container">
+        <div class="hint-text">Optical Crystalline Rendering</div>
+        <input type="text" id="textInput" value="particle" placeholder="Enter text" autocomplete="off" spellcheck="false">
+        <div class="btn-group">
+            <button id="toggleBtn">Scatter</button>
+            <button id="bakeBtn">Bake Glass</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const textInput = document.getElementById('textInput');
+        const toggleBtn = document.getElementById('toggleBtn');
+        const bakeBtn = document.getElementById('bakeBtn');
+        const fallbackTitle = document.getElementById('fallbackTitle');
+
+        let particleArray = [];
+        let textData = { text: '', x: 0, y: 0, fontSize: 0, totalWidth: 0 };
+        let isScattered = false;
+        let isGlass = false;
+        let glassProgress = 0;
+
+        const gravity = 0.4;
+        const frictionFloor = 0.45;
+        const frictionAir = 0.95;
+        const sandColors = ['#FDE68A', '#F59E0B', '#D97706', '#B45309'];
+
+        const mouse = {
+            x: null,
+            y: null,
+            radius: 150,
+            pressed: false
+        };
+
+        window.addEventListener('mousemove', event => {
+            mouse.x = event.x;
+            mouse.y = event.y;
+        });
+
+        window.addEventListener('mousedown', () => {
+            mouse.pressed = true;
+        });
+
+        window.addEventListener('mouseup', () => {
+            mouse.pressed = false;
+
+            if (!isScattered && !isGlass) {
+                for (const particle of particleArray) {
+                    const dx = particle.x - mouse.x;
+                    const dy = particle.y - mouse.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    const burstRadius = mouse.radius * 2.2;
+
+                    if (dist < burstRadius && dist > 0) {
+                        const force = Math.pow((burstRadius - dist) / burstRadius, 2) * 55;
+                        particle.vx += (dx / dist) * force;
+                        particle.vy += (dy / dist) * force;
+                    }
+                }
+            }
+        });
+
+        toggleBtn.addEventListener('click', () => {
+            if (isGlass) return;
+
+            isScattered = !isScattered;
+            toggleBtn.textContent = isScattered ? 'Assemble' : 'Scatter';
+
+            if (isScattered) {
+                for (const particle of particleArray) {
+                    particle.vx = (Math.random() - 0.5) * 18;
+                    particle.vy = (Math.random() - 1) * 8;
+                }
+            }
+        });
+
+        bakeBtn.addEventListener('click', () => {
+            isGlass = !isGlass;
+
+            if (isGlass) {
+                isScattered = false;
+                toggleBtn.textContent = 'Scatter';
+                bakeBtn.textContent = 'Restore Sand';
+                bakeBtn.classList.add('active');
+            } else {
+                bakeBtn.textContent = 'Bake Glass';
+                bakeBtn.classList.remove('active');
+            }
+        });
+
+        class Particle {
+            constructor(x, y) {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.baseX = x;
+                this.baseY = y;
+                this.size = Math.random() * 1.5 + 0.6;
+                this.density = Math.random() * 20 + 12;
+                this.color = sandColors[Math.floor(Math.random() * sandColors.length)];
+                this.vx = 0;
+                this.vy = 0;
+                this.ease = 0.06 + Math.random() * 0.06;
+            }
+
+            draw() {
+                if (glassProgress > 0.98) return;
+
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = Math.max(0, 1 - glassProgress * 1.5);
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+
+            update() {
+                if (isScattered) {
+                    this.vy += gravity;
+                    this.x += this.vx;
+                    this.y += this.vy;
+
+                    if (this.y + this.size >= canvas.height) {
+                        this.y = canvas.height - this.size;
+                        this.vy *= -0.15;
+                        this.vx *= frictionFloor;
+                    }
+
+                    if (this.x + this.size >= canvas.width || this.x - this.size <= 0) {
+                        this.vx *= -0.5;
+                    }
+
+                    this.vx *= frictionAir;
+                    this.vy *= frictionAir;
+                } else {
+                    const dx = (mouse.x || 0) - this.x;
+                    const dy = (mouse.y || 0) - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (mouse.x !== null && !isGlass) {
+                        if (mouse.pressed) {
+                            const pressRadius = mouse.radius * 2.5;
+
+                            if (dist < pressRadius && dist > 0) {
+                                const force = (pressRadius - dist) / pressRadius;
+                                this.vx += (dx / dist) * force * 2.5;
+                                this.vy += (dy / dist) * force * 2.5;
+                            }
+                        } else if (dist < mouse.radius && dist > 0) {
+                            const force = (mouse.radius - dist) / mouse.radius;
+                            this.vx -= (dx / dist) * force * this.density * 0.6;
+                            this.vy -= (dy / dist) * force * this.density * 0.6;
+                        }
+                    }
+
+                    const targetEase = isGlass ? 0.32 : this.ease;
+                    this.vx += (this.baseX - this.x) * targetEase;
+                    this.vy += (this.baseY - this.y) * targetEase;
+                    this.vx *= 0.78;
+                    this.vy *= 0.78;
+                    this.x += this.vx;
+                    this.y += this.vy;
+                }
+            }
+        }
+
+        function drawUltraRealisticGlassBlock() {
+            const progress = glassProgress;
+            if (progress < 0.01) return;
+
+            const { text, x, y, fontSize, totalWidth } = textData;
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.font = `900 ${fontSize}px Poppins`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            ctx.shadowColor = `rgba(0, 0, 0, ${0.8 * progress})`;
+            ctx.shadowBlur = 10 * progress;
+            ctx.shadowOffsetY = 14 * progress;
+            ctx.fillStyle = 'rgba(0,0,0,0.05)';
+            ctx.fillText(text, 0, 0);
+
+            ctx.shadowColor = `rgba(0, 238, 255, ${0.4 * progress})`;
+            ctx.shadowBlur = 40 * progress;
+            ctx.shadowOffsetY = 0;
+            ctx.fillStyle = `rgba(255, 255, 255, ${0.01 * progress})`;
+            ctx.fillText(text, 0, 0);
+            ctx.shadowBlur = 0;
+
+            const bodyGrad = ctx.createLinearGradient(-totalWidth / 2, -fontSize / 2, totalWidth / 2, fontSize / 2);
+            bodyGrad.addColorStop(0, `rgba(255, 255, 255, ${0.1 * progress})`);
+            bodyGrad.addColorStop(0.3, `rgba(200, 245, 255, ${0.05 * progress})`);
+            bodyGrad.addColorStop(0.7, `rgba(100, 220, 255, ${0.06 * progress})`);
+            bodyGrad.addColorStop(1, `rgba(220, 245, 255, ${0.08 * progress})`);
+
+            ctx.fillStyle = bodyGrad;
+            ctx.fillText(text, 0, 0);
+
+            ctx.strokeStyle = `rgba(255, 255, 255, ${0.9 * progress})`;
+            ctx.lineWidth = 0.5;
+            ctx.strokeText(text, 0, 0);
+
+            ctx.strokeStyle = `rgba(255, 255, 255, ${0.2 * progress})`;
+            ctx.lineWidth = 12 * progress;
+            ctx.strokeText(text, -3 * progress, -3 * progress);
+
+            ctx.strokeStyle = `rgba(0, 30, 60, ${0.4 * progress})`;
+            ctx.lineWidth = 2 * progress;
+            ctx.strokeText(text, 2 * progress, 2 * progress);
+
+            ctx.globalCompositeOperation = 'screen';
+
+            const mx = (mouse.x - x) / 20 || 0;
+            const my = (mouse.y - y) / 20 || 0;
+            const specGrad = ctx.createLinearGradient(
+                -totalWidth / 2 + mx * 20,
+                -fontSize / 2 + my * 20,
+                totalWidth / 2 + mx * 20,
+                fontSize / 2 + my * 20
+            );
+
+            specGrad.addColorStop(0, 'rgba(255,255,255,0)');
+            specGrad.addColorStop(0.48, `rgba(255, 255, 255, ${0.9 * progress})`);
+            specGrad.addColorStop(0.5, `rgba(255, 255, 255, ${1.0 * progress})`);
+            specGrad.addColorStop(0.52, `rgba(255, 255, 255, ${0.9 * progress})`);
+            specGrad.addColorStop(1, 'rgba(255,255,255,0)');
+
+            ctx.fillStyle = specGrad;
+            ctx.fillText(text, 0, 0);
+
+            ctx.fillStyle = `rgba(255, 255, 255, ${1.0 * progress})`;
+            [
+                { x: -0.38, y: -0.28, s: 0.04 },
+                { x: 0.18, y: -0.42, s: 0.03 },
+                { x: 0.42, y: 0.18, s: 0.025 }
+            ].forEach(glint => {
+                ctx.beginPath();
+                ctx.arc(glint.x * totalWidth + mx * 6, glint.y * fontSize + my * 6, fontSize * glint.s * progress, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            ctx.restore();
+        }
+
+        function init(text) {
+            particleArray = [];
+            fallbackTitle.textContent = text || '';
+
+            if (!text || canvas.width === 0 || canvas.height === 0) return;
+
+            let fontSize = 240;
+            ctx.font = `900 ${fontSize}px Poppins`;
+            let totalWidth = ctx.measureText(text).width;
+
+            if (totalWidth > canvas.width * 0.88) {
+                fontSize *= canvas.width * 0.88 / totalWidth;
+                totalWidth = canvas.width * 0.88;
+            }
+
+            ctx.font = `900 ${fontSize}px Poppins`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            textData = { text, x: centerX, y: centerY, fontSize, totalWidth };
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillText(text, centerX, centerY);
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const gap = 4;
+
+            for (let y = 0; y < canvas.height; y += gap) {
+                for (let x = 0; x < canvas.width; x += gap) {
+                    if (imgData.data[(y * canvas.width + x) * 4 + 3] > 128) {
+                        particleArray.push(new Particle(x, y));
+                    }
+                }
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            fallbackTitle.style.opacity = particleArray.length > 0 ? '0' : '1';
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (isGlass && glassProgress < 1) glassProgress += 0.015;
+            if (!isGlass && glassProgress > 0) glassProgress -= 0.025;
+
+            if (glassProgress > 0.01) {
+                drawUltraRealisticGlassBlock();
+            }
+
+            for (const particle of particleArray) {
+                particle.update();
+                particle.draw();
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        function resizeAndInit() {
+            const rect = document.body.getBoundingClientRect();
+            const width = Math.max(320, Math.round(rect.width || window.innerWidth || 800));
+            const height = Math.max(240, Math.round(rect.height || window.innerHeight || 600));
+
+            canvas.width = width;
+            canvas.height = height;
+            init(textInput.value);
+        }
+
+        window.addEventListener('resize', resizeAndInit);
+        window.addEventListener('pageshow', resizeAndInit);
+        if (window.ResizeObserver) {
+            new ResizeObserver(resizeAndInit).observe(document.body);
+        }
+        window.addEventListener('message', event => {
+            if (event.data?.type === 'particle:reset') {
+                resizeAndInit();
+            }
+        });
+
+        textInput.addEventListener('input', event => init(event.target.value));
+        if (document.fonts?.ready) {
+            document.fonts.ready.then(resizeAndInit).catch(resizeAndInit);
+        } else {
+            resizeAndInit();
+        }
+        animate();
+    </script>
+</body>
+</html>

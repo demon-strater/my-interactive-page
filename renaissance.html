@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>RENASCIMENTO</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#0d0905;color:#e4cfaa;font-family:'Georgia','Times New Roman',serif}
+#app{display:flex;flex-direction:column;width:100%;height:100%}
+header{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid rgba(200,168,107,.2);flex-shrink:0}
+.h-title{font-size:12px;letter-spacing:.28em;color:#c8a86b;font-style:italic}
+.h-period{font-size:9px;letter-spacing:.18em;color:rgba(228,207,170,.35)}
+nav{height:44px;display:flex;align-items:stretch;border-bottom:1px solid rgba(200,168,107,.2);flex-shrink:0}
+.tab{flex:1;background:none;border:none;border-right:1px solid rgba(200,168,107,.08);color:rgba(228,207,170,.38);font-family:'Georgia',serif;font-size:10px;letter-spacing:.18em;cursor:pointer;transition:all .25s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.tab:last-child{border-right:none}
+.tab .sub{font-size:7px;letter-spacing:.1em;opacity:.55}
+.tab:hover{color:#c8a86b;background:rgba(200,168,107,.05)}
+.tab.active{color:#f5d07a;background:rgba(200,168,107,.07);border-bottom:2px solid #c8a86b}
+#cw{flex:1;position:relative;overflow:hidden;min-height:0}
+canvas{position:absolute;top:0;left:0;display:block}
+footer{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-top:1px solid rgba(200,168,107,.2);flex-shrink:0}
+.f-mod{font-size:10px;letter-spacing:.2em;color:#c8a86b}
+.f-inst{font-size:9px;letter-spacing:.08em;color:rgba(228,207,170,.35);font-style:italic;max-width:360px;text-align:right}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <span class="h-title">RENASCIMENTO · ITALIA</span>
+    <span class="h-period">XIV – XVII SECOLO · QUATTROCENTO</span>
+  </header>
+  <nav>
+    <button class="tab active" data-m="perspectiva">PERSPECTIVA<span class="sub">Alberti · 1435</span></button>
+    <button class="tab" data-m="luce">LUCE<span class="sub">Leonardo · 1490</span></button>
+    <button class="tab" data-m="aurea">AUREA<span class="sub">Pacioli · 1509</span></button>
+    <button class="tab" data-m="corpo">CORPO<span class="sub">Vitruvio · 1490</span></button>
+  </nav>
+  <div id="cw"><canvas id="c"></canvas></div>
+  <footer>
+    <span class="f-mod" id="fmod">PERSPECTIVA · Costruzione Legittima</span>
+    <span class="f-inst" id="finst">Muovi il mouse · Fai clic per fissare il punto di fuga</span>
+  </footer>
+</div>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const wrap = document.getElementById('cw');
+let W = 0, H = 0;
+
+function resize() {
+  const dpr = window.devicePixelRatio || 1;
+  const r = wrap.getBoundingClientRect();
+  W = r.width; H = r.height;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  if (cur && cur.onResize) cur.onResize(W, H);
+}
+window.addEventListener('resize', resize);
+
+function evXY(e) {
+  const r = canvas.getBoundingClientRect();
+  const src = e.touches ? e.touches[0] : e;
+  return [src.clientX - r.left, src.clientY - r.top];
+}
+let mx = 0, my = 0, mdown = false;
+canvas.addEventListener('mousemove', e => { [mx,my]=evXY(e); cur&&cur.onMove&&cur.onMove(mx,my); });
+canvas.addEventListener('mousedown', e => { mdown=true; const [x,y]=evXY(e); cur&&cur.onDown&&cur.onDown(x,y); });
+canvas.addEventListener('mouseup',   e => { mdown=false; const [x,y]=evXY(e); cur&&cur.onUp&&cur.onUp(x,y); });
+canvas.addEventListener('mouseleave',e => { if(mdown){mdown=false;cur&&cur.onUp&&cur.onUp(mx,my);} });
+canvas.addEventListener('touchstart',e=>{e.preventDefault();const[x,y]=evXY(e);mdown=true;mx=x;my=y;cur&&cur.onDown&&cur.onDown(x,y);},{passive:false});
+canvas.addEventListener('touchmove', e=>{e.preventDefault();const[x,y]=evXY(e);mx=x;my=y;cur&&cur.onMove&&cur.onMove(x,y);},{passive:false});
+canvas.addEventListener('touchend',  e=>{e.preventDefault();mdown=false;cur&&cur.onUp&&cur.onUp(mx,my);},{passive:false});
+
+let cur = null, raf = null;
+function loop() {
+  raf = requestAnimationFrame(loop);
+  // Re-initialize if canvas is still 0×0 (was hidden during first resize call)
+  if (W === 0 || H === 0) { resize(); return; }
+  cur && cur.draw && cur.draw(ctx, W, H);
+}
+function go(m) {
+  cancelAnimationFrame(raf);
+  cur = MOD[m];
+  if(cur.onResize) cur.onResize(W,H);
+  if(cur.init) cur.init();
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.m===m));
+  document.getElementById('fmod').textContent = cur.fmod;
+  document.getElementById('finst').textContent = cur.finst;
+  loop();
+}
+
+const g  = (a=1) => `rgba(200,168,107,${a})`;
+const gb = (a=1) => `rgba(245,208,122,${a})`;
+function ln(ctx,x1,y1,x2,y2,col,lw=1){ ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.stroke(); }
+
+// ══════════════════════════════════════════════════════════
+// MODULE 1 · PERSPECTIVA — Costruzione Legittima
+// ══════════════════════════════════════════════════════════
+const MOD = {};
+MOD.perspectiva = {
+  fmod:'PERSPECTIVA · Costruzione Legittima · Alberti 1435',
+  finst:'Muovi il mouse · Fai clic per fissare il punto di fuga',
+  vp:{x:0,y:0}, tgt:{x:0,y:0}, pinned:false,
+  onResize(w,h){ this.vp.x=this.tgt.x=w/2; this.vp.y=this.tgt.y=h*0.42; },
+  init(){ this.pinned=false; },
+  onMove(x,y){ if(!this.pinned){this.tgt.x=x;this.tgt.y=y;} },
+  onDown(x,y){ this.pinned=!this.pinned; if(!this.pinned){this.tgt.x=x;this.tgt.y=y;} },
+  draw(ctx,W,H){
+    const v=this.vp;
+    v.x+=(this.tgt.x-v.x)*0.09; v.y+=(this.tgt.y-v.y)*0.09;
+    const vpx=v.x, vpy=v.y;
+
+    ctx.fillStyle='#0d0905'; ctx.fillRect(0,0,W,H);
+
+    const FAN=22, FT=16, CT=12, NW=10;
+
+    // floor fan lines
+    for(let i=0;i<=FAN;i++) ln(ctx,vpx,vpy,i/FAN*W,H,g(0.14),0.6);
+    // floor transversals
+    for(let i=1;i<=FT;i++){
+      const tp=Math.pow(i/(FT+1),1.4);
+      const y=vpy+(H-vpy)*tp;
+      ln(ctx,vpx-vpx*tp,y,vpx+(W-vpx)*tp,y,g(0.08+0.28*(1-tp)),0.6);
+    }
+    // ceiling fan lines
+    for(let i=0;i<=FAN;i++) ln(ctx,vpx,vpy,i/FAN*W,0,g(0.14),0.6);
+    // ceiling transversals
+    for(let i=1;i<=CT;i++){
+      const tp=Math.pow(i/(CT+1),1.4);
+      ln(ctx,vpx-vpx*tp,vpy-vpy*tp,vpx+(W-vpx)*tp,vpy-vpy*tp,g(0.06+0.2*(1-tp)),0.6);
+    }
+    // wall verticals (left & right)
+    for(let i=1;i<=NW;i++){
+      const tp=Math.pow(i/(NW+1),1.4);
+      ln(ctx,vpx-vpx*tp,vpy-vpy*tp,vpx-vpx*tp,vpy+(H-vpy)*tp,g(0.06+0.18*(1-tp)),0.6);
+      ln(ctx,vpx+(W-vpx)*tp,vpy-vpy*tp,vpx+(W-vpx)*tp,vpy+(H-vpy)*tp,g(0.06+0.18*(1-tp)),0.6);
+    }
+
+    // main room edge orthogonals
+    ln(ctx,vpx,vpy,0,0,g(0.65),1.2);   ln(ctx,vpx,vpy,W,0,g(0.65),1.2);
+    ln(ctx,vpx,vpy,0,H,g(0.65),1.2);   ln(ctx,vpx,vpy,W,H,g(0.65),1.2);
+
+    // back wall
+    const bw=Math.min(W,H)*0.09, bh=Math.min(W,H)*0.11;
+    ctx.strokeStyle=g(0.75); ctx.lineWidth=1;
+    ctx.strokeRect(vpx-bw,vpy-bh,bw*2,bh*2);
+    // arch
+    ctx.beginPath(); ctx.arc(vpx,vpy-bh,bw,Math.PI,0);
+    ctx.strokeStyle=g(0.6); ctx.stroke();
+    // arch ribs
+    for(let i=1;i<=5;i++){
+      const a=Math.PI+i*(Math.PI/6), r=bw*0.7;
+      ln(ctx,vpx,vpy-bh,vpx+Math.cos(a)*r,vpy-bh+Math.sin(a)*r,g(0.18),0.5);
+    }
+
+    // horizon line
+    ln(ctx,0,vpy,W,vpy,g(0.1),0.5);
+
+    // VP marker
+    const ms=14;
+    ln(ctx,vpx-ms,vpy,vpx+ms,vpy,g(this.pinned?1:0.72));
+    ln(ctx,vpx,vpy-ms,vpx,vpy+ms,g(this.pinned?1:0.72));
+    ctx.beginPath(); ctx.arc(vpx,vpy,5,0,Math.PI*2);
+    ctx.strokeStyle=g(this.pinned?1:0.65); ctx.lineWidth=1; ctx.stroke();
+    if(this.pinned){ ctx.beginPath();ctx.arc(vpx,vpy,3,0,Math.PI*2);ctx.fillStyle=gb(1);ctx.fill(); }
+
+    ctx.font='italic 9px Georgia'; ctx.fillStyle=g(0.42); ctx.textAlign='center';
+    ctx.fillText('P·F',vpx,vpy-22);
+
+    ctx.textAlign='left';
+    ctx.font='italic 9px Georgia'; ctx.fillStyle=g(0.3);
+    ctx.fillText('PUNTO DI FUGA',18,20);
+    ctx.font='italic 8px Georgia'; ctx.fillStyle=g(0.18);
+    ctx.fillText('x = '+Math.round(vpx)+'   y = '+Math.round(vpy),18,32);
+    if(this.pinned){ ctx.fillStyle=gb(0.45); ctx.fillText('⊙  FISSATO',18,46); }
+    ctx.fillStyle=g(0.15);
+    ctx.fillText('Leon Battista Alberti · De Pictura · MCDXXXV',18,H-14);
+    ctx.fillText('Omnia ad punctum unum convergunt',18,H-4);
+  }
+};
+
+// ══════════════════════════════════════════════════════════
+// MODULE 2 · LUCE — Chiaroscuro e Sfumato
+// ══════════════════════════════════════════════════════════
+MOD.luce = {
+  fmod:'LUCE · Chiaroscuro e Sfumato · Leonardo da Vinci',
+  finst:'Muovi il mouse per spostare la fonte di luce',
+  lt:{x:0,y:0}, tgt:{x:0,y:0},
+  onResize(w,h){ this.lt.x=this.tgt.x=w*0.28; this.lt.y=this.tgt.y=h*0.22; },
+  onMove(x,y){ this.tgt.x=x; this.tgt.y=y; },
+  draw(ctx,W,H){
+    this.lt.x+=(this.tgt.x-this.lt.x)*0.1;
+    this.lt.y+=(this.tgt.y-this.lt.y)*0.1;
+    const lx=this.lt.x, ly=this.lt.y;
+
+    ctx.fillStyle='#0d0905'; ctx.fillRect(0,0,W,H);
+
+    // ambient room glow
+    const ag=ctx.createRadialGradient(lx,ly,0,lx,ly,Math.max(W,H)*0.85);
+    ag.addColorStop(0,'rgba(210,150,70,0.13)');
+    ag.addColorStop(0.6,'rgba(100,60,20,0.04)');
+    ag.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=ag; ctx.fillRect(0,0,W,H);
+
+    const flY=H*0.68;
+    const R=Math.min(W,H)*0.11;
+    const sph=[
+      {cx:W*0.28,cy:flY-R*0.95,   r:R*0.95},
+      {cx:W*0.5, cy:flY-R*0.82,   r:R*0.82},
+      {cx:W*0.72,cy:flY-R*1.05,   r:R*1.05},
+    ];
+
+    // cast shadows
+    sph.forEach(s=>{
+      const dx=s.cx-lx, dy=s.cy-ly, dist=Math.hypot(dx,dy)||1;
+      const sx=s.cx+(dx/dist)*s.r*3, sy=flY+s.r*0.12;
+      ctx.save();
+      ctx.translate(sx,sy); ctx.rotate(Math.atan2(dy,dx)+Math.PI/2); ctx.scale(1,0.22);
+      const sg=ctx.createRadialGradient(0,0,0,0,0,s.r*1.9);
+      sg.addColorStop(0,'rgba(0,0,0,0.52)'); sg.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=sg; ctx.beginPath(); ctx.arc(0,0,s.r*1.9,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    });
+
+    // floor line
+    ln(ctx,0,flY,W,flY,g(0.1));
+
+    // draw spheres
+    const base=['#6b4c2a','#5a3d22','#7a5533'];
+    sph.forEach((s,i)=>{
+      const dx=lx-s.cx, dy=ly-s.cy, dist=Math.hypot(dx,dy)||1;
+      const nx=dx/dist, ny=dy/dist;
+      const hx=s.cx+nx*s.r*0.52, hy=s.cy+ny*s.r*0.52;
+
+      ctx.beginPath(); ctx.arc(s.cx,s.cy,s.r,0,Math.PI*2);
+      ctx.fillStyle=base[i]; ctx.fill();
+
+      const gr=ctx.createRadialGradient(hx,hy,s.r*0.04,s.cx,s.cy,s.r*1.08);
+      gr.addColorStop(0,'rgba(255,225,165,0.96)');
+      gr.addColorStop(0.18,'rgba(225,175,105,0.72)');
+      gr.addColorStop(0.52,'rgba(80,45,15,0.45)');
+      gr.addColorStop(0.82,'rgba(0,0,0,0.62)');
+      gr.addColorStop(1,'rgba(0,0,0,0.88)');
+      ctx.beginPath(); ctx.arc(s.cx,s.cy,s.r,0,Math.PI*2);
+      ctx.fillStyle=gr; ctx.fill();
+
+      ctx.save();
+      ctx.beginPath(); ctx.arc(s.cx,s.cy,s.r,0,Math.PI*2); ctx.clip();
+      // specular
+      const sp=ctx.createRadialGradient(hx,hy,0,hx,hy,s.r*0.28);
+      sp.addColorStop(0,'rgba(255,245,210,0.9)'); sp.addColorStop(1,'rgba(255,200,100,0)');
+      ctx.fillStyle=sp; ctx.fillRect(s.cx-s.r,s.cy-s.r,s.r*2,s.r*2);
+      // sfumato
+      const ef=ctx.createRadialGradient(s.cx,s.cy,s.r*0.65,s.cx,s.cy,s.r);
+      ef.addColorStop(0,'rgba(0,0,0,0)'); ef.addColorStop(1,'rgba(0,0,0,0.42)');
+      ctx.fillStyle=ef; ctx.fillRect(s.cx-s.r,s.cy-s.r,s.r*2,s.r*2);
+      ctx.restore();
+    });
+
+    // light source
+    const lg=ctx.createRadialGradient(lx,ly,0,lx,ly,22);
+    lg.addColorStop(0,'rgba(255,230,140,0.9)'); lg.addColorStop(1,'rgba(255,150,0,0)');
+    ctx.beginPath(); ctx.arc(lx,ly,22,0,Math.PI*2); ctx.fillStyle=lg; ctx.fill();
+    ctx.beginPath(); ctx.arc(lx,ly,3.5,0,Math.PI*2); ctx.fillStyle='rgba(255,245,190,0.92)'; ctx.fill();
+
+    ctx.textAlign='left';
+    ctx.font='italic 9px Georgia'; ctx.fillStyle=g(0.3);
+    ctx.fillText('CHIAROSCURO',18,20);
+    ctx.font='italic 8px Georgia'; ctx.fillStyle=g(0.17);
+    ctx.fillText('La luce e l\'ombra rivelano la forma',18,32);
+    ctx.fillText('Leonardo da Vinci · Trattato della Pittura · c.1490',18,H-14);
+    ctx.fillText('"La pittura è cosa mentale"',18,H-4);
+  }
+};
+
+// ══════════════════════════════════════════════════════════
+// MODULE 3 · AUREA — Sectio Aurea, φ = 1.6180339…
+// ══════════════════════════════════════════════════════════
+function drawSpiral(ctx,rx,ry,rw,rh){
+  ctx.save();
+  ctx.beginPath(); ctx.rect(rx,ry,rw,rh); ctx.clip();
+  let x=rx,y=ry,w=rw,h=rh;
+  let dir=(w>=h)?0:1;
+  for(let i=0;i<11;i++){
+    if(w<1.5||h<1.5) break;
+    const a=Math.max(0.04,0.62-i*0.058);
+    const lw=Math.max(0.25,1.35-i*0.115);
+    if(dir===0){
+      const s=h;
+      ctx.strokeStyle=g(a*0.3);ctx.lineWidth=0.35;ctx.strokeRect(x,y,s,s);
+      ctx.strokeStyle=gb(a);ctx.lineWidth=lw;
+      ctx.beginPath();ctx.arc(x+s,y+s,s,Math.PI,1.5*Math.PI);ctx.stroke();
+      x+=s;w-=s;
+    } else if(dir===1){
+      const s=w;
+      ctx.strokeStyle=g(a*0.3);ctx.lineWidth=0.35;ctx.strokeRect(x,y,s,s);
+      ctx.strokeStyle=gb(a);ctx.lineWidth=lw;
+      ctx.beginPath();ctx.arc(x,y+s,s,1.5*Math.PI,0);ctx.stroke();
+      y+=s;h-=s;
+    } else if(dir===2){
+      const s=h;
+      ctx.strokeStyle=g(a*0.3);ctx.lineWidth=0.35;ctx.strokeRect(x+w-s,y,s,s);
+      ctx.strokeStyle=gb(a);ctx.lineWidth=lw;
+      ctx.beginPath();ctx.arc(x+w-s,y,s,0,0.5*Math.PI);ctx.stroke();
+      w-=s;
+    } else {
+      const s=w;
+      ctx.strokeStyle=g(a*0.3);ctx.lineWidth=0.35;ctx.strokeRect(x,y+h-s,s,s);
+      ctx.strokeStyle=gb(a);ctx.lineWidth=lw;
+      ctx.beginPath();ctx.arc(x+w,y+h-s,s,0.5*Math.PI,Math.PI);ctx.stroke();
+      h-=s;
+    }
+    dir=(dir+1)%4;
+  }
+  ctx.restore();
+}
+
+MOD.aurea = {
+  fmod:'PROPORTIO AUREA · Divina Proportione · Pacioli 1509',
+  finst:'Fai clic e trascina per disegnare un rettangolo · Cerca la proporzione aurea',
+  PHI:1.6180339887,
+  drag:null, rect:null,
+  onResize(w,h){
+    const rw=w*0.44, rh=rw/this.PHI;
+    this.rect={x:(w-rw)/2,y:(h-rh)/2,w:rw,h:rh};
+  },
+  init(){},
+  onDown(x,y){ this.drag={x0:x,y0:y,x1:x,y1:y}; this.rect=null; },
+  onMove(x,y){ if(this.drag){this.drag.x1=x;this.drag.y1=y;} },
+  onUp(x,y){
+    if(this.drag){
+      const dx=this.drag.x1-this.drag.x0, dy=this.drag.y1-this.drag.y0;
+      if(Math.abs(dx)>18&&Math.abs(dy)>18){
+        this.rect={x:Math.min(this.drag.x0,this.drag.x1),y:Math.min(this.drag.y0,this.drag.y1),w:Math.abs(dx),h:Math.abs(dy)};
+      }
+      this.drag=null;
+    }
+  },
+  draw(ctx,W,H){
+    ctx.fillStyle='#0d0905'; ctx.fillRect(0,0,W,H);
+
+    // subtle grid
+    for(let x=0;x<W;x+=44) ln(ctx,x,0,x,H,g(0.04),0.4);
+    for(let y=0;y<H;y+=44) ln(ctx,0,y,W,y,g(0.04),0.4);
+
+    // watermark phi
+    ctx.font='italic 200px Georgia'; ctx.fillStyle=g(0.022); ctx.textAlign='center';
+    ctx.fillText('φ',W/2,H*0.68);
+
+    const dr=this.drag?{
+      x:Math.min(this.drag.x0,this.drag.x1), y:Math.min(this.drag.y0,this.drag.y1),
+      w:Math.abs(this.drag.x1-this.drag.x0), h:Math.abs(this.drag.y1-this.drag.y0)
+    }:this.rect;
+
+    if(dr&&dr.w>6&&dr.h>6){
+      const ratio=dr.w/dr.h;
+      const err=Math.abs(ratio-this.PHI)/this.PHI;
+      const golden=err<0.05;
+
+      ctx.strokeStyle=golden?gb(0.88):g(0.65);
+      ctx.lineWidth=golden?1.6:1;
+      ctx.strokeRect(dr.x,dr.y,dr.w,dr.h);
+
+      if(golden&&!this.drag){
+        drawSpiral(ctx,dr.x,dr.y,dr.w,dr.h);
+      } else if(!this.drag){
+        const gw=dr.h*this.PHI;
+        ctx.setLineDash([4,5]); ctx.lineWidth=0.6; ctx.strokeStyle=g(0.2);
+        ctx.strokeRect(dr.x,dr.y,gw,dr.h);
+        ctx.setLineDash([]);
+        ctx.font='italic 9px Georgia'; ctx.fillStyle=g(0.28); ctx.textAlign='center';
+        ctx.fillText('larghezza ideale: '+Math.round(gw),dr.x+gw/2,dr.y-9);
+      }
+
+      const midX=dr.x+dr.w/2, midY=dr.y+dr.h/2;
+      ctx.font='italic '+Math.min(22,dr.h*0.22)+'px Georgia';
+      ctx.fillStyle=golden?gb(0.88):g(0.55);
+      ctx.textAlign='center';
+      ctx.fillText('φ = '+ratio.toFixed(4),midX,midY-4);
+      ctx.font='italic '+Math.min(11,dr.h*0.1)+'px Georgia';
+      ctx.fillStyle=g(golden?0.55:0.28);
+      ctx.fillText(golden?'✦  PROPORTIO AUREA  ✦':'obiettivo: 1.6180',midX,midY+14);
+      ctx.font='italic 8px Georgia'; ctx.fillStyle=g(0.28);
+      ctx.fillText(Math.round(dr.w)+' × '+Math.round(dr.h),midX,midY+28);
+    }
+
+    ctx.textAlign='left';
+    ctx.font='italic 9px Georgia'; ctx.fillStyle=g(0.3);
+    ctx.fillText('SECTIO AUREA',18,20);
+    ctx.font='italic 8px Georgia'; ctx.fillStyle=g(0.17);
+    ctx.fillText('φ = (1 + √5) / 2 = 1.6180339…',18,32);
+    ctx.fillText('Luca Pacioli · Divina Proportione · MDIX',18,H-14);
+    ctx.fillText('"La divina proportione è unica e singolare"',18,H-4);
+  }
+};
+
+// ══════════════════════════════════════════════════════════
+// MODULE 4 · CORPO — Proporzioni del Corpo Umano
+// ══════════════════════════════════════════════════════════
+function distSeg(px,py,ax,ay,bx,by){
+  const cx2=bx-ax,cy2=by-ay,apx=px-ax,apy=py-ay;
+  const t=Math.max(0,Math.min(1,(apx*cx2+apy*cy2)/(cx2*cx2+cy2*cy2||1)));
+  return Math.hypot(px-(ax+t*cx2),py-(ay+t*cy2));
+}
+
+MOD.corpo = {
+  fmod:'CORPO · Proporzioni Umane · Leonardo da Vinci · c.1490',
+  finst:'Passa il mouse sul corpo per scoprire le proporzioni canoniche',
+  hov:null, mx:0, my:0,
+  onMove(x,y){ this.mx=x; this.my=y; },
+  draw(ctx,W,H){
+    ctx.fillStyle='#0d0905'; ctx.fillRect(0,0,W,H);
+
+    // 8-head canon geometry
+    const figH=Math.min(H*0.74,W*0.55);
+    const u=figH/8;
+    const cx=W/2;
+    const top=H/2-figH/2;
+
+    const hcy=top+u/2;      // head centre
+    const chin=top+u;
+    const sY=top+u*1.9;     // shoulder
+    const navel=top+u*3.6;  // navel ≈ golden ratio from feet
+    const hipY=top+u*4.2;
+    const kneeY=top+u*6.1;
+    const footY=top+figH;
+
+    const sw=u*1.25;        // shoulder half-width
+    const hw=u*0.78;        // hip half-width
+    const kw=u*0.45;        // knee half-width
+    const fs=u*0.82;        // foot spread
+    const armY=sY+u*0.05;
+    const handL=cx-figH/2;
+    const handR=cx+figH/2;
+
+    const zones=[
+      {id:'head', lbl:'TESTA',    info:'1/8 dell\'altezza totale · diametro = 1 unità',
+       hit:(x,y)=>Math.hypot(x-cx,y-hcy)<u/2+14},
+      {id:'torso',lbl:'TORSO',    info:'3/8 dell\'altezza totale (spalla → anca)',
+       hit:(x,y)=>x>cx-sw-12&&x<cx+sw+12&&y>sY-8&&y<hipY+8},
+      {id:'larm', lbl:'BRACCIO',  info:'Apertura totale = altezza del corpo',
+       hit:(x,y)=>x<cx&&distSeg(x,y,cx-sw,armY,handL,armY)<20},
+      {id:'rarm', lbl:'BRACCIO',  info:'Apertura totale = altezza del corpo',
+       hit:(x,y)=>x>=cx&&distSeg(x,y,cx+sw,armY,handR,armY)<20},
+      {id:'lleg', lbl:'GAMBA',    info:'4/8 dell\'altezza totale (anca → piede)',
+       hit:(x,y)=>x<cx&&(distSeg(x,y,cx-hw*.5,hipY,cx-kw,kneeY)<20||distSeg(x,y,cx-kw,kneeY,cx-fs,footY)<20)},
+      {id:'rleg', lbl:'GAMBA',    info:'4/8 dell\'altezza totale (anca → piede)',
+       hit:(x,y)=>x>=cx&&(distSeg(x,y,cx+hw*.5,hipY,cx+kw,kneeY)<20||distSeg(x,y,cx+kw,kneeY,cx+fs,footY)<20)},
+      {id:'circ', lbl:'CIRCOLO',  info:'Centro: ombelico · Raggio = altezza / 2',
+       hit:(x,y)=>{const d=Math.hypot(x-cx,y-navel);return d>figH/2-18&&d<figH/2+18;}},
+      {id:'sq',   lbl:'QUADRATO', info:'Lato = altezza totale = apertura delle braccia',
+       hit:(x,y)=>Math.abs(x-(cx-figH/2))<14||Math.abs(x-(cx+figH/2))<14||Math.abs(y-top)<14||Math.abs(y-footY)<14},
+    ];
+
+    this.hov=null;
+    for(const z of zones){ if(z.hit(this.mx,this.my)){this.hov=z;break;} }
+
+    const hl =(id,base=0.62)=>(this.hov&&this.hov.id===id)?'#f5d07a':g(base);
+    const hlw=(id,base=1)  =>(this.hov&&this.hov.id===id)?2.2:base;
+
+    // CIRCLE
+    ctx.beginPath(); ctx.arc(cx,navel,figH/2,0,Math.PI*2);
+    ctx.strokeStyle=(this.hov&&this.hov.id==='circ')?gb(0.7):g(0.15);
+    ctx.lineWidth=(this.hov&&this.hov.id==='circ')?1.5:0.8; ctx.stroke();
+
+    // SQUARE
+    ctx.strokeStyle=(this.hov&&this.hov.id==='sq')?gb(0.7):g(0.13);
+    ctx.lineWidth=(this.hov&&this.hov.id==='sq')?1.5:0.8;
+    ctx.strokeRect(cx-figH/2,top,figH,figH);
+
+    // guide lines
+    ctx.save(); ctx.setLineDash([2,7]); ctx.lineWidth=0.35; ctx.strokeStyle=g(0.1);
+    [chin,sY,navel,hipY,kneeY].forEach(y=>{
+      ctx.beginPath();ctx.moveTo(cx-figH/2-18,y);ctx.lineTo(cx+figH/2+18,y);ctx.stroke();
+    });
+    ctx.restore();
+
+    // rail labels
+    const lbls=[{y:top,t:'cima'},{y:chin,t:'mento · 7/8'},{y:sY,t:'spalle · 6/8'},
+                {y:navel,t:'ombelico · φ'},{y:hipY,t:'anca · 4/8'},{y:kneeY,t:'ginocchio · 2/8'},{y:footY,t:'pianta · 0'}];
+    ctx.font='italic 7px Georgia'; ctx.fillStyle=g(0.2); ctx.textAlign='right';
+    lbls.forEach(l=>ctx.fillText(l.t,cx-figH/2-22,l.y+3));
+
+    // HEAD
+    ctx.beginPath(); ctx.arc(cx,hcy,u/2,0,Math.PI*2);
+    ctx.strokeStyle=hl('head'); ctx.lineWidth=hlw('head'); ctx.stroke();
+
+    // NECK
+    ln(ctx,cx-u*.28,chin,cx-u*.32,sY,g(0.45),0.8);
+    ln(ctx,cx+u*.28,chin,cx+u*.32,sY,g(0.45),0.8);
+
+    // TORSO
+    ctx.strokeStyle=hl('torso'); ctx.lineWidth=hlw('torso',0.9);
+    ctx.beginPath();
+    ctx.moveTo(cx-sw,sY);
+    ctx.bezierCurveTo(cx-sw*.92,sY+u*.6,cx-hw*1.08,hipY-u*.3,cx-hw,hipY);
+    ctx.lineTo(cx+hw,hipY);
+    ctx.bezierCurveTo(cx+hw*1.08,hipY-u*.3,cx+sw*.92,sY+u*.6,cx+sw,sY);
+    ctx.lineTo(cx-sw,sY); ctx.stroke();
+
+    // ARMS
+    ln(ctx,cx-sw,armY,handL,armY,hl('larm'),hlw('larm'));
+    ctx.beginPath();ctx.arc(handL,armY,u*.18,0,Math.PI*2);ctx.strokeStyle=hl('larm',.4);ctx.lineWidth=.7;ctx.stroke();
+    ln(ctx,cx+sw,armY,handR,armY,hl('rarm'),hlw('rarm'));
+    ctx.beginPath();ctx.arc(handR,armY,u*.18,0,Math.PI*2);ctx.strokeStyle=hl('rarm',.4);ctx.lineWidth=.7;ctx.stroke();
+
+    // LEGS
+    ln(ctx,cx-hw*.5,hipY,cx-kw,kneeY,hl('lleg'),hlw('lleg'));
+    ln(ctx,cx-kw,kneeY,cx-fs,footY,hl('lleg'),hlw('lleg'));
+    ctx.beginPath();ctx.arc(cx-kw,kneeY,u*.14,0,Math.PI*2);ctx.strokeStyle=hl('lleg',.4);ctx.lineWidth=.6;ctx.stroke();
+    ln(ctx,cx+hw*.5,hipY,cx+kw,kneeY,hl('rleg'),hlw('rleg'));
+    ln(ctx,cx+kw,kneeY,cx+fs,footY,hl('rleg'),hlw('rleg'));
+    ctx.beginPath();ctx.arc(cx+kw,kneeY,u*.14,0,Math.PI*2);ctx.strokeStyle=hl('rleg',.4);ctx.lineWidth=.6;ctx.stroke();
+
+    // feet
+    ln(ctx,cx-fs,footY,cx-fs+u*.35,footY,g(.5),.9);
+    ln(ctx,cx+fs,footY,cx+fs-u*.35,footY,g(.5),.9);
+
+    // TOOLTIP
+    if(this.hov){
+      const tw=174, th=40;
+      let bx=this.mx+16, by=this.my-24;
+      if(bx+tw>W) bx=this.mx-tw-16;
+      if(by<10) by=this.my+16;
+      ctx.fillStyle='rgba(13,9,5,0.93)'; ctx.fillRect(bx,by,tw,th);
+      ctx.strokeStyle=gb(.5); ctx.lineWidth=.8; ctx.strokeRect(bx,by,tw,th);
+      ctx.font='bold italic 10px Georgia'; ctx.fillStyle='#f5d07a'; ctx.textAlign='left';
+      ctx.fillText(this.hov.lbl,bx+10,by+14);
+      ctx.font='italic 9px Georgia'; ctx.fillStyle=g(.7);
+      ctx.fillText(this.hov.info,bx+10,by+28);
+    }
+
+    ctx.textAlign='left'; ctx.font='italic 9px Georgia'; ctx.fillStyle=g(.28);
+    ctx.fillText('HOMO AD CIRCULUM ET QUADRATUM',18,20);
+    ctx.font='italic 8px Georgia'; ctx.fillStyle=g(.16);
+    ctx.fillText('L\'uomo è la misura di tutte le cose',18,32);
+    ctx.fillText('Leonardo da Vinci · Uomo Vitruviano · c.1490',18,H-14);
+    ctx.fillText('Vitruvio · De Architectura · XXV a.C.',18,H-4);
+  }
+};
+
+// ── tabs & boot ───────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>go(t.dataset.m));
+});
+resize();
+go('perspectiva');
+
+// Re-size when parent iframe becomes visible (initially hidden under display:none)
+const _ro = new ResizeObserver(entries => {
+  const r = entries[0].contentRect;
+  if (r.width > 0 && r.height > 0 && (Math.abs(r.width - W) > 1 || Math.abs(r.height - H) > 1)) {
+    resize();
+  }
+});
+_ro.observe(wrap);
+
+// Also handle postMessage resize request from parent page
+window.addEventListener('message', e => {
+  if (e.data === 'renaissance:resize') resize();
+});
+</script>
+</body>
+</html>

@@ -25,6 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const durationTimeEl = document.getElementById('durationTime');
     const albumArtContainer = document.querySelector('.album-art-container');
     const playlistItems = document.querySelectorAll('.playlist-item');
+    const particleFrame = document.querySelector('.particle-frame');
+    const renaissanceFrame = document.querySelector('.renaissance-frame');
 
     const scenes = {
         morning: document.getElementById('morningScene'),
@@ -93,11 +95,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let carouselOffset = 0;
 
     const interactions = [
-        { hour: 1, title: 'IMPRESSIONISM', meta: 'Music gallery', status: 'Available', site: 'impressionism', top: '#ff7a59', bottom: '#77325f' },
-        { hour: 2, title: 'LIGHT STUDY', meta: 'Light and opacity', status: 'Coming soon', top: '#ffd166', bottom: '#9a5c2e' },
-        { hour: 3, title: 'SOUND LOOP', meta: 'Reactive audio sketch', status: 'Coming soon', top: '#54d2c4', bottom: '#23566d' },
+        { hour: 1, title: 'RENAISSANCE', meta: 'Perspective engine', status: 'Available', site: 'renaissance', top: '#c8a86b', bottom: '#3a2510' },
+        { hour: 2, title: 'particle', meta: 'Text particles', status: 'Available', site: 'particle', top: '#ffd166', bottom: '#9a5c2e' },
+        { hour: 3, title: 'FLUID COLLISION', meta: 'Shader flow', status: 'Available', site: 'fluid-collision', top: '#54d2c4', bottom: '#23566d' },
         { hour: 4, title: 'MEMORY GRID', meta: 'Pattern recall', status: 'Coming soon', top: '#9b8cff', bottom: '#3f3a7d' },
-        { hour: 5, title: 'MOTION TYPE', meta: 'Kinetic typography', status: 'Coming soon', top: '#ff9bb3', bottom: '#7e3652' },
+        { hour: 5, title: 'IMPRESSIONISM', meta: 'Music gallery', status: 'Available', site: 'impressionism', top: '#ff7a59', bottom: '#77325f' },
         { hour: 6, title: 'COLOR FIELD', meta: 'Chromatic controls', status: 'Coming soon', top: '#a5e66f', bottom: '#336b4a' },
         { hour: 7, title: 'TEXTURE MAP', meta: 'Surface explorer', status: 'Coming soon', top: '#67e8f9', bottom: '#2563eb' },
         { hour: 8, title: 'TYPE CLOCK', meta: 'Temporal letterforms', status: 'Coming soon', top: '#f0abfc', bottom: '#7c3aed' },
@@ -173,8 +175,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const railRect = timelineRail.getBoundingClientRect();
         const cardCount = timelineCards.length;
-        const radiusX = Math.max(railRect.width * 0.62, 460);
-        const radiusY = Math.max(railRect.height * 0.58, 340);
+        const compactScreen = window.matchMedia('(max-width: 900px), (max-height: 820px)').matches;
+        const radiusX = compactScreen
+            ? Math.min(railRect.width * 0.42, Math.max(railRect.width * 0.31, 220))
+            : Math.max(railRect.width * 0.57, 430);
+        const radiusY = compactScreen
+            ? Math.max(railRect.height * 0.72, 460)
+            : Math.max(railRect.height * 0.86, 620);
         const activeIndex = ((Math.round(carouselOffset) % cardCount) + cardCount) % cardCount;
 
         timelineCards.forEach((card, index) => {
@@ -238,16 +245,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function openCard(card) {
-        selectedHour = Number(card.dataset.hour);
+        const interactionHour = Number(card.dataset.hour);
+        const interaction = interactions.find(item => item.hour === interactionHour) || interactions[0];
+        selectedHour = interactionHour;
 
-        if (selectedInteraction().site === 'impressionism') {
-            openInteraction(card);
+        if (interaction.site) {
+            openInteraction(card, interaction);
         } else {
             rotateCardToFront(card);
         }
     }
 
-    function openInteraction(card) {
+    function openInteraction(card, interaction) {
         if (isInteractionOpening || body.classList.contains('view-interaction')) {
             return;
         }
@@ -257,22 +266,78 @@ document.addEventListener('DOMContentLoaded', () => {
 
         transitionPanel.style.setProperty('--transition-color', cardStyle.backgroundColor);
         transitionHour.textContent = card.querySelector('.card-hour')?.textContent || '01';
-        transitionTitle.textContent = card.querySelector('strong')?.textContent || 'IMPRESSIONISM';
-        transitionMeta.textContent = card.querySelector('small')?.textContent || 'Music gallery';
+        transitionTitle.textContent = card.querySelector('strong')?.textContent || 'RENAISSANCE';
+        transitionMeta.textContent = card.querySelector('small')?.textContent || 'Perspective engine';
         siteTransition.classList.add('show');
-
         setTimeout(() => {
             body.classList.remove('view-hub');
-            body.classList.add('view-interaction');
+            body.classList.remove('view-impressionism', 'view-particle', 'view-schema-architecture', 'view-fluid-collision', 'view-renaissance');
+            body.classList.add('view-interaction', `view-${interaction.site}`);
             siteTransition.classList.remove('show');
             isInteractionOpening = false;
-            updateScenes();
+
+            if (interaction.site === 'impressionism') {
+                updateScenes();
+            } else {
+                pauseAllMusic();
+                body.classList.remove('night-background');
+
+                if (interaction.site === 'particle') {
+                    resetParticleFrame();
+                }
+
+                if (interaction.site === 'renaissance') {
+                    resetRenaissanceFrame();
+                }
+            }
         }, 680);
+    }
+
+    function resetRenaissanceFrame() {
+        if (!renaissanceFrame) {
+            return;
+        }
+
+        const sendResize = () => {
+            try {
+                renaissanceFrame.contentWindow?.postMessage('renaissance:resize', '*');
+            } catch (error) {
+                console.error('Renaissance resize failed:', error);
+            }
+        };
+
+        if (!renaissanceFrame.src) {
+            renaissanceFrame.addEventListener('load', sendResize, { once: true });
+            renaissanceFrame.src = renaissanceFrame.dataset.src || 'renaissance.html';
+            return;
+        }
+
+        if (renaissanceFrame.contentWindow) {
+            sendResize();
+            setTimeout(sendResize, 120);
+            setTimeout(sendResize, 360);
+        }
+
+        requestAnimationFrame(sendResize);
+    }
+
+    function resetParticleFrame() {
+        if (!particleFrame) {
+            return;
+        }
+
+        requestAnimationFrame(() => {
+            try {
+                particleFrame.contentWindow?.postMessage({ type: 'particle:reset' }, '*');
+            } catch (error) {
+                console.error('Particle reset failed:', error);
+            }
+        });
     }
 
     function closeInteraction() {
         pauseAllMusic();
-        body.classList.remove('view-interaction', 'night-background');
+        body.classList.remove('view-interaction', 'view-impressionism', 'view-particle', 'view-schema-architecture', 'view-fluid-collision', 'view-renaissance', 'night-background');
         body.classList.add('view-hub');
         isNight = false;
         updateScenes();
