@@ -92,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let timelineStartOffset = 0;
     let carouselOffset = 0;
     let carouselTargetOffset = 0;
+    let scrollSnapTimer = null;
 
     const interactions = [
         { hour: 1, title: 'RENAISSANCE', meta: 'c. 1400-1600', status: 'Available', site: 'renaissance', top: '#c8a86b', bottom: '#3a2510' },
@@ -170,6 +171,16 @@ document.addEventListener('DOMContentLoaded', () => {
         carouselTargetOffset -= shift;
     }
 
+    function smoothstep(edge0, edge1, value) {
+        const span = edge1 - edge0;
+        if (span === 0) {
+            return value >= edge1 ? 1 : 0;
+        }
+
+        const t = Math.max(0, Math.min(1, (value - edge0) / span));
+        return t * t * (3 - 2 * t);
+    }
+
     function updateTimelineState() {
         timelineFrame = null;
 
@@ -201,7 +212,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         timelineCards.forEach((card, index) => {
             const angle = Math.PI - ((index - carouselOffset) / cardCount) * Math.PI * 2;
-            const x = Math.cos(angle) * radiusX;
+            const baseX = Math.cos(angle) * radiusX;
+            const rightLift = baseX * 0.58 * smoothstep(0, radiusX * 0.92, baseX);
+            const x = baseX + rightLift;
             const y = Math.sin(angle) * radiusY + (compactScreen ? 98 : 190);
             const front = (1 - Math.cos(angle)) / 2;
             const easedFront = front * front * (3 - 2 * front);
@@ -645,12 +658,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     backToShelf.addEventListener('click', closeInteraction);
 
-        timelineRail.addEventListener('wheel', event => {
+    timelineRail.addEventListener('wheel', event => {
         event.preventDefault();
-        const delta = Math.abs(event.deltaY) > Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
-        carouselTargetOffset -= delta * 0.0032;
+        const rawDelta = Math.abs(event.deltaY) > Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
+        // 기기별 deltaY 편차 제한 (트랙패드/마우스 동일 감도 보장)
+        const capped = Math.sign(rawDelta) * Math.min(Math.abs(rawDelta), 120);
+        carouselTargetOffset -= capped * 0.003;
         recenterCarouselOffsets(timelineCards.length);
         requestTimelineState();
+
+        // 스크롤 멈춘 후 가장 가까운 카드 위치로 스냅
+        clearTimeout(scrollSnapTimer);
+        scrollSnapTimer = setTimeout(() => {
+            carouselTargetOffset = Math.round(carouselTargetOffset);
+            requestTimelineState();
+        }, 180);
     }, { passive: false });
 
     timelineRail.addEventListener('pointerdown', event => {
