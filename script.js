@@ -158,12 +158,27 @@ document.addEventListener('DOMContentLoaded', () => {
         return interactions.find(item => item.hour === selectedHour) || interactions[0];
     }
 
+    function recenterCarouselOffsets(cardCount) {
+        const limit = cardCount * 40;
+
+        if (Math.abs(carouselOffset) < limit && Math.abs(carouselTargetOffset) < limit) {
+            return;
+        }
+
+        const shift = Math.round(carouselOffset / cardCount) * cardCount;
+        carouselOffset -= shift;
+        carouselTargetOffset -= shift;
+    }
+
     function updateTimelineState() {
         timelineFrame = null;
 
         if (!body.classList.contains('view-hub')) {
             return;
         }
+
+        const cardCount = timelineCards.length;
+        recenterCarouselOffsets(cardCount);
 
         if (!isTimelineDragging) {
             const distanceToTarget = carouselTargetOffset - carouselOffset;
@@ -175,7 +190,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const railRect = timelineRail.getBoundingClientRect();
-        const cardCount = timelineCards.length;
         const compactScreen = window.matchMedia('(max-width: 900px), (max-height: 820px)').matches;
         const radiusX = compactScreen
             ? Math.min(railRect.width * 0.34, Math.max(railRect.width * 0.29, 230))
@@ -187,8 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         timelineCards.forEach((card, index) => {
             const angle = Math.PI - ((index - carouselOffset) / cardCount) * Math.PI * 2;
-            const baseX = Math.cos(angle) * radiusX;
-            const x = baseX + Math.max(0, baseX) * 0.58;
+            const x = Math.cos(angle) * radiusX;
             const y = Math.sin(angle) * radiusY + (compactScreen ? 98 : 190);
             const front = (1 - Math.cos(angle)) / 2;
             const easedFront = front * front * (3 - 2 * front);
@@ -632,10 +645,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     backToShelf.addEventListener('click', closeInteraction);
 
-    timelineRail.addEventListener('wheel', event => {
+        timelineRail.addEventListener('wheel', event => {
         event.preventDefault();
         const delta = Math.abs(event.deltaY) > Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
         carouselTargetOffset -= delta * 0.0032;
+        recenterCarouselOffsets(timelineCards.length);
         requestTimelineState();
     }, { passive: false });
 
@@ -661,6 +675,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         carouselTargetOffset = timelineStartOffset + distance * 0.01;
         carouselOffset = carouselTargetOffset;
+        recenterCarouselOffsets(timelineCards.length);
         requestTimelineState();
     });
 
