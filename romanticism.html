@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Romanticism Storm</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #02050a;
+            color: #e8eef5;
+            font-family: system-ui, sans-serif;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .hud {
+            position: fixed;
+            left: 50%;
+            bottom: 18px;
+            z-index: 3;
+            width: min(760px, calc(100vw - 32px));
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 14px;
+            border: 1px solid rgba(221, 235, 255, 0.2);
+            border-radius: 999px;
+            background: rgba(3, 9, 18, 0.48);
+            color: rgba(238, 246, 255, 0.8);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0;
+            pointer-events: none;
+        }
+
+        .meter {
+            flex: 1;
+            height: 8px;
+            align-self: center;
+            overflow: hidden;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #88d7ff, #f5f1b8, #ff704d);
+            transition: width 120ms ease;
+        }
+
+        .flash {
+            position: fixed;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            background: #dfeeff;
+            opacity: 0;
+            mix-blend-mode: screen;
+        }
+    </style>
+</head>
+<body>
+    <div class="flash" id="flash"></div>
+    <div class="hud">
+        <span>WASD boat control</span>
+        <div class="meter"><div class="fill" id="fill"></div></div>
+        <span>Scroll storm / click lightning</span>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 0.9;
+        document.body.appendChild(renderer.domElement);
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050912);
+        scene.fog = new THREE.FogExp2(0x050912, 0.018);
+
+        const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 420);
+        camera.position.set(0, 8.5, 17);
+        camera.lookAt(0, 0, -8);
+
+        const fill = document.getElementById('fill');
+        const flashOverlay = document.getElementById('flash');
+        const keys = new Set();
+        const boatState = {
+            position: new THREE.Vector3(0, 0, 0),
+            velocity: new THREE.Vector3(0, 0, -0.02),
+            heading: 0
+        };
+        let storm = 0;
+        let targetStorm = 0;
+        let lightning = 0;
+
+        const sun = new THREE.DirectionalLight(0x9db7d6, 1.0);
+        sun.position.set(-3, 8, 6);
+        scene.add(sun);
+
+        const lightningLight = new THREE.DirectionalLight(0xdbeaff, 0);
+        lightningLight.position.set(-8, 14, 5);
+        scene.add(lightningLight);
+        scene.add(new THREE.AmbientLight(0x20314a, 0.42));
+
+        const waterUniforms = {
+            u_time: { value: 0 },
+            u_storm: { value: 0 },
+            u_lightning: { value: 0 }
+        };
+
+        const water = new THREE.Mesh(
+            new THREE.PlaneGeometry(360, 360, 260, 260),
+            new THREE.ShaderMaterial({
+                uniforms: waterUniforms,
+                vertexShader: `
+                    uniform float u_time;
+                    uniform float u_storm;
+                    varying vec3 v_pos;
+                    varying float v_height;
+
+                    vec3 gerstner(vec3 p, vec2 dir, float steepness, float wavelength, float speed, float amp) {
+                        float k = 6.28318530718 / wavelength;
+                        float c = sqrt(9.8 / k) * speed;
+                        vec2 d = normalize(dir);
+                        float f = k * dot(d, p.xz) - c * u_time;
+                        float a = amp;
+                        return vec3(
+                            d.x * steepness * a * cos(f),
+                            a * sin(f),
+                            d.y * steepness * a * cos(f)
+                        );
+                    }
+
+                    void main() {
+                        vec3 p = position;
+                        float s = u_storm;
+                        float amp = mix(0.16, 4.4, s * s);
+                        float freq = mix(1.0, 2.9, s);
+                        vec3 displaced = p;
+                        displaced += gerstner(p, vec2(1.0, 0.25), 0.48, 22.0 / freq, 0.9 + s, amp);
+                        displaced += gerstner(p, vec2(-0.45, 1.0), 0.36, 13.0 / freq, 1.2 + s * 1.2, amp * 0.64);
+                        displaced += gerstner(p, vec2(0.2, -1.0), 0.28, 8.0 / freq, 1.8 + s * 1.6, amp * 0.36);
+                        displaced += gerstner(p, vec2(-1.0, -0.15), 0.22, 5.2 / freq, 2.2 + s * 2.2, amp * 0.18);
+                        v_pos = displaced;
+                        v_height = displaced.y;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    precision highp float;
+                    uniform float u_storm;
+                    uniform float u_lightning;
+                    varying vec3 v_pos;
+                    varying float v_height;
+
+                    void main() {
+                        float foam = smoothstep(0.8, 3.4, v_height) * (0.25 + u_storm);
+                        float depth = smoothstep(-5.0, 3.0, v_height);
+                        vec3 calm = vec3(0.02, 0.19, 0.28);
+                        vec3 storm = vec3(0.015, 0.035, 0.07);
+                        vec3 color = mix(calm, storm, u_storm);
+                        color = mix(color, vec3(0.55, 0.72, 0.78), foam);
+                        color += vec3(0.36, 0.48, 0.72) * depth * 0.14;
+                        color += vec3(0.7, 0.82, 1.0) * u_lightning * (0.25 + foam);
+                        gl_FragColor = vec4(color, 1.0);
+                    }
+                `,
+                side: THREE.DoubleSide
+            })
+        );
+        water.rotation.x = -Math.PI / 2;
+        scene.add(water);
+
+        function gerstnerHeight(x, z, time, s) {
+            const waves = [
+                [1, 0.25, 22, 0.9 + s, 1.0],
+                [-0.45, 1, 13, 1.2 + s * 1.2, 0.64],
+                [0.2, -1, 8, 1.8 + s * 1.6, 0.36],
+                [-1, -0.15, 5.2, 2.2 + s * 2.2, 0.18]
+            ];
+            const amp = THREE.MathUtils.lerp(0.16, 4.4, s * s);
+            const freq = THREE.MathUtils.lerp(1.0, 2.9, s);
+            let height = 0;
+            let dx = 0;
+            let dz = 0;
+            for (const [dirX, dirZ, wavelengthBase, speed, mult] of waves) {
+                const length = Math.hypot(dirX, dirZ);
+                const ux = dirX / length;
+                const uz = dirZ / length;
+                const wavelength = wavelengthBase / freq;
+                const k = Math.PI * 2 / wavelength;
+                const c = Math.sqrt(9.8 / k) * speed;
+                const phase = k * (ux * x + uz * z) - c * time;
+                const a = amp * mult;
+                height += a * Math.sin(phase);
+                const slope = a * k * Math.cos(phase);
+                dx += ux * slope;
+                dz += uz * slope;
+            }
+            return { height, dx, dz };
+        }
+
+        function createBoat() {
+            const boat = new THREE.Group();
+            const hullMat = new THREE.MeshStandardMaterial({ color: 0x5a321f, roughness: 0.62, metalness: 0.02 });
+            const sailMat = new THREE.MeshStandardMaterial({ color: 0xd8d0bd, roughness: 0.78, metalness: 0.01, side: THREE.DoubleSide });
+            const darkMat = new THREE.MeshStandardMaterial({ color: 0x1a100b, roughness: 0.7 });
+
+            const hull = new THREE.Mesh(new THREE.CapsuleGeometry(0.5, 1.8, 16, 28), hullMat);
+            hull.scale.set(1.25, 0.24, 0.58);
+            hull.rotation.z = Math.PI / 2;
+            boat.add(hull);
+
+            const keel = new THREE.Mesh(new THREE.ConeGeometry(0.42, 1.8, 4), darkMat);
+            keel.position.y = -0.18;
+            keel.rotation.y = Math.PI / 4;
+            keel.scale.set(0.42, 0.22, 0.95);
+            boat.add(keel);
+
+            const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.05, 1.8, 12), darkMat);
+            mast.position.y = 0.76;
+            boat.add(mast);
+
+            const sailShape = new THREE.Shape();
+            sailShape.moveTo(0, 0);
+            sailShape.lineTo(0.82, 0.24);
+            sailShape.lineTo(0.08, 1.18);
+            sailShape.closePath();
+            const sail = new THREE.Mesh(new THREE.ShapeGeometry(sailShape), sailMat);
+            sail.position.set(0.02, 0.2, 0.04);
+            sail.rotation.y = Math.PI / 2;
+            boat.add(sail);
+
+            boat.scale.setScalar(0.78);
+            return boat;
+        }
+
+        const boat = createBoat();
+        scene.add(boat);
+
+        const sky = new THREE.Mesh(
+            new THREE.SphereGeometry(190, 48, 24),
+            new THREE.ShaderMaterial({
+                uniforms: { u_lightning: { value: 0 }, u_storm: { value: 0 } },
+                vertexShader: 'varying vec3 v_pos; void main(){ v_pos = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+                fragmentShader: `
+                    precision highp float;
+                    uniform float u_lightning;
+                    uniform float u_storm;
+                    varying vec3 v_pos;
+                    void main() {
+                        float horizon = smoothstep(-20.0, 35.0, v_pos.y);
+                        float cloud = sin(v_pos.x * 0.035 + v_pos.z * 0.05) * sin(v_pos.z * 0.025);
+                        vec3 low = mix(vec3(0.05, 0.08, 0.12), vec3(0.015, 0.018, 0.026), u_storm);
+                        vec3 high = mix(vec3(0.16, 0.24, 0.36), vec3(0.045, 0.05, 0.07), u_storm);
+                        vec3 color = mix(low, high, horizon);
+                        color += vec3(0.08, 0.08, 0.1) * cloud * u_storm;
+                        color += vec3(0.75, 0.82, 1.0) * u_lightning;
+                        gl_FragColor = vec4(color, 1.0);
+                    }
+                `,
+                side: THREE.BackSide
+            })
+        );
+        scene.add(sky);
+
+        const stormSilhouette = new THREE.Mesh(
+            new THREE.TorusKnotGeometry(22, 8, 180, 24, 2, 3),
+            new THREE.MeshBasicMaterial({ color: 0x0a0d13, transparent: true, opacity: 0 })
+        );
+        stormSilhouette.position.set(0, 28, -70);
+        stormSilhouette.scale.set(2.2, 0.8, 0.55);
+        scene.add(stormSilhouette);
+
+        window.addEventListener('keydown', event => keys.add(event.key.toLowerCase()));
+        window.addEventListener('keyup', event => keys.delete(event.key.toLowerCase()));
+        window.addEventListener('wheel', event => {
+            targetStorm = THREE.MathUtils.clamp(targetStorm + Math.max(event.deltaY, -60) * 0.0009, 0, 1);
+            fill.style.width = `${Math.round(targetStorm * 100)}%`;
+        }, { passive: true });
+        window.addEventListener('click', () => {
+            lightning = 1;
+        });
+
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        });
+
+        function animate(ms) {
+            requestAnimationFrame(animate);
+            const time = ms * 0.001;
+            storm = THREE.MathUtils.lerp(storm, targetStorm, 0.04);
+            lightning *= 0.86;
+            if (lightning < 0.002) lightning = 0;
+
+            waterUniforms.u_time.value = time;
+            waterUniforms.u_storm.value = storm;
+            waterUniforms.u_lightning.value = lightning;
+            sky.material.uniforms.u_storm.value = storm;
+            sky.material.uniforms.u_lightning.value = lightning;
+            lightningLight.intensity = lightning * 9.5;
+            renderer.toneMappingExposure = 0.75 + lightning * 2.8 + storm * 0.18;
+            flashOverlay.style.opacity = String(lightning * 0.36);
+            stormSilhouette.material.opacity = lightning * (0.08 + storm * 0.32);
+
+            const forward = new THREE.Vector3(Math.sin(boatState.heading), 0, -Math.cos(boatState.heading));
+            const side = new THREE.Vector3(Math.cos(boatState.heading), 0, Math.sin(boatState.heading));
+            const controlAuthority = Math.max(0.03, 1 - Math.pow(storm, 1.55) * 1.18);
+            const currentForce = new THREE.Vector3(
+                Math.sin(time * 0.8 + boatState.position.z * 0.09),
+                0,
+                Math.cos(time * 0.7 + boatState.position.x * 0.08)
+            ).multiplyScalar(storm * storm * 0.105);
+
+            if (keys.has('a')) boatState.heading += 0.026 * controlAuthority;
+            if (keys.has('d')) boatState.heading -= 0.026 * controlAuthority;
+            if (keys.has('w')) boatState.velocity.add(forward.multiplyScalar(0.012 * controlAuthority));
+            if (keys.has('s')) boatState.velocity.add(forward.multiplyScalar(-0.007 * controlAuthority));
+            if (keys.has('q')) boatState.velocity.add(side.multiplyScalar(-0.006 * controlAuthority));
+            if (keys.has('e')) boatState.velocity.add(side.multiplyScalar(0.006 * controlAuthority));
+
+            boatState.velocity.add(currentForce);
+            boatState.velocity.multiplyScalar(0.982 - storm * 0.01);
+            boatState.position.add(boatState.velocity);
+            boatState.position.x = THREE.MathUtils.clamp(boatState.position.x, -38, 38);
+            boatState.position.z = THREE.MathUtils.clamp(boatState.position.z, -58, 28);
+
+            const sample = gerstnerHeight(boatState.position.x, boatState.position.z, time, storm);
+            boat.position.set(boatState.position.x, sample.height + 0.32, boatState.position.z);
+            boat.rotation.y = boatState.heading;
+            boat.rotation.x = THREE.MathUtils.clamp(sample.dz * 0.16, -0.75, 0.75);
+            boat.rotation.z = THREE.MathUtils.clamp(-sample.dx * 0.16, -0.85, 0.85);
+            boat.scale.setScalar(0.78 * (1 + storm * 0.04));
+
+            const camOffset = new THREE.Vector3(0, 8 + storm * 5, 16 + storm * 7);
+            camera.position.lerp(boat.position.clone().add(camOffset), 0.045);
+            camera.lookAt(boat.position.x, boat.position.y + 0.7, boat.position.z - 8 - storm * 8);
+            scene.fog.density = 0.018 + storm * 0.02;
+            renderer.render(scene, camera);
+        }
+
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>

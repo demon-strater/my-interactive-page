@@ -1,29 +1,24 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interaction Library</title>
+    <title>Five Art Movements</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="view-hub">
     <section class="hub-screen" id="hubScreen" aria-label="Interaction hub">
-        <main class="clock-hub timeline-hub" aria-label="Scrollable clock timeline of interaction sites">
+        <main class="clock-hub timeline-hub" aria-label="Circular timeline of art movement sites">
             <header class="hub-header">
-                <p>Interactive Archive</p>
-                <h1>Interaction Library</h1>
+                <p>Interactive Art Movements</p>
+                <h1>Five Art Movements That Shaped Me</h1>
             </header>
 
-            <section class="clock-stage timeline-clock" aria-label="Current interaction hour">
-                <div class="clock-face" aria-hidden="true">
-                    <span class="clock-hand hour-hand" id="timelineHand"></span>
-                    <span class="clock-hand minute-hand"></span>
-                    <span class="clock-pin"></span>
-                </div>
-                <div class="clock-readout">
+            <section class="clock-stage timeline-clock" aria-label="Current art movement">
+                <div class="clock-readout feature-readout">
                     <span id="featureHour">01</span>
                     <strong id="featureTitle">RENAISSANCE</strong>
-                    <small id="featureMeta">Perspective engine</small>
+                    <small id="featureMeta">c. 1400-1600</small>
                 </div>
             </section>
 
@@ -32,62 +27,37 @@
                     <button class="timeline-card active" type="button" data-hour="1" data-site="renaissance">
                         <span class="card-hour">01</span>
                         <strong>RENAISSANCE</strong>
-                        <small>Perspective engine</small>
+                        <small>c. 1400-1600</small>
                     </button>
-                    <button class="timeline-card" type="button" data-hour="2" data-site="particle">
+                    <button class="timeline-card art-card surrealism-card" type="button" data-hour="2" data-site="impressionism">
                         <span class="card-hour">02</span>
-                        <strong>particle</strong>
-                        <small>Text particles</small>
+                        <strong>SURREALISM</strong>
+                        <small>1924-1966</small>
+                        <span class="card-artwork">
+                            <span>Rene Magritte</span>
+                            <em>The Empire of Light</em>
+                            <span>1956</span>
+                        </span>
                     </button>
-                    <button class="timeline-card" type="button" data-hour="3" data-site="fluid-collision">
-                        <span class="card-hour">03</span>
-                        <strong>FLUID COLLISION</strong>
-                        <small>Shader flow</small>
-                    </button>
-                    <button class="timeline-card" type="button" data-hour="4">
+                    <button class="timeline-card art-card impressionism-card" type="button" data-hour="4" data-site="impressionism-time">
                         <span class="card-hour">04</span>
-                        <strong>MEMORY GRID</strong>
-                        <small>Pattern recall</small>
-                    </button>
-                    <button class="timeline-card" type="button" data-hour="5" data-site="impressionism">
-                        <span class="card-hour">05</span>
                         <strong>IMPRESSIONISM</strong>
-                        <small>Music gallery</small>
+                        <small>c. 1874-1886</small>
+                        <span class="card-artwork">
+                            <span>Claude Monet</span>
+                            <em>Rouen Cathedral</em>
+                            <span>1894</span>
+                        </span>
                     </button>
-                    <button class="timeline-card" type="button" data-hour="6">
-                        <span class="card-hour">06</span>
-                        <strong>COLOR FIELD</strong>
-                        <small>Chromatic controls</small>
+                    <button class="timeline-card" type="button" data-hour="3">
+                        <span class="card-hour">03</span>
+                        <strong>BAUHAUS</strong>
+                        <small>1919-1933</small>
                     </button>
-                    <button class="timeline-card" type="button" data-hour="7">
-                        <span class="card-hour">07</span>
-                        <strong>TEXTURE MAP</strong>
-                        <small>Surface explorer</small>
-                    </button>
-                    <button class="timeline-card" type="button" data-hour="8">
-                        <span class="card-hour">08</span>
-                        <strong>TYPE CLOCK</strong>
-                        <small>Temporal letterforms</small>
-                    </button>
-                    <button class="timeline-card" type="button" data-hour="9">
-                        <span class="card-hour">09</span>
-                        <strong>SHADOW ROOM</strong>
-                        <small>Depth and contrast</small>
-                    </button>
-                    <button class="timeline-card" type="button" data-hour="10">
-                        <span class="card-hour">10</span>
-                        <strong>NOISE BLOOM</strong>
-                        <small>Generated particles</small>
-                    </button>
-                    <button class="timeline-card" type="button" data-hour="11">
-                        <span class="card-hour">11</span>
-                        <strong>WAVE INDEX</strong>
-                        <small>Rhythm interface</small>
-                    </button>
-                    <button class="timeline-card" type="button" data-hour="12">
-                        <span class="card-hour">12</span>
-                        <strong>ORBIT NOTES</strong>
-                        <small>Circular navigation</small>
+                    <button class="timeline-card" type="button" data-hour="5" data-site="romanticism">
+                        <span class="card-hour">05</span>
+                        <strong>ROMANTICISM</strong>
+                        <small>c. 1798-1850</small>
                     </button>
                 </div>
             </section>
@@ -99,61 +69,67 @@
         <div class="transition-panel" id="transitionPanel">
             <span class="transition-hour" id="transitionHour">01</span>
             <strong id="transitionTitle">RENAISSANCE</strong>
-            <small id="transitionMeta">Perspective engine</small>
+            <small id="transitionMeta">c. 1400-1600</small>
         </div>
     </div>
 
-    <section class="interaction-screen" id="interactionScreen" aria-label="Impressionism interaction">
-        <button class="back-button" id="backToShelf" type="button">Back to Clock</button>
+    <section class="interaction-screen" id="interactionScreen" aria-label="Art movement interaction">
+        <button class="back-button" id="backToShelf" type="button" aria-label="Return home">
+            <span class="home-label">Home</span>
+        </button>
 
         <div class="interaction-content impressionism-site">
             <header class="site-header">
-                <h1>IMPRESSIONISM</h1>
+                <h1>SURREALISM</h1>
             </header>
 
-            <main class="main-container" aria-label="Impressionism music player">
-                <button class="nav-arrow left-arrow" id="leftArrow" aria-label="Previous artwork">&#9664;</button>
+            <main class="main-container surreal-room" aria-label="Surrealism room window">
+                <section class="music-player side-player" id="musicPlayer" aria-label="Music control">
+                    <div class="now-playing">
+                        <div>
+                            <h2 class="track-title" id="trackTitle">Morning Music</h2>
+                            <p class="track-info" id="trackInfo">Surrealism Study</p>
+                        </div>
+                        <button id="playPauseBtn" class="player-button" aria-label="Play">&#9654;</button>
+                    </div>
+
+                    <div class="progress-panel" aria-hidden="true">
+                        <div class="time-row">
+                            <span id="currentTime">0:00</span>
+                            <span id="durationTime">0:00</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                    </div>
+                </section>
+
                 <section class="player-shell">
-                    <div class="album-art-container" aria-label="Current artwork">
-                        <div class="scene" id="morningScene"></div>
-                        <div class="scene" id="nightScene"></div>
-                        <div class="scene" id="vincentMorningScene"></div>
-                        <div class="scene" id="vincentNightScene"></div>
+                    <div class="album-art-container room-window" aria-label="Window view">
+                        <div class="window-reveal">
+                            <div class="scene" id="morningScene"></div>
+                            <div class="scene" id="nightScene"></div>
+                            <div class="scene" id="vincentMorningScene"></div>
+                            <div class="scene" id="vincentNightScene"></div>
+                        </div>
+                        <div class="window-frame" aria-hidden="true">
+                            <span class="muntin muntin-vertical"></span>
+                            <span class="muntin muntin-horizontal"></span>
+                        </div>
+                        <div class="curtain curtain-left" aria-hidden="true"></div>
+                        <div class="curtain curtain-right" aria-hidden="true"></div>
+                        <div class="window-sill" aria-hidden="true"></div>
+                        <div class="room-shadow" aria-hidden="true"></div>
                         <div class="album-overlay">
                             <span class="album-tag" id="albumTag">Morning</span>
                         </div>
                     </div>
-
-                    <div class="music-player" id="musicPlayer">
-                        <div class="now-playing">
-                            <div>
-                                <h2 class="track-title" id="trackTitle">Morning Music</h2>
-                                <p class="track-info" id="trackInfo">Impressionism Study</p>
-                            </div>
-                            <button id="playPauseBtn" class="player-button" aria-label="Play">&#9654;</button>
-                        </div>
-
-                        <div class="progress-panel" aria-hidden="true">
-                            <div class="time-row">
-                                <span id="currentTime">0:00</span>
-                                <span id="durationTime">0:00</span>
-                            </div>
-                            <div class="progress-track">
-                                <div class="progress-fill" id="progressFill"></div>
-                            </div>
-                        </div>
-
-                        <div class="playlist">
-                            <button class="playlist-item active" data-track="morning" type="button">
-                                <span>Morning</span>
-                            </button>
-                            <button class="playlist-item" data-track="night" type="button">
-                                <span>Night</span>
-                            </button>
-                        </div>
-                    </div>
                 </section>
-                <button class="nav-arrow right-arrow" id="rightArrow" aria-label="Next artwork">&#9654;</button>
+                <div class="room-furniture" aria-hidden="true">
+                    <span class="wall-picture"></span>
+                    <span class="floor-lamp"></span>
+                    <span class="side-table"></span>
+                </div>
             </main>
         </div>
 
@@ -164,12 +140,12 @@
 
         <div class="interaction-content particle-site" aria-label="Particle interaction">
             <header class="site-header particle-header">
-                <h1>particle</h1>
+                <h1>PARTICLE</h1>
             </header>
 
             <main class="particle-stage" aria-label="Particle stage">
                 <section class="particle-canvas" aria-label="Particle canvas">
-                    <iframe class="particle-frame" src="particle.html" title="particle"></iframe>
+                    <iframe class="particle-frame" src="particle.html" title="Particle"></iframe>
                 </section>
             </main>
         </div>
@@ -180,9 +156,15 @@
             </main>
         </div>
 
+        <div class="interaction-content baroque-site" aria-label="Baroque interaction">
+            <main class="baroque-stage" aria-label="Baroque hidden vault stage">
+                <iframe class="baroque-frame" data-src="baroque.html" title="Baroque Hidden Vault"></iframe>
+            </main>
+        </div>
+
         <div class="interaction-content fluid-site" aria-label="Fluid Collision interaction">
             <header class="site-header fluid-header">
-                <h1>FLUID COLLISION</h1>
+                <h1>DIGITAL ABSTRACT</h1>
             </header>
 
             <main class="fluid-stage" aria-label="Fluid Collision stage">
@@ -195,6 +177,18 @@
                     <small>Drag to disturb</small>
                     <small>Red + Blue = Purple</small>
                 </section>
+            </main>
+        </div>
+
+        <div class="interaction-content romanticism-site" aria-label="Romanticism interaction">
+            <main class="romanticism-stage" aria-label="Romanticism storm ocean stage">
+                <iframe class="romanticism-frame" data-src="romanticism.html" title="Romanticism Storm"></iframe>
+            </main>
+        </div>
+
+        <div class="interaction-content impressionism-time-site" aria-label="Impressionism interaction">
+            <main class="impressionism-time-stage" aria-label="Impressionism time and temperature stage">
+                <iframe class="impressionism-time-frame" data-src="impressionism.html" title="Impressionism Time Study"></iframe>
             </main>
         </div>
     </section>

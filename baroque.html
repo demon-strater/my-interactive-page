@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baroque Hidden Vault</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #030201;
+            cursor: crosshair;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .hint {
+            position: fixed;
+            left: 50%;
+            bottom: 20px;
+            transform: translateX(-50%);
+            z-index: 2;
+            max-width: min(680px, calc(100vw - 32px));
+            padding: 10px 14px;
+            border: 1px solid rgba(255, 232, 176, 0.24);
+            border-radius: 999px;
+            color: rgba(255, 239, 206, 0.82);
+            background: rgba(14, 7, 2, 0.46);
+            font: 700 12px/1.2 system-ui, sans-serif;
+            letter-spacing: 0;
+            text-align: center;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            pointer-events: none;
+            transition: opacity 480ms ease;
+        }
+
+        .opened .hint {
+            opacity: 0.72;
+        }
+    </style>
+</head>
+<body>
+    <div class="hint" id="hint">Click the gilded center. Move the cursor to reveal the statues, then scroll to widen or narrow the light.</div>
+
+    <script type="module">
+        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.15;
+        document.body.appendChild(renderer.domElement);
+
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x030201, 0.022);
+
+        const aspect = () => window.innerWidth / window.innerHeight;
+        const orthoCamera = new THREE.OrthographicCamera(-aspect(), aspect(), 1, -1, 0.1, 30);
+        orthoCamera.position.set(0, 0, 8);
+        orthoCamera.lookAt(0, 0, 0);
+
+        const perspectiveCamera = new THREE.PerspectiveCamera(58, aspect(), 0.1, 120);
+        perspectiveCamera.position.set(0, 0, 8);
+        perspectiveCamera.lookAt(0, 0, -8);
+        let activeCamera = orthoCamera;
+
+        const raycaster = new THREE.Raycaster();
+        const pointer = new THREE.Vector2(0, 0);
+        const lightCursor = new THREE.Vector2(0.18, -0.08);
+        const targetLightCursor = new THREE.Vector2(0.18, -0.08);
+        const frescoGroup = new THREE.Group();
+        const voidGroup = new THREE.Group();
+        const shards = [];
+        let opened = false;
+        let openProgress = 0;
+        let dive = 0;
+        let targetDive = 8.5;
+        let spotSize = 0.22;
+        let targetSpotSize = 0.22;
+
+        scene.add(frescoGroup);
+        scene.add(voidGroup);
+
+        function createFrescoTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 2048;
+            canvas.height = 2048;
+            const ctx = canvas.getContext('2d');
+            const cx = 1024;
+            const cy = 1024;
+
+            const bg = ctx.createRadialGradient(cx, cy, 20, cx, cy, 1280);
+            bg.addColorStop(0, '#fff0bd');
+            bg.addColorStop(0.2, '#dba65c');
+            bg.addColorStop(0.44, '#7d5b49');
+            bg.addColorStop(0.68, '#2f527f');
+            bg.addColorStop(1, '#0b0708');
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            function ellipse(x, y, w, h, rot, color, alpha = 1) {
+                ctx.save();
+                ctx.globalAlpha = alpha;
+                ctx.translate(x, y);
+                ctx.rotate(rot);
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.ellipse(0, 0, w, h, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            function drawCloud(x, y, scale, alpha) {
+                ellipse(x - 95 * scale, y + 10 * scale, 120 * scale, 48 * scale, -0.12, '#d9d0bf', alpha * 0.5);
+                ellipse(x, y, 170 * scale, 62 * scale, 0.04, '#f2dfbf', alpha * 0.62);
+                ellipse(x + 110 * scale, y + 18 * scale, 130 * scale, 46 * scale, 0.16, '#c6cbd1', alpha * 0.36);
+                ellipse(x + 20 * scale, y - 38 * scale, 96 * scale, 42 * scale, -0.08, '#fff2d0', alpha * 0.48);
+            }
+
+            drawCloud(520, 520, 1.8, 0.72);
+            drawCloud(1460, 510, 1.65, 0.68);
+            drawCloud(450, 1290, 1.45, 0.52);
+            drawCloud(1510, 1270, 1.55, 0.56);
+            drawCloud(1040, 330, 1.2, 0.42);
+            drawCloud(1020, 1570, 1.25, 0.42);
+
+            const rays = ctx.createRadialGradient(cx, cy, 140, cx, cy, 820);
+            rays.addColorStop(0, 'rgba(255, 236, 159, 0.78)');
+            rays.addColorStop(0.42, 'rgba(224, 157, 75, 0.24)');
+            rays.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            ctx.fillStyle = rays;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < 12; i++) {
+                const a = (i / 12) * Math.PI * 2;
+                ctx.save();
+                ctx.translate(cx, cy);
+                ctx.rotate(a);
+                const beam = ctx.createLinearGradient(0, -110, 0, -780);
+                beam.addColorStop(0, 'rgba(255, 229, 138, 0.46)');
+                beam.addColorStop(1, 'rgba(255, 229, 138, 0)');
+                ctx.fillStyle = beam;
+                ctx.beginPath();
+                ctx.moveTo(-28, -96);
+                ctx.bezierCurveTo(-88, -360, -74, -590, -12, -820);
+                ctx.bezierCurveTo(74, -590, 88, -360, 28, -96);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            function drawFigure(x, y, scale, rot, robe, skin) {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(rot);
+                ellipse(0, 0, 56 * scale, 86 * scale, 0, robe, 0.82);
+                ellipse(0, -88 * scale, 35 * scale, 42 * scale, 0, skin, 0.9);
+                ellipse(-72 * scale, -6 * scale, 88 * scale, 22 * scale, -0.42, 'rgba(245, 230, 199, 0.58)', 0.8);
+                ellipse(72 * scale, -6 * scale, 88 * scale, 22 * scale, 0.42, 'rgba(245, 230, 199, 0.58)', 0.8);
+                ellipse(-28 * scale, 82 * scale, 20 * scale, 70 * scale, -0.32, '#8a4a2e', 0.56);
+                ellipse(30 * scale, 82 * scale, 20 * scale, 68 * scale, 0.34, '#8a4a2e', 0.56);
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(255, 227, 142, 0.72)';
+                ctx.lineWidth = 8 * scale;
+                ctx.ellipse(0, -134 * scale, 46 * scale, 18 * scale, 0, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            drawFigure(560, 720, 1.15, -0.55, '#c0804d', '#f1d1a2');
+            drawFigure(1420, 710, 1.08, 0.52, '#b36a48', '#f0cf9f');
+            drawFigure(750, 1260, 1.0, 0.35, '#8c5f9c', '#eecb9c');
+            drawFigure(1300, 1250, 1.05, -0.34, '#446fa2', '#f0d1a8');
+
+            ctx.globalAlpha = 1;
+            ctx.lineWidth = 30;
+            ctx.strokeStyle = '#d9a34a';
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, 820, 520, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.lineWidth = 8;
+            ctx.strokeStyle = 'rgba(255, 239, 181, 0.72)';
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, 884, 566, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.lineWidth = 16;
+            ctx.strokeStyle = 'rgba(88, 44, 21, 0.54)';
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, 720, 458, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            for (let i = 0; i < 8; i++) {
+                const a = (i / 8) * Math.PI * 2 + Math.PI / 8;
+                const x = cx + Math.cos(a) * 835;
+                const y = cy + Math.sin(a) * 530;
+                ellipse(x, y, 52, 30, a, '#f3cf76', 0.86);
+            }
+
+            ctx.fillStyle = '#120706';
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, 226, 160, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#ffd36f';
+            ctx.lineWidth = 32;
+            ctx.stroke();
+
+            ctx.strokeStyle = 'rgba(255, 246, 200, 0.9)';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, 270, 194, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.colorSpace = THREE.SRGBColorSpace;
+            texture.anisotropy = 8;
+            return texture;
+        }
+
+        const frescoTexture = createFrescoTexture();
+        const frescoMaterial = new THREE.MeshBasicMaterial({ map: frescoTexture });
+        const frescoPlane = new THREE.Mesh(new THREE.PlaneGeometry(3.55, 2, 96, 54), frescoMaterial);
+        frescoPlane.name = 'fresco-hit-plane';
+        frescoGroup.add(frescoPlane);
+
+        const aperture = new THREE.Mesh(
+            new THREE.RingGeometry(0.19, 0.32, 96),
+            new THREE.MeshBasicMaterial({ color: 0xffd66b, transparent: true, opacity: 0.92, side: THREE.DoubleSide })
+        );
+        aperture.position.z = 0.012;
+        frescoGroup.add(aperture);
+
+        function makeShard(i, total) {
+            const a0 = (i / total) * Math.PI * 2;
+            const a1 = ((i + 1) / total) * Math.PI * 2;
+            const inner = 0.18;
+            const outer = 1.65 + Math.random() * 0.55;
+            const shape = new THREE.Shape();
+            shape.moveTo(Math.cos(a0) * inner, Math.sin(a0) * inner);
+            shape.lineTo(Math.cos(a0) * outer, Math.sin(a0) * outer);
+            shape.lineTo(Math.cos(a1) * outer, Math.sin(a1) * outer);
+            shape.lineTo(Math.cos(a1) * inner, Math.sin(a1) * inner);
+            shape.closePath();
+
+            const mesh = new THREE.Mesh(
+                new THREE.ShapeGeometry(shape),
+                new THREE.MeshBasicMaterial({ map: frescoTexture, side: THREE.DoubleSide, transparent: true, opacity: 0 })
+            );
+            mesh.position.z = 0.04;
+            mesh.userData.velocity = new THREE.Vector3(Math.cos((a0 + a1) * 0.5), Math.sin((a0 + a1) * 0.5), -0.8 - Math.random() * 1.3);
+            mesh.userData.spin = new THREE.Vector3(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1);
+            shards.push(mesh);
+            frescoGroup.add(mesh);
+        }
+
+        for (let i = 0; i < 28; i++) {
+            makeShard(i, 28);
+        }
+
+        const black = new THREE.Mesh(
+            new THREE.CircleGeometry(0.33, 96),
+            new THREE.MeshBasicMaterial({ color: 0x020100, transparent: true, opacity: 0 })
+        );
+        black.position.z = 0.02;
+        frescoGroup.add(black);
+
+        const ambient = new THREE.AmbientLight(0x1b1008, 0.018);
+        scene.add(ambient);
+
+        const spotlight = new THREE.SpotLight(0xffd28a, 98, 38, Math.PI / 8, 0.72, 1.1);
+        spotlight.position.set(0, 0.35, 6.5);
+        spotlight.target.position.set(0.2, -0.12, -7);
+        spotlight.castShadow = true;
+        spotlight.shadow.mapSize.set(1024, 1024);
+        scene.add(spotlight, spotlight.target);
+
+        const rimLight = new THREE.PointLight(0x5b2a12, 1.6, 16);
+        rimLight.position.set(-4, 3, -11);
+        scene.add(rimLight);
+
+        function createMarbleTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+            const base = ctx.createLinearGradient(0, 0, 1024, 1024);
+            base.addColorStop(0, '#d8c8b2');
+            base.addColorStop(0.42, '#f0e2cc');
+            base.addColorStop(1, '#a99782');
+            ctx.fillStyle = base;
+            ctx.fillRect(0, 0, 1024, 1024);
+
+            for (let i = 0; i < 44; i++) {
+                const y = 80 + i * 22;
+                ctx.save();
+                ctx.globalAlpha = i % 3 === 0 ? 0.18 : 0.09;
+                ctx.strokeStyle = i % 3 === 0 ? '#725b49' : '#ffffff';
+                ctx.lineWidth = i % 3 === 0 ? 2.2 : 3.5;
+                ctx.beginPath();
+                ctx.moveTo(-80, y);
+                ctx.bezierCurveTo(220, y - 120, 420, y + 90, 650, y - 18);
+                ctx.bezierCurveTo(830, y - 104, 980, y + 58, 1120, y - 24);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.colorSpace = THREE.SRGBColorSpace;
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(1.7, 1.7);
+            return texture;
+        }
+
+        const marbleTexture = createMarbleTexture();
+        const angelMaterial = new THREE.MeshStandardMaterial({
+            map: marbleTexture,
+            color: 0xd7c8b2,
+            roughness: 0.58,
+            metalness: 0.03
+        });
+        const clothMaterial = new THREE.MeshStandardMaterial({
+            color: 0xa56f48,
+            roughness: 0.76,
+            metalness: 0.02
+        });
+        const featherMaterial = new THREE.MeshStandardMaterial({
+            color: 0xd5c6aa,
+            roughness: 0.68,
+            metalness: 0.02
+        });
+        const goldMaterial = new THREE.MeshStandardMaterial({
+            color: 0xd2a34d,
+            roughness: 0.36,
+            metalness: 0.56
+        });
+
+        function statueMaterial() {
+            return angelMaterial;
+        }
+
+        function addWing(group, side) {
+            for (let row = 0; row < 3; row++) {
+                for (let i = 0; i < 7; i++) {
+                    const length = 0.64 - i * 0.035 - row * 0.06;
+                    const feather = new THREE.Mesh(new THREE.CapsuleGeometry(0.027 + row * 0.004, length, 10, 24), featherMaterial);
+                    feather.position.set(
+                        side * (0.25 + i * 0.07 + row * 0.03),
+                        0.26 - i * 0.045 - row * 0.12,
+                        -0.1 - i * 0.014 + row * 0.035
+                    );
+                    feather.rotation.z = side * (0.84 + i * 0.095 - row * 0.05);
+                    feather.rotation.y = side * (-0.48 - i * 0.016);
+                    feather.rotation.x = 0.22 + row * 0.08;
+                    feather.castShadow = true;
+                    feather.receiveShadow = true;
+                    group.add(feather);
+                }
+            }
+
+            const wingBase = new THREE.Mesh(new THREE.SphereGeometry(0.28, 32, 18), featherMaterial);
+            wingBase.scale.set(0.55, 0.95, 0.18);
+            wingBase.position.set(side * 0.28, 0.18, -0.12);
+            wingBase.rotation.z = side * 0.45;
+            wingBase.castShadow = true;
+            wingBase.receiveShadow = true;
+            group.add(wingBase);
+        }
+
+        function addLimb(group, start, end, radius, material) {
+            const mid = start.clone().add(end).multiplyScalar(0.5);
+            const direction = end.clone().sub(start);
+            const length = direction.length();
+            const limb = new THREE.Mesh(new THREE.CapsuleGeometry(radius, length, 16, 32), material);
+            limb.position.copy(mid);
+            limb.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
+            limb.castShadow = true;
+            limb.receiveShadow = true;
+            group.add(limb);
+            return limb;
+        }
+
+        function addHand(group, x, y, z, scale, material) {
+            const hand = new THREE.Mesh(new THREE.SphereGeometry(0.045 * scale, 20, 14), material);
+            hand.scale.set(1.25, 0.72, 0.52);
+            hand.position.set(x, y, z);
+            hand.castShadow = true;
+            group.add(hand);
+        }
+
+        function addFoot(group, x, y, z, side, scale, material) {
+            const foot = new THREE.Mesh(new THREE.SphereGeometry(0.058 * scale, 22, 14), material);
+            foot.scale.set(1.7, 0.62, 0.72);
+            foot.position.set(x, y, z);
+            foot.rotation.z = side * 0.25;
+            foot.castShadow = true;
+            group.add(foot);
+        }
+
+        function addDrapery(group, twist) {
+            const points = [
+                new THREE.Vector3(-0.28, -0.06, 0.14),
+                new THREE.Vector3(-0.08, -0.28, 0.22),
+                new THREE.Vector3(0.2, -0.48, 0.16),
+                new THREE.Vector3(0.36, -0.82, 0.02)
+            ];
+
+            for (let i = 0; i < 6; i++) {
+                const offset = (i - 2.5) * 0.055;
+                const curve = new THREE.CatmullRomCurve3(points.map(point => {
+                    return point.clone().add(new THREE.Vector3(offset, Math.sin(i + point.y * 5) * 0.04, i * 0.012));
+                }));
+                const fold = new THREE.Mesh(new THREE.TubeGeometry(curve, 28, 0.026 + i * 0.003, 10, false), clothMaterial);
+                fold.rotation.z = twist * 0.15;
+                fold.castShadow = true;
+                fold.receiveShadow = true;
+                group.add(fold);
+            }
+
+            const sash = new THREE.Mesh(new THREE.TorusGeometry(0.26, 0.025, 10, 64, Math.PI * 1.25), clothMaterial);
+            sash.position.set(0.03, -0.18, 0.16);
+            sash.rotation.set(1.15, 0.24, twist * 0.45 - 0.55);
+            sash.castShadow = true;
+            sash.receiveShadow = true;
+            group.add(sash);
+        }
+
+        function createAngel(x, y, z, scale, twist) {
+            const group = new THREE.Group();
+            const mat = statueMaterial();
+
+            const torso = new THREE.Mesh(new THREE.SphereGeometry(0.32, 48, 34), mat);
+            torso.scale.set(0.72, 1.18, 0.42);
+            torso.position.set(0, -0.04, 0);
+            torso.rotation.set(0.18, 0.12 * twist, twist * 0.16);
+            torso.castShadow = true;
+            torso.receiveShadow = true;
+            group.add(torso);
+
+            const chest = new THREE.Mesh(new THREE.SphereGeometry(0.25, 42, 28), mat);
+            chest.scale.set(0.9, 0.62, 0.42);
+            chest.position.set(0.02 * twist, 0.22, 0.08);
+            chest.rotation.z = twist * 0.18;
+            chest.castShadow = true;
+            chest.receiveShadow = true;
+            group.add(chest);
+
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.17, 56, 36), mat);
+            head.scale.set(0.88, 1.06, 0.78);
+            head.position.set(0.06 * twist, 0.62, 0.08);
+            head.rotation.y = twist * 0.22;
+            head.castShadow = true;
+            group.add(head);
+
+            const nose = new THREE.Mesh(new THREE.ConeGeometry(0.025, 0.075, 16), mat);
+            nose.position.set(0.06 * twist, 0.6, 0.19);
+            nose.rotation.x = Math.PI / 2;
+            nose.rotation.z = twist * 0.08;
+            nose.castShadow = true;
+            group.add(nose);
+
+            for (let side of [-1, 1]) {
+                const brow = new THREE.Mesh(new THREE.CapsuleGeometry(0.009, 0.06, 6, 10), mat);
+                brow.position.set(0.06 * twist + side * 0.045, 0.635, 0.18);
+                brow.rotation.z = side * 0.18;
+                brow.castShadow = true;
+                group.add(brow);
+            }
+
+            const hairMat = new THREE.MeshStandardMaterial({ color: 0x8a6847, roughness: 0.66, metalness: 0.02 });
+            for (let i = 0; i < 18; i++) {
+                const curl = new THREE.Mesh(new THREE.TorusGeometry(0.03 + (i % 3) * 0.005, 0.011, 8, 20), hairMat);
+                const a = (i / 18) * Math.PI * 2;
+                curl.position.set(Math.cos(a) * 0.13 + 0.06 * twist, 0.65 + Math.sin(a) * 0.052, 0.04 + Math.sin(i * 1.7) * 0.06);
+                curl.rotation.set(a * 0.2, a, Math.PI / 2);
+                curl.castShadow = true;
+                group.add(curl);
+            }
+
+            const halo = new THREE.Mesh(new THREE.TorusGeometry(0.23, 0.018, 12, 96), goldMaterial);
+            halo.position.set(0.06 * twist, 0.82, -0.04);
+            halo.rotation.x = Math.PI / 2.6;
+            halo.castShadow = true;
+            group.add(halo);
+
+            for (let side of [-1, 1]) {
+                const shoulder = new THREE.Vector3(side * 0.2, 0.28, 0.07);
+                const elbow = new THREE.Vector3(side * (0.42 + 0.06 * twist), 0.08 + side * twist * 0.04, 0.15);
+                const hand = new THREE.Vector3(side * (0.64 - 0.04 * twist), -0.14 + side * 0.08, 0.2);
+                addLimb(group, shoulder, elbow, 0.046, mat);
+                addLimb(group, elbow, hand, 0.038, mat);
+                addHand(group, hand.x, hand.y, hand.z, 1, mat);
+
+                const hip = new THREE.Vector3(side * 0.1, -0.42, 0.03);
+                const knee = new THREE.Vector3(side * (0.18 - twist * 0.03), -0.72, 0.08);
+                const foot = new THREE.Vector3(side * (0.27 + twist * 0.03), -0.98, 0.16);
+                addLimb(group, hip, knee, 0.06, mat);
+                addLimb(group, knee, foot, 0.052, mat);
+                addFoot(group, foot.x, foot.y, foot.z, side, 1, mat);
+            }
+
+            addWing(group, -1);
+            addWing(group, 1);
+            addDrapery(group, twist);
+            group.position.set(x, y, z);
+            group.scale.setScalar(scale);
+            group.rotation.set(0.15 * twist, 0.45 * twist, -0.12 * twist);
+            voidGroup.add(group);
+        }
+
+        createAngel(-2.8, 1.1, -8.5, 1.15, -1);
+        createAngel(2.5, -0.7, -11.5, 1.35, 1);
+        createAngel(0.7, 1.9, -15.2, 1.55, 0.55);
+        createAngel(-1.5, -1.75, -18.8, 1.25, -0.45);
+
+        const cloudMat = new THREE.MeshStandardMaterial({ color: 0x6f6257, roughness: 0.86, metalness: 0.01 });
+        for (let i = 0; i < 44; i++) {
+            const cloud = new THREE.Mesh(new THREE.SphereGeometry(0.22 + (i % 5) * 0.045, 24, 16), cloudMat);
+            const a = (i / 44) * Math.PI * 2;
+            const radius = 1.7 + (i % 7) * 0.38;
+            cloud.position.set(Math.cos(a) * radius, Math.sin(a * 1.7) * 1.15, -7.6 - (i % 11) * 1.1);
+            cloud.scale.set(1.7, 0.48 + (i % 3) * 0.08, 0.68);
+            cloud.rotation.set(0.2, a, Math.sin(a) * 0.5);
+            cloud.castShadow = true;
+            cloud.receiveShadow = true;
+            voidGroup.add(cloud);
+        }
+
+        const plinthMat = new THREE.MeshStandardMaterial({ color: 0x8b6d50, roughness: 0.58, metalness: 0.16 });
+        [
+            [-2.8, 0.22, -8.9, 0.82],
+            [2.5, -1.58, -11.9, 0.96],
+            [0.7, 0.95, -15.7, 1.08],
+            [-1.5, -2.62, -19.2, 0.86]
+        ].forEach(([x, y, z, s]) => {
+            const plinth = new THREE.Mesh(new THREE.CylinderGeometry(0.56 * s, 0.72 * s, 0.22, 48), plinthMat);
+            plinth.position.set(x, y, z + 0.12);
+            plinth.rotation.x = Math.PI / 2;
+            plinth.castShadow = true;
+            plinth.receiveShadow = true;
+            voidGroup.add(plinth);
+        });
+
+        const vaultMaterial = new THREE.MeshStandardMaterial({ color: 0x100806, roughness: 0.8, metalness: 0.02, side: THREE.BackSide });
+        const vault = new THREE.Mesh(new THREE.CylinderGeometry(5.8, 8.5, 28, 96, 16, true), vaultMaterial);
+        vault.position.z = -13;
+        vault.rotation.x = Math.PI / 2;
+        vault.receiveShadow = true;
+        voidGroup.add(vault);
+
+        for (let i = 0; i < 36; i++) {
+            const column = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.045, 0.08, 6.5, 24),
+                new THREE.MeshStandardMaterial({ color: 0x7d5735, roughness: 0.62, metalness: 0.18 })
+            );
+            const a = (i / 36) * Math.PI * 2;
+            column.position.set(Math.cos(a) * 4.8, Math.sin(a) * 3.2, -8 - i * 0.26);
+            column.rotation.x = Math.PI / 2;
+            column.rotation.z = a;
+            column.castShadow = true;
+            column.receiveShadow = true;
+            voidGroup.add(column);
+        }
+
+        const ornamentMat = new THREE.MeshStandardMaterial({ color: 0xc6943e, roughness: 0.34, metalness: 0.58 });
+        for (let i = 0; i < 9; i++) {
+            const arch = new THREE.Mesh(new THREE.TorusGeometry(2.2 + i * 0.38, 0.018, 10, 144, Math.PI), ornamentMat);
+            arch.position.set(0, -2.65 + i * 0.04, -6.8 - i * 1.45);
+            arch.rotation.set(Math.PI * 0.5, 0, 0);
+            arch.castShadow = true;
+            arch.receiveShadow = true;
+            voidGroup.add(arch);
+        }
+
+        voidGroup.traverse(child => {
+            if (child.isMesh) {
+                child.visible = false;
+            }
+        });
+
+        function beginOpening() {
+            if (opened) return;
+            opened = true;
+            document.body.classList.add('opened');
+            voidGroup.traverse(child => {
+                if (child.isMesh) child.visible = true;
+            });
+        }
+
+        function pointerToNdc(event) {
+            pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+            pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        }
+
+        window.addEventListener('pointerdown', event => {
+            pointerToNdc(event);
+            targetLightCursor.set(pointer.x, pointer.y);
+            raycaster.setFromCamera(pointer, activeCamera);
+            const hit = raycaster.intersectObject(frescoPlane)[0];
+            if (hit && hit.point.length() < 0.42) {
+                beginOpening();
+            }
+        });
+
+        window.addEventListener('pointermove', event => {
+            pointerToNdc(event);
+            targetLightCursor.set(
+                THREE.MathUtils.clamp(pointer.x, -1.0, 1.0),
+                THREE.MathUtils.clamp(pointer.y, -0.72, 0.72)
+            );
+        }, { passive: true });
+
+        window.addEventListener('wheel', event => {
+            if (!opened) return;
+            targetSpotSize = THREE.MathUtils.clamp(targetSpotSize + event.deltaY * 0.00022, 0.1, 0.54);
+        }, { passive: true });
+
+        window.addEventListener('resize', () => {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+            const a = width / height;
+            orthoCamera.left = -a;
+            orthoCamera.right = a;
+            orthoCamera.top = 1;
+            orthoCamera.bottom = -1;
+            orthoCamera.updateProjectionMatrix();
+            perspectiveCamera.aspect = a;
+            perspectiveCamera.updateProjectionMatrix();
+        });
+
+        function animate(time) {
+            requestAnimationFrame(animate);
+            const t = time * 0.001;
+
+            if (opened) {
+                openProgress = THREE.MathUtils.lerp(openProgress, 1, 0.035);
+                dive = THREE.MathUtils.lerp(dive, targetDive, 0.07);
+                spotSize = THREE.MathUtils.lerp(spotSize, targetSpotSize, 0.12);
+                activeCamera = openProgress > 0.38 ? perspectiveCamera : orthoCamera;
+            }
+
+            black.material.opacity = openProgress * 0.95;
+            aperture.scale.setScalar(1 + openProgress * 2.8);
+            aperture.material.opacity = 0.92 * (1 - openProgress * 0.82);
+            frescoPlane.material.opacity = 1 - openProgress * 0.78;
+            frescoPlane.material.transparent = true;
+
+            shards.forEach((shard, index) => {
+                shard.material.opacity = openProgress * (1 - openProgress * 0.15);
+                const v = shard.userData.velocity;
+                const s = shard.userData.spin;
+                shard.position.set(v.x * openProgress * 1.8, v.y * openProgress * 1.3, 0.04 + v.z * openProgress * 2.8);
+                shard.rotation.set(s.x * openProgress * 2.4, s.y * openProgress * 2.4, s.z * openProgress * 2.4 + index * 0.02);
+            });
+
+            perspectiveCamera.position.set(0, 0, 6.5 - openProgress * 5.6 - dive * openProgress);
+            perspectiveCamera.rotation.z = Math.sin(t * 0.4) * openProgress * 0.03;
+            perspectiveCamera.lookAt(0, 0, -9 - dive * 0.45);
+
+            lightCursor.lerp(targetLightCursor, 0.14);
+            spotlight.position.set(lightCursor.x * 1.7, lightCursor.y * 1.05, 3.9 - dive * 0.11);
+            spotlight.target.position.set(lightCursor.x * 5.2, lightCursor.y * 3.8, -11.5 - dive * 0.45);
+            spotlight.intensity = opened ? 120 + (0.54 - spotSize) * 70 : 0;
+            spotlight.angle = spotSize + Math.sin(t * 0.8) * 0.01;
+            rimLight.intensity = openProgress * 1.35;
+
+            voidGroup.rotation.z = Math.sin(t * 0.16) * 0.025;
+            renderer.render(scene, activeCamera);
+        }
+
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>

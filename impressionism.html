@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impressionism Time Study</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --sepia: 0;
+            --hue: 0deg;
+            --brightness: 1;
+            --saturate: 1;
+            --day-progress: 0%;
+        }
+
+        html,
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #15120f;
+            color: #f4efe5;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        body {
+            display: grid;
+            place-items: center;
+            padding: clamp(24px, 3.4vw, 52px);
+            background:
+                radial-gradient(circle at 18% 16%, rgba(255, 220, 151, 0.2), transparent 28%),
+                radial-gradient(circle at 88% 12%, rgba(124, 154, 194, 0.14), transparent 28%),
+                linear-gradient(135deg, #1b1714 0%, #29211b 46%, #11100f 100%);
+        }
+
+        .stage {
+            width: min(1160px, 100%);
+            height: min(calc(100% - clamp(18px, 3vh, 42px)), 800px);
+            display: grid;
+            grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+            grid-template-rows: minmax(0, 1fr) auto;
+            column-gap: clamp(34px, 4.2vw, 64px);
+            row-gap: clamp(24px, 3.2vw, 42px);
+            align-items: stretch;
+            padding-bottom: clamp(14px, 2.6vh, 34px);
+        }
+
+        .intro {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: clamp(28px, 4vw, 52px);
+            min-height: 0;
+            padding: clamp(16px, 2.2vw, 28px) 0 clamp(26px, 4vh, 46px);
+        }
+
+        .title-block {
+            display: grid;
+            gap: 12px;
+        }
+
+        .eyebrow {
+            margin: 0;
+            color: rgba(244, 239, 229, 0.56);
+            font-size: 0.74rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .title {
+            margin: 0;
+            max-width: 9ch;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(2.85rem, 5.2vw, 6.3rem);
+            line-height: 0.82;
+            letter-spacing: 0;
+        }
+
+        .time-readout {
+            display: grid;
+            gap: 12px;
+            padding-top: 22px;
+            border-top: 1px solid rgba(244, 239, 229, 0.18);
+        }
+
+        .time-name {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(1.5rem, 2.5vw, 2.9rem);
+            line-height: 0.96;
+        }
+
+        .time-note {
+            color: rgba(244, 239, 229, 0.58);
+            font-size: clamp(0.78rem, 1vw, 0.92rem);
+            line-height: 1.5;
+        }
+
+        .image-area {
+            min-width: 0;
+            min-height: 0;
+            display: grid;
+            align-items: center;
+            padding: clamp(10px, 1.4vw, 18px) 0 clamp(30px, 5vh, 62px);
+        }
+
+        .image-shell {
+            position: relative;
+            align-self: center;
+            justify-self: center;
+            width: auto;
+            height: min(64svh, 590px);
+            max-width: 100%;
+            aspect-ratio: 2 / 3;
+            min-height: 0;
+            overflow: hidden;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
+            filter: sepia(var(--sepia)) hue-rotate(var(--hue)) brightness(var(--brightness)) saturate(var(--saturate));
+            transition: filter 1.2s ease;
+            box-shadow:
+                0 30px 82px rgba(0, 0, 0, 0.38),
+                none;
+        }
+
+        .image-shell::before {
+            content: none;
+        }
+
+        .image-shell::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            background: radial-gradient(circle at 50% 50%, transparent 68%, rgba(0, 0, 0, 0.12) 100%);
+        }
+
+        .time-image {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: transparent;
+            opacity: 0;
+            transition: none;
+            will-change: opacity;
+        }
+
+        .controls {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: minmax(190px, 240px) minmax(0, 1fr) minmax(180px, 230px);
+            gap: clamp(22px, 3vw, 38px);
+            align-items: center;
+            padding: clamp(18px, 2.1vw, 24px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.055);
+            box-shadow: 0 18px 54px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+
+        .transport {
+            display: grid;
+            grid-template-columns: 48px 1fr;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .flow-copy {
+            display: grid;
+            gap: 3px;
+        }
+
+        .flow-copy strong {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        .flow-copy span {
+            color: rgba(244, 239, 229, 0.52);
+            font-size: 0.68rem;
+            font-weight: 700;
+        }
+
+        button {
+            min-height: 42px;
+            padding: 0 14px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 999px;
+            color: #f4efe5;
+            background: rgba(255, 255, 255, 0.06);
+            font: inherit;
+            font-size: 0.78rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            border-color: rgba(255, 234, 184, 0.54);
+            background: rgba(255, 234, 184, 0.1);
+        }
+
+        .play-button {
+            width: 48px;
+            padding: 0;
+            display: grid;
+            place-items: center;
+            font-size: 1rem;
+        }
+
+        .timeline {
+            display: grid;
+            gap: 14px;
+            min-width: 0;
+            padding-inline: clamp(4px, 0.8vw, 12px);
+        }
+
+        .scrubber {
+            appearance: none;
+            width: 100%;
+            height: 34px;
+            border-radius: 999px;
+            background:
+                linear-gradient(90deg, rgba(99, 129, 173, 0.72), rgba(255, 224, 163, 0.9) 48%, rgba(177, 102, 84, 0.72)),
+                rgba(244, 239, 229, 0.12);
+            accent-color: #ffe0a3;
+            cursor: pointer;
+        }
+
+        .scrubber::-webkit-slider-thumb {
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            border: 2px solid rgba(255, 255, 255, 0.82);
+            border-radius: 50%;
+            background: #ffe0a3;
+            box-shadow:
+                0 0 0 7px rgba(255, 224, 163, 0.16),
+                0 10px 22px rgba(0, 0, 0, 0.28);
+        }
+
+        .scrubber::-moz-range-thumb {
+            width: 26px;
+            height: 26px;
+            border: 2px solid rgba(255, 255, 255, 0.82);
+            border-radius: 50%;
+            background: #ffe0a3;
+            box-shadow:
+                0 0 0 7px rgba(255, 224, 163, 0.16),
+                0 10px 22px rgba(0, 0, 0, 0.28);
+        }
+
+        .time-track {
+            position: relative;
+            height: 34px;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            align-items: start;
+            color: rgba(244, 239, 229, 0.52);
+            font-size: clamp(0.58rem, 0.78vw, 0.72rem);
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .time-track::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 17px;
+            height: 1px;
+            background: rgba(244, 239, 229, 0.18);
+        }
+
+        .time-marker {
+            position: relative;
+            display: grid;
+            gap: 7px;
+            justify-items: center;
+            text-align: center;
+        }
+
+        .time-marker::after {
+            content: "";
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: rgba(244, 239, 229, 0.44);
+            box-shadow: 0 0 0 4px rgba(244, 239, 229, 0.04);
+        }
+
+        .time-marker.active {
+            color: #ffe0a3;
+        }
+
+        .time-marker.active::after {
+            background: #ffe0a3;
+            box-shadow: 0 0 0 5px rgba(255, 224, 163, 0.16);
+        }
+
+        .temperature {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .temperature label {
+            color: rgba(244, 239, 229, 0.62);
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .temperature input {
+            accent-color: #ffe0a3;
+        }
+
+        @media (max-width: 900px) {
+            body {
+                overflow: auto;
+                align-items: start;
+            }
+
+            .stage {
+                height: auto;
+                grid-template-columns: 1fr;
+                row-gap: 24px;
+            }
+
+            .title {
+                max-width: none;
+                font-size: clamp(2.45rem, 11vw, 4.3rem);
+            }
+
+            .intro {
+                gap: 18px;
+                padding: 0 0 4px;
+            }
+
+            .image-shell {
+                width: min(100%, 420px);
+                height: auto;
+                aspect-ratio: 2 / 3;
+            }
+
+            .controls {
+                grid-template-columns: 1fr;
+                gap: 18px;
+                padding: 18px;
+            }
+
+            .transport,
+            .temperature {
+                justify-content: space-between;
+            }
+
+            .transport {
+                grid-template-columns: 48px minmax(0, 1fr);
+            }
+
+            .time-track {
+                font-size: 0.58rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="stage">
+        <aside class="intro" aria-label="Impressionism overview">
+            <div class="title-block">
+                <p class="eyebrow">Light Across A Day</p>
+                <h1 class="title">Impressionism</h1>
+            </div>
+
+            <div class="time-readout" aria-live="polite">
+                <strong class="time-name" id="timeName">Early Morning</strong>
+                <span class="time-note" id="timeNote">The first light slowly gathers on the cathedral surface.</span>
+            </div>
+        </aside>
+
+        <section class="image-area">
+            <section class="image-shell" id="imageShell" aria-label="Impressionist time image">
+                <img class="time-image" src="2.png" alt="Early morning impression">
+                <img class="time-image" src="1.png" alt="Morning impression">
+                <img class="time-image" src="3.png" alt="Noon impression">
+                <img class="time-image" src="4.png" alt="Afternoon impression">
+                <img class="time-image" src="5.png" alt="Early evening impression">
+                <img class="time-image" src="6.png" alt="Evening impression">
+                <img class="time-image" src="7.png" alt="Late evening impression">
+            </section>
+        </section>
+
+        <section class="controls" aria-label="Time flow controls">
+            <div class="transport">
+                <button class="play-button" id="playButton" type="button" aria-label="Pause time">II</button>
+                <div class="flow-copy">
+                    <strong>Daylight Flow</strong>
+                    <span id="flowState">time is moving forward</span>
+                </div>
+            </div>
+
+            <div class="timeline">
+                <input class="scrubber" id="timeScrubber" type="range" min="0" max="6" value="0" step="0.001" aria-label="Pull the daylight through the day">
+                <div class="time-track" id="timeTrack" aria-hidden="true"></div>
+            </div>
+
+            <div class="temperature">
+                <label for="temperatureSlider">Temperature</label>
+                <input id="temperatureSlider" type="range" min="-5" max="5" value="0" step="1">
+            </div>
+        </section>
+    </main>
+
+    <script>
+        (() => {
+            const shell = document.getElementById('imageShell');
+            const images = Array.from(document.querySelectorAll('.time-image'));
+            const playButton = document.getElementById('playButton');
+            const scrubber = document.getElementById('timeScrubber');
+            const temperatureSlider = document.getElementById('temperatureSlider');
+            const timeName = document.getElementById('timeName');
+            const timeNote = document.getElementById('timeNote');
+            const timeTrack = document.getElementById('timeTrack');
+            const flowState = document.getElementById('flowState');
+
+            const moments = [
+                ['Early Morning', 'The first light slowly gathers on the cathedral surface.'],
+                ['Morning', 'Blue shadows lift as the facade begins to warm.'],
+                ['Noon', 'The surface dissolves into brighter color and vibrating air.'],
+                ['Afternoon', 'The architecture turns softer as light slides sideways.'],
+                ['Early Evening', 'Warm color thickens and the stone starts to glow.'],
+                ['Evening', 'The image cools again as daylight thins.'],
+                ['Late Evening', 'Forms nearly disappear into atmosphere and memory.']
+            ];
+
+            if (!shell || images.length === 0 || !playButton || !scrubber || !temperatureSlider || !timeName || !timeNote || !timeTrack || !flowState) {
+                return;
+            }
+
+            let timeValue = 0;
+            let playing = true;
+            let lastFrame = performance.now();
+            const secondsPerCycle = 34;
+
+            moments.forEach(([label], index) => {
+                const marker = document.createElement('span');
+                marker.className = 'time-marker';
+                marker.textContent = label;
+                marker.dataset.index = String(index);
+                timeTrack.appendChild(marker);
+            });
+
+            const markers = Array.from(document.querySelectorAll('.time-marker'));
+
+            function wrap(value) {
+                const max = images.length - 1;
+                if (value < 0) {
+                    return max + (value % max);
+                }
+                return value % max;
+            }
+
+            function updateTemperature() {
+                const temperature = Number(temperatureSlider.value);
+                const warm = Math.max(temperature, 0);
+                const cool = Math.max(-temperature, 0);
+                const sepia = Math.min(warm * 0.11, 0.55);
+                const hue = warm > 0 ? warm * 6.5 : -cool * 9;
+                const brightness = Math.max(0.74, 1 - cool * 0.034 + warm * 0.011);
+                const saturate = Math.max(0.74, 1 + warm * 0.055 - cool * 0.04);
+
+                shell.style.setProperty('--sepia', sepia.toFixed(2));
+                shell.style.setProperty('--hue', `${hue.toFixed(1)}deg`);
+                shell.style.setProperty('--brightness', brightness.toFixed(2));
+                shell.style.setProperty('--saturate', saturate.toFixed(2));
+            }
+
+            function render() {
+                const max = images.length - 1;
+                const clamped = Math.max(0, Math.min(max, timeValue));
+                const lower = Math.floor(clamped);
+                const upper = Math.min(lower + 1, max);
+                const blend = clamped - lower;
+                const activeMoment = Math.round(clamped);
+                const progress = (clamped / max) * 100;
+
+                images.forEach((image, index) => {
+                    let opacity = 0;
+
+                    if (index === lower) {
+                        opacity = 1 - blend;
+                    }
+
+                    if (index === upper) {
+                        opacity = Math.max(opacity, blend);
+                    }
+
+                    if (lower === upper && index === lower) {
+                        opacity = 1;
+                    }
+
+                    image.style.opacity = opacity.toFixed(3);
+                });
+
+                markers.forEach((marker, index) => {
+                    marker.classList.toggle('active', index === activeMoment);
+                });
+
+                shell.style.setProperty('--day-progress', `${progress}%`);
+                scrubber.value = clamped.toFixed(3);
+                timeName.textContent = moments[activeMoment][0];
+                timeNote.textContent = moments[activeMoment][1];
+            }
+
+            function tick(now) {
+                const delta = Math.min(0.08, (now - lastFrame) / 1000);
+                lastFrame = now;
+
+                if (playing) {
+                    timeValue += delta * ((images.length - 1) / secondsPerCycle);
+
+                    if (timeValue > images.length - 1) {
+                        timeValue = 0;
+                    }
+                }
+
+                render();
+                requestAnimationFrame(tick);
+            }
+
+            playButton.addEventListener('click', () => {
+                playing = !playing;
+                playButton.textContent = playing ? 'II' : 'Play';
+                playButton.setAttribute('aria-label', playing ? 'Pause time' : 'Play time');
+                flowState.textContent = playing ? 'time is moving forward' : 'time is held still';
+            });
+
+            scrubber.addEventListener('input', () => {
+                playing = false;
+                playButton.textContent = 'Play';
+                playButton.setAttribute('aria-label', 'Play time');
+                flowState.textContent = 'you are pulling the light';
+                timeValue = Number(scrubber.value);
+                render();
+            });
+
+            temperatureSlider.addEventListener('input', updateTemperature);
+
+            updateTemperature();
+            render();
+            requestAnimationFrame(time => {
+                lastFrame = time;
+                requestAnimationFrame(tick);
+            });
+        })();
+    </script>
+</body>
+</html>

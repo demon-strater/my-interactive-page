@@ -27,6 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const playlistItems = document.querySelectorAll('.playlist-item');
     const particleFrame = document.querySelector('.particle-frame');
     const renaissanceFrame = document.querySelector('.renaissance-frame');
+    const baroqueFrame = document.querySelector('.baroque-frame');
+    const romanticismFrame = document.querySelector('.romanticism-frame');
+    const impressionismTimeFrame = document.querySelector('.impressionism-time-frame');
 
     const scenes = {
         morning: document.getElementById('morningScene'),
@@ -57,25 +60,20 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             morning: scenes.morning,
             night: scenes.night,
-            label: 'Impression Sunrise'
-        },
-        {
-            morning: scenes.vincentMorning,
-            night: scenes.vincentNight,
-            label: 'Vincent Collection'
+            label: 'Surrealist Sequence'
         }
     ];
 
     const tracks = {
         morning: {
             title: 'Morning Music',
-            info: 'Soft light, open air',
+            info: 'Bright dream image',
             tag: 'Morning',
             audio: morningMusic
         },
         night: {
             title: 'Night Music',
-            info: 'Deep blue, quiet glow',
+            info: 'Dark dream image',
             tag: 'Night',
             audio: nightMusic
         }
@@ -93,20 +91,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let timelineStartX = 0;
     let timelineStartOffset = 0;
     let carouselOffset = 0;
+    let carouselTargetOffset = 0;
 
     const interactions = [
-        { hour: 1, title: 'RENAISSANCE', meta: 'Perspective engine', status: 'Available', site: 'renaissance', top: '#c8a86b', bottom: '#3a2510' },
-        { hour: 2, title: 'particle', meta: 'Text particles', status: 'Available', site: 'particle', top: '#ffd166', bottom: '#9a5c2e' },
-        { hour: 3, title: 'FLUID COLLISION', meta: 'Shader flow', status: 'Available', site: 'fluid-collision', top: '#54d2c4', bottom: '#23566d' },
-        { hour: 4, title: 'MEMORY GRID', meta: 'Pattern recall', status: 'Coming soon', top: '#9b8cff', bottom: '#3f3a7d' },
-        { hour: 5, title: 'IMPRESSIONISM', meta: 'Music gallery', status: 'Available', site: 'impressionism', top: '#ff7a59', bottom: '#77325f' },
-        { hour: 6, title: 'COLOR FIELD', meta: 'Chromatic controls', status: 'Coming soon', top: '#a5e66f', bottom: '#336b4a' },
-        { hour: 7, title: 'TEXTURE MAP', meta: 'Surface explorer', status: 'Coming soon', top: '#67e8f9', bottom: '#2563eb' },
-        { hour: 8, title: 'TYPE CLOCK', meta: 'Temporal letterforms', status: 'Coming soon', top: '#f0abfc', bottom: '#7c3aed' },
-        { hour: 9, title: 'SHADOW ROOM', meta: 'Depth and contrast', status: 'Coming soon', top: '#fb7185', bottom: '#9f1239' },
-        { hour: 10, title: 'NOISE BLOOM', meta: 'Generated particles', status: 'Coming soon', top: '#86efac', bottom: '#15803d' },
-        { hour: 11, title: 'WAVE INDEX', meta: 'Rhythm interface', status: 'Coming soon', top: '#fde047', bottom: '#ca8a04' },
-        { hour: 12, title: 'ORBIT NOTES', meta: 'Circular navigation', status: 'Coming soon', top: '#f97316', bottom: '#7f1d1d' }
+        { hour: 1, title: 'RENAISSANCE', meta: 'c. 1400-1600', status: 'Available', site: 'renaissance', top: '#c8a86b', bottom: '#3a2510' },
+        { hour: 2, title: 'SURREALISM', meta: '1924-1966', status: 'Available', site: 'impressionism', top: '#ff7a59', bottom: '#77325f' },
+        { hour: 3, title: 'BAUHAUS', meta: '1919-1933', status: 'Coming soon', top: '#f5c84b', bottom: '#283c8f' },
+        { hour: 4, title: 'IMPRESSIONISM', meta: 'c. 1874-1886', status: 'Available', site: 'impressionism-time', top: '#a5d96a', bottom: '#4b8aa0' },
+        { hour: 5, title: 'ROMANTICISM', meta: 'c. 1798-1850', status: 'Available', site: 'romanticism', top: '#6b7f99', bottom: '#07101c' }
     ];
 
     function activeKey() {
@@ -173,31 +165,41 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        if (!isTimelineDragging) {
+            const distanceToTarget = carouselTargetOffset - carouselOffset;
+            carouselOffset += distanceToTarget * 0.12;
+
+            if (Math.abs(distanceToTarget) < 0.0008) {
+                carouselOffset = carouselTargetOffset;
+            }
+        }
+
         const railRect = timelineRail.getBoundingClientRect();
         const cardCount = timelineCards.length;
         const compactScreen = window.matchMedia('(max-width: 900px), (max-height: 820px)').matches;
         const radiusX = compactScreen
-            ? Math.min(railRect.width * 0.42, Math.max(railRect.width * 0.31, 220))
-            : Math.max(railRect.width * 0.57, 430);
+            ? Math.min(railRect.width * 0.34, Math.max(railRect.width * 0.29, 230))
+            : Math.max(railRect.width * 0.4, 370);
         const radiusY = compactScreen
-            ? Math.max(railRect.height * 0.72, 460)
-            : Math.max(railRect.height * 0.86, 620);
+            ? Math.max(railRect.height * 0.76, 500)
+            : Math.max(railRect.height * 0.84, 640);
         const activeIndex = ((Math.round(carouselOffset) % cardCount) + cardCount) % cardCount;
 
         timelineCards.forEach((card, index) => {
             const angle = Math.PI - ((index - carouselOffset) / cardCount) * Math.PI * 2;
-            const x = Math.cos(angle) * radiusX;
-            const y = Math.sin(angle) * radiusY;
+            const baseX = Math.cos(angle) * radiusX;
+            const x = baseX + Math.max(0, baseX) * 0.58;
+            const y = Math.sin(angle) * radiusY + (compactScreen ? 98 : 190);
             const front = (1 - Math.cos(angle)) / 2;
             const easedFront = front * front * (3 - 2 * front);
-            const tilt = Math.sin(angle) * -6;
+            const tilt = Math.sin(angle) * -5;
 
             card.style.setProperty('--card-x', `${x.toFixed(1)}px`);
             card.style.setProperty('--card-y', `${y.toFixed(1)}px`);
-            card.style.setProperty('--card-scale', (0.38 + easedFront * 0.84).toFixed(3));
-            card.style.setProperty('--card-gray', (0.78 - easedFront * 0.78).toFixed(3));
-            card.style.setProperty('--card-saturation', (0.42 + easedFront * 1.16).toFixed(3));
-            card.style.setProperty('--card-opacity', (0.26 + easedFront * 0.74).toFixed(3));
+            card.style.setProperty('--card-scale', (0.26 + easedFront * 0.78).toFixed(3));
+            card.style.setProperty('--card-gray', (0.76 - easedFront * 0.76).toFixed(3));
+            card.style.setProperty('--card-saturation', (0.45 + easedFront * 0.9).toFixed(3));
+            card.style.setProperty('--card-opacity', (0.2 + easedFront * 0.8).toFixed(3));
             card.style.setProperty('--card-rotate', `${tilt.toFixed(2)}deg`);
             card.style.zIndex = String(Math.round(easedFront * 1000));
         });
@@ -208,11 +210,17 @@ document.addEventListener('DOMContentLoaded', () => {
         featureHour.textContent = interaction.hour.toString().padStart(2, '0');
         featureTitle.textContent = interaction.title;
         featureMeta.textContent = interaction.meta;
-        timelineHand.style.transform = `translateX(-50%) rotate(${selectedHour * 30}deg)`;
+        if (timelineHand) {
+            timelineHand.style.transform = `translateX(-50%) rotate(${selectedHour * 30}deg)`;
+        }
 
         timelineCards.forEach(card => {
             card.classList.toggle('active', Number(card.dataset.hour) === selectedHour);
         });
+
+        if (!isTimelineDragging && Math.abs(carouselTargetOffset - carouselOffset) > 0.0008) {
+            requestTimelineState();
+        }
     }
 
     function requestTimelineState() {
@@ -231,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const cardCount = timelineCards.length;
-        const currentIndex = ((Math.round(carouselOffset) % cardCount) + cardCount) % cardCount;
+        const currentIndex = ((Math.round(carouselTargetOffset) % cardCount) + cardCount) % cardCount;
         let delta = cardIndex - currentIndex;
 
         if (delta > cardCount / 2) {
@@ -240,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
             delta += cardCount;
         }
 
-        carouselOffset -= delta;
+        carouselTargetOffset -= delta;
         requestTimelineState();
     }
 
@@ -256,41 +264,219 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function parseCssUrl(value) {
+        const match = value.match(/url\(["']?(.+?)["']?\)/);
+        return match ? match[1] : '';
+    }
+
+    function loadImageSize(src) {
+        return new Promise(resolve => {
+            if (!src) {
+                resolve(null);
+                return;
+            }
+
+            const image = new Image();
+            image.onload = () => resolve({
+                width: image.naturalWidth || image.width,
+                height: image.naturalHeight || image.height
+            });
+            image.onerror = () => resolve(null);
+            image.src = src;
+        });
+    }
+
+    function containRect(bounds, ratio) {
+        if (!ratio || !Number.isFinite(ratio)) {
+            return bounds;
+        }
+
+        const boundsRatio = bounds.width / bounds.height;
+        let width = bounds.width;
+        let height = bounds.height;
+
+        if (boundsRatio > ratio) {
+            width = height * ratio;
+        } else {
+            height = width / ratio;
+        }
+
+        return {
+            left: bounds.left + (bounds.width - width) / 2,
+            top: bounds.top + (bounds.height - height) / 2,
+            width,
+            height
+        };
+    }
+
+    async function createArtworkTransition(card) {
+        const cardStyle = window.getComputedStyle(card);
+        const cardRect = card.getBoundingClientRect();
+        const artImage = cardStyle.getPropertyValue('--art-image').trim();
+        const isArtCard = artImage && artImage !== 'none';
+        const imageSrc = parseCssUrl(artImage);
+        const imageSize = await loadImageSize(imageSrc);
+        const imageRatio = imageSize ? imageSize.width / imageSize.height : null;
+        const sourceBounds = isArtCard
+            ? {
+                left: cardRect.left,
+                top: cardRect.top,
+                width: cardRect.width * 0.64,
+                height: cardRect.height
+            }
+            : {
+                left: cardRect.left,
+                top: cardRect.top,
+                width: cardRect.width,
+                height: cardRect.height
+            };
+        const startRect = isArtCard ? containRect(sourceBounds, imageRatio) : sourceBounds;
+        const backdrop = document.createElement('div');
+        const clone = document.createElement('div');
+
+        backdrop.className = 'artwork-transition-backdrop';
+        clone.className = 'artwork-transition-clone';
+        clone.style.left = `${startRect.left}px`;
+        clone.style.top = `${startRect.top}px`;
+        clone.style.width = `${startRect.width}px`;
+        clone.style.height = `${startRect.height}px`;
+
+        if (isArtCard) {
+            clone.style.backgroundImage = artImage;
+        } else {
+            clone.style.background = cardStyle.backgroundColor || cardStyle.getPropertyValue('--feature-color');
+            clone.textContent = card.querySelector('strong')?.textContent || '';
+        }
+
+        document.body.append(backdrop, clone);
+
+        requestAnimationFrame(() => {
+            backdrop.classList.add('visible');
+        });
+
+        return { backdrop, clone, imageRatio };
+    }
+
+    function getInteractionArtworkRect(interaction) {
+        if (interaction.site === 'impressionism') {
+            return document.querySelector('.impressionism-site .window-reveal')?.getBoundingClientRect();
+        }
+
+        if (interaction.site === 'impressionism-time' && impressionismTimeFrame) {
+            try {
+                const frameRect = impressionismTimeFrame.getBoundingClientRect();
+                const imageShell = impressionismTimeFrame.contentDocument?.querySelector('.image-shell');
+
+                if (imageShell) {
+                    const imageRect = imageShell.getBoundingClientRect();
+                    return {
+                        left: frameRect.left + imageRect.left,
+                        top: frameRect.top + imageRect.top,
+                        width: imageRect.width,
+                        height: imageRect.height
+                    };
+                }
+
+                return frameRect;
+            } catch (error) {
+                return impressionismTimeFrame.getBoundingClientRect();
+            }
+        }
+
+        const activeContent = document.querySelector(`.view-${interaction.site} .interaction-content, body.view-${interaction.site} .interaction-content`);
+        const fallbackRect = activeContent?.getBoundingClientRect();
+        const targetWidth = Math.min(window.innerWidth * 0.64, 920);
+        const targetHeight = Math.min(window.innerHeight * 0.72, 680);
+
+        return fallbackRect || {
+            left: (window.innerWidth - targetWidth) / 2,
+            top: (window.innerHeight - targetHeight) / 2,
+            width: targetWidth,
+            height: targetHeight
+        };
+    }
+
+    function moveCloneToRect(clone, rect) {
+        clone.classList.add('settled');
+        clone.style.left = `${rect.left}px`;
+        clone.style.top = `${rect.top}px`;
+        clone.style.width = `${rect.width}px`;
+        clone.style.height = `${rect.height}px`;
+    }
+
+    function revealInteraction(interaction) {
+        body.classList.remove('view-hub');
+        body.classList.remove('view-impressionism', 'view-particle', 'view-schema-architecture', 'view-fluid-collision', 'view-renaissance', 'view-baroque', 'view-romanticism', 'view-impressionism-time');
+        body.classList.add('view-interaction', `view-${interaction.site}`);
+
+        if (interaction.site === 'impressionism') {
+            updateScenes();
+        } else {
+            pauseAllMusic();
+            body.classList.remove('night-background');
+
+            if (interaction.site === 'particle') {
+                resetParticleFrame();
+            }
+
+            if (interaction.site === 'renaissance') {
+                resetRenaissanceFrame();
+            }
+
+            if (interaction.site === 'baroque') {
+                resetBaroqueFrame();
+            }
+
+            if (interaction.site === 'romanticism') {
+                resetRomanticismFrame();
+            }
+
+            if (interaction.site === 'impressionism-time') {
+                resetImpressionismTimeFrame();
+            }
+        }
+    }
+
     function openInteraction(card, interaction) {
         if (isInteractionOpening || body.classList.contains('view-interaction')) {
             return;
         }
 
         isInteractionOpening = true;
-        const cardStyle = window.getComputedStyle(card);
-
-        transitionPanel.style.setProperty('--transition-color', cardStyle.backgroundColor);
-        transitionHour.textContent = card.querySelector('.card-hour')?.textContent || '01';
-        transitionTitle.textContent = card.querySelector('strong')?.textContent || 'RENAISSANCE';
-        transitionMeta.textContent = card.querySelector('small')?.textContent || 'Perspective engine';
-        siteTransition.classList.add('show');
-        setTimeout(() => {
-            body.classList.remove('view-hub');
-            body.classList.remove('view-impressionism', 'view-particle', 'view-schema-architecture', 'view-fluid-collision', 'view-renaissance');
-            body.classList.add('view-interaction', `view-${interaction.site}`);
-            siteTransition.classList.remove('show');
-            isInteractionOpening = false;
-
-            if (interaction.site === 'impressionism') {
-                updateScenes();
-            } else {
-                pauseAllMusic();
-                body.classList.remove('night-background');
-
-                if (interaction.site === 'particle') {
-                    resetParticleFrame();
-                }
-
-                if (interaction.site === 'renaissance') {
-                    resetRenaissanceFrame();
-                }
+        card.classList.add('transition-source');
+        body.classList.add('artwork-opening');
+        createArtworkTransition(card).then(transition => {
+            if (!isInteractionOpening) {
+                transition.backdrop.remove();
+                transition.clone.remove();
+                return;
             }
-        }, 680);
+
+            setTimeout(() => {
+                revealInteraction(interaction);
+
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        const targetRect = containRect(getInteractionArtworkRect(interaction), transition.imageRatio);
+                        moveCloneToRect(transition.clone, targetRect);
+                    });
+                });
+
+                setTimeout(() => {
+                    body.classList.add('artwork-arrived');
+                    transition.backdrop.classList.add('leaving');
+                    transition.clone.classList.add('leaving');
+
+                    setTimeout(() => {
+                        transition.backdrop.remove();
+                        transition.clone.remove();
+                        card.classList.remove('transition-source');
+                        body.classList.remove('artwork-opening', 'artwork-arrived');
+                        isInteractionOpening = false;
+                    }, 620);
+                }, 860);
+            }, 520);
+        });
     }
 
     function resetRenaissanceFrame() {
@@ -335,9 +521,33 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function resetBaroqueFrame() {
+        if (!baroqueFrame) {
+            return;
+        }
+
+        baroqueFrame.src = baroqueFrame.dataset.src || 'baroque.html';
+    }
+
+    function resetRomanticismFrame() {
+        if (!romanticismFrame) {
+            return;
+        }
+
+        romanticismFrame.src = romanticismFrame.dataset.src || 'romanticism.html';
+    }
+
+    function resetImpressionismTimeFrame() {
+        if (!impressionismTimeFrame) {
+            return;
+        }
+
+        impressionismTimeFrame.src = impressionismTimeFrame.dataset.src || 'impressionism.html';
+    }
+
     function closeInteraction() {
         pauseAllMusic();
-        body.classList.remove('view-interaction', 'view-impressionism', 'view-particle', 'view-schema-architecture', 'view-fluid-collision', 'view-renaissance', 'night-background');
+        body.classList.remove('view-interaction', 'view-impressionism', 'view-particle', 'view-schema-architecture', 'view-fluid-collision', 'view-renaissance', 'view-baroque', 'view-romanticism', 'view-impressionism-time', 'night-background');
         body.classList.add('view-hub');
         isNight = false;
         updateScenes();
@@ -425,7 +635,7 @@ document.addEventListener('DOMContentLoaded', () => {
     timelineRail.addEventListener('wheel', event => {
         event.preventDefault();
         const delta = Math.abs(event.deltaY) > Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
-        carouselOffset -= delta * 0.004;
+        carouselTargetOffset -= delta * 0.0032;
         requestTimelineState();
     }, { passive: false });
 
@@ -433,7 +643,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isTimelineDragging = true;
         hasTimelineDragged = false;
         timelineStartX = event.clientX;
-        timelineStartOffset = carouselOffset;
+        timelineStartOffset = carouselTargetOffset;
         timelineRail.classList.add('dragging');
         timelineRail.setPointerCapture(event.pointerId);
     });
@@ -449,7 +659,8 @@ document.addEventListener('DOMContentLoaded', () => {
             hasTimelineDragged = true;
         }
 
-        carouselOffset = timelineStartOffset + distance * 0.01;
+        carouselTargetOffset = timelineStartOffset + distance * 0.01;
+        carouselOffset = carouselTargetOffset;
         requestTimelineState();
     });
 
