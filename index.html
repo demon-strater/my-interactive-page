@@ -8,6 +8,7 @@
 </head>
 <body class="view-hub">
     <section class="hub-screen" id="hubScreen" aria-label="Interaction hub">
+        <div class="hub-bg-tint" id="hubBgTint" aria-hidden="true"></div>
         <main class="clock-hub timeline-hub" aria-label="Circular timeline of art movement sites">
             <header class="hub-header">
                 <p>Interactive Art Movements</p>
@@ -24,10 +25,15 @@
 
             <section class="timeline-rail" aria-label="Scroll interaction cards">
                 <div class="timeline-track" id="timelineTrack">
-                    <button class="timeline-card active" type="button" data-hour="1" data-site="renaissance">
+                    <button class="timeline-card art-card renaissance-card active" type="button" data-hour="1" data-site="renaissance">
                         <span class="card-hour">01</span>
                         <strong>RENAISSANCE</strong>
                         <small>c. 1400-1600</small>
+                        <span class="card-artwork">
+                            <span>Raffaello Sanzio</span>
+                            <em>The School of Athens</em>
+                            <span>1509–1511</span>
+                        </span>
                     </button>
                     <button class="timeline-card art-card surrealism-card" type="button" data-hour="2" data-site="impressionism">
                         <span class="card-hour">02</span>
@@ -49,15 +55,25 @@
                             <span>1894</span>
                         </span>
                     </button>
-                    <button class="timeline-card" type="button" data-hour="3">
+                    <button class="timeline-card art-card bauhaus-card" type="button" data-hour="3">
                         <span class="card-hour">03</span>
                         <strong>BAUHAUS</strong>
                         <small>1919-1933</small>
+                        <span class="card-artwork">
+                            <span>Bauhaus Workshop</span>
+                            <em>Lage der Ebenen zu Einander</em>
+                            <span>c. 1923</span>
+                        </span>
                     </button>
-                    <button class="timeline-card" type="button" data-hour="5" data-site="romanticism">
+                    <button class="timeline-card art-card romanticism-card" type="button" data-hour="5" data-site="romanticism">
                         <span class="card-hour">05</span>
                         <strong>ROMANTICISM</strong>
                         <small>c. 1798-1850</small>
+                        <span class="card-artwork">
+                            <span>Caspar David<br>Friedrich</span>
+                            <em>Wanderer above<br>the Sea of Fog</em>
+                            <span>1818</span>
+                        </span>
                     </button>
                 </div>
             </section>

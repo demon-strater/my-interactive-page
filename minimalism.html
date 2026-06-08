@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Minimalism Subtraction</title>
+<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f7f2;color:#111;font-family:Georgia,serif}#app{position:fixed;inset:0}.hud{position:fixed;left:24px;bottom:20px;pointer-events:none}h1{margin:0;color:#111;font-size:clamp(2rem,6vw,5rem);font-style:italic;font-weight:400;line-height:.9}p{max-width:380px;margin:10px 0 0;color:rgba(17,17,17,.58);font-size:12px;line-height:1.5}.actions{position:fixed;right:24px;top:24px;display:flex;gap:8px;z-index:3}.actions button{min-height:34px;border:1px solid rgba(17,17,17,.22);border-radius:999px;color:#111;background:rgba(247,247,242,.72);padding:0 12px;font:700 10px system-ui;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}</style></head>
+<body><div id="app"></div><div class="actions" onpointerdown="event.stopPropagation()" onclick="event.stopPropagation()"><button id="subtractBtn" type="button">Subtract</button><button id="restartBtn" type="button">Restart</button></div><section class="hud"><h1>Minimalism</h1><p>Every input subtracts. Click, drag, scroll, or type until only a point remains.</p></section>
+<script type="module">
+import * as THREE from 'https://unpkg.com/three@0.164.1/build/three.module.js';
+const subtractBtn=document.getElementById('subtractBtn');
+const restartBtn=document.getElementById('restartBtn');
+const scene=new THREE.Scene();scene.background=new THREE.Color(0xf7f7f2);const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,100);camera.position.set(0,2,16);
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);document.getElementById('app').appendChild(renderer.domElement);
+scene.add(new THREE.AmbientLight(0xffffff,1.3));const l=new THREE.DirectionalLight(0xffffff,2);l.position.set(5,8,5);scene.add(l);
+const group=new THREE.Group();scene.add(group);const meshes=[];
+for(let i=0;i<160;i++){const geo=[new THREE.BoxGeometry(1,1,1),new THREE.SphereGeometry(.62,24,12),new THREE.ConeGeometry(.65,1.2,5)][i%3];const mat=new THREE.MeshStandardMaterial({color:new THREE.Color().setHSL(i/160,.65,.5),roughness:.55,transparent:true,opacity:.92});const m=new THREE.Mesh(geo,mat);m.position.set((Math.random()-.5)*10,(Math.random()-.5)*7,(Math.random()-.5)*8);m.rotation.set(Math.random()*3,Math.random()*3,Math.random()*3);m.scale.setScalar(.45+Math.random()*1.2);group.add(m);meshes.push(m)}
+let reduction=0;
+function subtract(power=1){reduction=Math.min(1,reduction+.018*power);const remove=Math.ceil(meshes.length*.045*power);for(let i=0;i<remove;i++){const m=meshes.find(x=>x.visible);if(m)m.visible=false}meshes.forEach(m=>{m.scale.multiplyScalar(.975);m.material.opacity=Math.max(0,1-reduction*1.2)});}
+['click','pointermove','keydown'].forEach(type=>addEventListener(type,()=>subtract(type==='pointermove'?.12:1)));addEventListener('wheel',e=>subtract(Math.min(4,Math.abs(e.deltaY)/120)),{passive:true});
+subtractBtn.addEventListener('click',e=>{e.stopPropagation();subtract(3)});restartBtn.addEventListener('click',e=>{e.stopPropagation();reduction=0;scene.remove(scene.getObjectByName('point'));meshes.forEach(m=>{m.visible=true;m.scale.setScalar(.45+Math.random()*1.2);m.material.opacity=.92})});
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+function animate(){requestAnimationFrame(animate);group.rotation.y+=.004*(1-reduction);group.rotation.x+=.0015*(1-reduction);if(reduction>.96){meshes.forEach(m=>m.visible=false);if(!scene.getObjectByName('point')){const p=new THREE.Mesh(new THREE.SphereGeometry(.045,16,8),new THREE.MeshBasicMaterial({color:0x111111}));p.name='point';scene.add(p)}}renderer.render(scene,camera)}animate();
+</script></body></html>

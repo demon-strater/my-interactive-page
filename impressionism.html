@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Impressionism Time Study</title>
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         :root {
             --sepia: 0;
@@ -15,121 +13,116 @@
             --brightness: 1;
             --saturate: 1;
             --day-progress: 0%;
+            --wood: #7a5028;
+            --wood-dark: #4e3010;
+            --wood-light: #a07040;
         }
 
-        html,
-        body {
+        html, body {
             margin: 0;
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: #15120f;
-            color: #f4efe5;
+            background: #cdc6bc;
+            color: #1e1a14;
             font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
         body {
             display: grid;
             place-items: center;
-            padding: clamp(24px, 3.4vw, 52px);
-            background:
-                radial-gradient(circle at 18% 16%, rgba(255, 220, 151, 0.2), transparent 28%),
-                radial-gradient(circle at 88% 12%, rgba(124, 154, 194, 0.14), transparent 28%),
-                linear-gradient(135deg, #1b1714 0%, #29211b 46%, #11100f 100%);
+            padding: clamp(12px, 1.6vw, 22px) clamp(68px, 8vw, 96px) clamp(12px, 1.6vw, 22px) clamp(12px, 1.6vw, 22px);
         }
 
         .stage {
-            width: min(1160px, 100%);
-            height: min(calc(100% - clamp(18px, 3vh, 42px)), 800px);
+            width: 100%;
+            max-width: 1160px;
+            height: min(calc(100% - 8px), 960px);
             display: grid;
-            grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
-            grid-template-rows: minmax(0, 1fr) auto;
-            column-gap: clamp(34px, 4.2vw, 64px);
-            row-gap: clamp(24px, 3.2vw, 42px);
+            grid-template-columns: 1fr;
+            grid-template-rows: auto minmax(0, 1fr) auto;
+            row-gap: clamp(10px, 1.4vh, 18px);
             align-items: stretch;
-            padding-bottom: clamp(14px, 2.6vh, 34px);
         }
 
+        /* ── Top header row ── */
         .intro {
             display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            gap: clamp(28px, 4vw, 52px);
+            flex-direction: row;
+            align-items: flex-end;
+            gap: clamp(18px, 2.6vw, 40px);
             min-height: 0;
-            padding: clamp(16px, 2.2vw, 28px) 0 clamp(26px, 4vh, 46px);
+            padding-bottom: clamp(8px, 1.2vh, 14px);
+            border-bottom: 1px solid rgba(30, 26, 20, 0.12);
         }
 
-        .title-block {
-            display: grid;
-            gap: 12px;
-        }
+        .title-block { display: grid; gap: 6px; }
 
         .eyebrow {
             margin: 0;
-            color: rgba(244, 239, 229, 0.56);
-            font-size: 0.74rem;
+            color: rgba(30, 26, 20, 0.48);
+            font-size: 0.72rem;
             font-weight: 800;
             text-transform: uppercase;
+            letter-spacing: 0.08em;
         }
 
         .title {
             margin: 0;
-            max-width: 9ch;
             font-family: Georgia, "Times New Roman", serif;
-            font-size: clamp(2.85rem, 5.2vw, 6.3rem);
-            line-height: 0.82;
-            letter-spacing: 0;
+            font-size: clamp(1.5rem, 2.2vw, 2.4rem);
+            line-height: 0.88;
+            color: #1e1a14;
         }
 
         .time-readout {
             display: grid;
-            gap: 12px;
-            padding-top: 22px;
-            border-top: 1px solid rgba(244, 239, 229, 0.18);
+            gap: 6px;
+            padding-left: clamp(16px, 2vw, 28px);
+            border-left: 1px solid rgba(30, 26, 20, 0.16);
         }
 
         .time-name {
             font-family: Georgia, "Times New Roman", serif;
-            font-size: clamp(1.5rem, 2.5vw, 2.9rem);
-            line-height: 0.96;
+            font-size: clamp(1rem, 1.6vw, 1.6rem);
+            line-height: 1;
+            color: #1e1a14;
         }
 
         .time-note {
-            color: rgba(244, 239, 229, 0.58);
-            font-size: clamp(0.78rem, 1vw, 0.92rem);
-            line-height: 1.5;
+            color: rgba(30, 26, 20, 0.56);
+            font-size: clamp(0.7rem, 0.85vw, 0.84rem);
+            line-height: 1.52;
         }
 
+        /* ── Easel area ── */
         .image-area {
             min-width: 0;
             min-height: 0;
-            display: grid;
+            display: flex;
             align-items: center;
-            padding: clamp(10px, 1.4vw, 18px) 0 clamp(30px, 5vh, 62px);
+            justify-content: center;
+        }
+
+        .easel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
         }
 
         .image-shell {
             position: relative;
-            align-self: center;
-            justify-self: center;
             width: auto;
-            height: min(64svh, 590px);
-            max-width: 100%;
+            height: min(72svh, 640px);
+            max-width: min(calc(100vw - 200px), 700px);
             aspect-ratio: 2 / 3;
             min-height: 0;
             overflow: hidden;
-            border: 0;
-            border-radius: 10px;
-            background: transparent;
+            border-radius: 1px;
+            background: #f4ede0;
             filter: sepia(var(--sepia)) hue-rotate(var(--hue)) brightness(var(--brightness)) saturate(var(--saturate));
             transition: filter 1.2s ease;
-            box-shadow:
-                0 30px 82px rgba(0, 0, 0, 0.38),
-                none;
-        }
-
-        .image-shell::before {
-            content: none;
         }
 
         .image-shell::after {
@@ -138,7 +131,7 @@
             inset: 0;
             z-index: 2;
             pointer-events: none;
-            background: radial-gradient(circle at 50% 50%, transparent 68%, rgba(0, 0, 0, 0.12) 100%);
+            background: radial-gradient(circle at 50% 50%, transparent 60%, rgba(0, 0, 0, 0.06) 100%);
         }
 
         .time-image {
@@ -149,58 +142,54 @@
             object-fit: contain;
             background: transparent;
             opacity: 0;
-            transition: none;
             will-change: opacity;
         }
 
+        /* ── Controls bar (transport + timeline only) ── */
         .controls {
             grid-column: 1 / -1;
             display: grid;
-            grid-template-columns: minmax(190px, 240px) minmax(0, 1fr) minmax(180px, 230px);
-            gap: clamp(22px, 3vw, 38px);
+            grid-template-columns: minmax(150px, 190px) minmax(0, 1fr);
+            gap: clamp(14px, 2vw, 28px);
             align-items: center;
-            padding: clamp(18px, 2.1vw, 24px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: clamp(12px, 1.6vw, 18px) clamp(14px, 1.8vw, 22px);
+            border: 1px solid rgba(30, 26, 20, 0.12);
             border-radius: 10px;
-            background: rgba(255, 255, 255, 0.055);
-            box-shadow: 0 18px 54px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
+            background: rgba(30, 26, 20, 0.05);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
         }
 
         .transport {
             display: grid;
-            grid-template-columns: 48px 1fr;
-            gap: 14px;
+            grid-template-columns: 42px 1fr;
+            gap: 12px;
             align-items: center;
         }
 
-        .flow-copy {
-            display: grid;
-            gap: 3px;
-        }
+        .flow-copy { display: grid; gap: 3px; }
 
         .flow-copy strong {
             font-family: Georgia, "Times New Roman", serif;
-            font-size: 1rem;
+            font-size: 0.88rem;
             line-height: 1;
+            color: #1e1a14;
         }
 
         .flow-copy span {
-            color: rgba(244, 239, 229, 0.52);
-            font-size: 0.68rem;
+            color: rgba(30, 26, 20, 0.5);
+            font-size: 0.64rem;
             font-weight: 700;
         }
 
         button {
-            min-height: 42px;
+            min-height: 40px;
             padding: 0 14px;
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(30, 26, 20, 0.22);
             border-radius: 999px;
-            color: #f4efe5;
-            background: rgba(255, 255, 255, 0.06);
+            color: #1e1a14;
+            background: rgba(30, 26, 20, 0.06);
             font: inherit;
-            font-size: 0.78rem;
+            font-size: 0.76rem;
             font-weight: 800;
             cursor: pointer;
             transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
@@ -208,68 +197,59 @@
 
         button:hover {
             transform: translateY(-1px);
-            border-color: rgba(255, 234, 184, 0.54);
-            background: rgba(255, 234, 184, 0.1);
+            border-color: rgba(122, 80, 40, 0.6);
+            background: rgba(122, 80, 40, 0.1);
         }
 
         .play-button {
-            width: 48px;
+            width: 42px;
             padding: 0;
             display: grid;
             place-items: center;
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
 
-        .timeline {
-            display: grid;
-            gap: 14px;
-            min-width: 0;
-            padding-inline: clamp(4px, 0.8vw, 12px);
-        }
+        .timeline { display: grid; gap: 10px; min-width: 0; }
 
         .scrubber {
             appearance: none;
             width: 100%;
-            height: 34px;
+            height: 30px;
             border-radius: 999px;
             background:
-                linear-gradient(90deg, rgba(99, 129, 173, 0.72), rgba(255, 224, 163, 0.9) 48%, rgba(177, 102, 84, 0.72)),
-                rgba(244, 239, 229, 0.12);
-            accent-color: #ffe0a3;
+                linear-gradient(90deg, rgba(99, 130, 175, 0.7), rgba(245, 200, 120, 0.9) 48%, rgba(180, 100, 70, 0.7)),
+                rgba(30, 26, 20, 0.1);
+            accent-color: #7a5028;
             cursor: pointer;
         }
 
         .scrubber::-webkit-slider-thumb {
             appearance: none;
-            width: 26px;
-            height: 26px;
-            border: 2px solid rgba(255, 255, 255, 0.82);
+            width: 24px;
+            height: 24px;
+            border: 2px solid rgba(255, 255, 255, 0.9);
             border-radius: 50%;
-            background: #ffe0a3;
-            box-shadow:
-                0 0 0 7px rgba(255, 224, 163, 0.16),
-                0 10px 22px rgba(0, 0, 0, 0.28);
+            background: #7a5028;
+            box-shadow: 0 0 0 6px rgba(122, 80, 40, 0.15), 0 8px 20px rgba(0, 0, 0, 0.22);
         }
 
         .scrubber::-moz-range-thumb {
-            width: 26px;
-            height: 26px;
-            border: 2px solid rgba(255, 255, 255, 0.82);
+            width: 24px;
+            height: 24px;
+            border: 2px solid rgba(255, 255, 255, 0.9);
             border-radius: 50%;
-            background: #ffe0a3;
-            box-shadow:
-                0 0 0 7px rgba(255, 224, 163, 0.16),
-                0 10px 22px rgba(0, 0, 0, 0.28);
+            background: #7a5028;
+            box-shadow: 0 0 0 6px rgba(122, 80, 40, 0.15), 0 8px 20px rgba(0, 0, 0, 0.22);
         }
 
         .time-track {
             position: relative;
-            height: 34px;
+            height: 28px;
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             align-items: start;
-            color: rgba(244, 239, 229, 0.52);
-            font-size: clamp(0.58rem, 0.78vw, 0.72rem);
+            color: rgba(30, 26, 20, 0.46);
+            font-size: clamp(0.52rem, 0.7vw, 0.66rem);
             font-weight: 800;
             text-transform: uppercase;
         }
@@ -277,102 +257,166 @@
         .time-track::before {
             content: "";
             position: absolute;
-            left: 0;
-            right: 0;
-            top: 17px;
+            left: 0; right: 0; top: 14px;
             height: 1px;
-            background: rgba(244, 239, 229, 0.18);
+            background: rgba(30, 26, 20, 0.14);
         }
 
         .time-marker {
             position: relative;
             display: grid;
-            gap: 7px;
+            gap: 5px;
             justify-items: center;
             text-align: center;
         }
 
         .time-marker::after {
             content: "";
-            width: 7px;
-            height: 7px;
+            width: 6px;
+            height: 6px;
             border-radius: 999px;
-            background: rgba(244, 239, 229, 0.44);
-            box-shadow: 0 0 0 4px rgba(244, 239, 229, 0.04);
+            background: rgba(30, 26, 20, 0.34);
+            box-shadow: 0 0 0 3px rgba(30, 26, 20, 0.06);
         }
 
-        .time-marker.active {
-            color: #ffe0a3;
-        }
+        .time-marker.active { color: #7a5028; }
 
         .time-marker.active::after {
-            background: #ffe0a3;
-            box-shadow: 0 0 0 5px rgba(255, 224, 163, 0.16);
+            background: #7a5028;
+            box-shadow: 0 0 0 4px rgba(122, 80, 40, 0.18);
         }
 
-        .temperature {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
+        /* ── Temperature panel (right side, vertical) ── */
+        .temperature-panel {
+            position: fixed;
+            right: clamp(16px, 2.2vw, 32px);
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
             align-items: center;
+            gap: 10px;
+            z-index: 10;
+            padding: 16px 10px;
+            border: 1px solid rgba(30, 26, 20, 0.12);
+            border-radius: 999px;
+            background: rgba(205, 198, 188, 0.72);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
         }
 
-        .temperature label {
-            color: rgba(244, 239, 229, 0.62);
-            font-size: 0.72rem;
+        .temp-label {
+            font-size: 0.6rem;
             font-weight: 800;
             text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: rgba(30, 26, 20, 0.52);
+            writing-mode: vertical-rl;
         }
 
-        .temperature input {
-            accent-color: #ffe0a3;
+        .temp-label--warm { color: rgba(180, 100, 40, 0.8); }
+        .temp-label--cool { color: rgba(70, 110, 170, 0.8); }
+
+        #temperatureSlider {
+            -webkit-appearance: slider-vertical;
+            appearance: none;
+            writing-mode: vertical-lr;
+            direction: rtl;
+            width: 28px;
+            height: clamp(100px, 18vh, 180px);
+            cursor: pointer;
+            accent-color: #7a5028;
+            background: transparent;
+        }
+
+        #temperatureSlider::-webkit-slider-runnable-track {
+            width: 6px;
+            border-radius: 3px;
+            background: linear-gradient(to top, rgba(99, 130, 175, 0.6), rgba(245, 200, 120, 0.7) 50%, rgba(180, 100, 70, 0.6));
+        }
+
+        #temperatureSlider::-webkit-slider-thumb {
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            margin-left: -8px;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            background: #7a5028;
+            box-shadow: 0 0 0 5px rgba(122, 80, 40, 0.15), 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        #temperatureSlider::-moz-range-thumb {
+            width: 22px;
+            height: 22px;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            background: #7a5028;
+            box-shadow: 0 0 0 5px rgba(122, 80, 40, 0.15), 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         @media (max-width: 900px) {
             body {
                 overflow: auto;
                 align-items: start;
+                padding-right: clamp(14px, 2vw, 28px);
             }
 
             .stage {
                 height: auto;
-                grid-template-columns: 1fr;
-                row-gap: 24px;
+                row-gap: 18px;
             }
 
-            .title {
-                max-width: none;
-                font-size: clamp(2.45rem, 11vw, 4.3rem);
-            }
-
+            .title { font-size: clamp(1.4rem, 8vw, 2.4rem); }
             .intro {
-                gap: 18px;
-                padding: 0 0 4px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+                padding-bottom: 10px;
+            }
+
+            .time-readout {
+                padding-left: 0;
+                border-left: none;
+                border-top: 1px solid rgba(30, 26, 20, 0.14);
+                padding-top: 8px;
             }
 
             .image-shell {
-                width: min(100%, 420px);
+                width: min(100%, 320px);
                 height: auto;
+                max-width: 100%;
                 aspect-ratio: 2 / 3;
             }
 
             .controls {
                 grid-template-columns: 1fr;
-                gap: 18px;
-                padding: 18px;
+                gap: 14px;
+                padding: 14px;
             }
 
-            .transport,
-            .temperature {
-                justify-content: space-between;
+            .transport { grid-template-columns: 42px minmax(0, 1fr); }
+            .time-track { font-size: 0.52rem; }
+
+            .temperature-panel {
+                position: static;
+                transform: none;
+                flex-direction: row;
+                border-radius: 999px;
+                padding: 10px 16px;
+                margin-top: 8px;
             }
 
-            .transport {
-                grid-template-columns: 48px minmax(0, 1fr);
-            }
+            .temp-label { writing-mode: horizontal-tb; }
 
-            .time-track {
-                font-size: 0.58rem;
+            #temperatureSlider {
+                -webkit-appearance: auto;
+                appearance: auto;
+                writing-mode: horizontal-tb;
+                direction: ltr;
+                width: clamp(100px, 40vw, 200px);
+                height: 28px;
             }
         }
     </style>
@@ -384,7 +428,6 @@
                 <p class="eyebrow">Light Across A Day</p>
                 <h1 class="title">Impressionism</h1>
             </div>
-
             <div class="time-readout" aria-live="polite">
                 <strong class="time-name" id="timeName">Early Morning</strong>
                 <span class="time-note" id="timeNote">The first light slowly gathers on the cathedral surface.</span>
@@ -392,15 +435,17 @@
         </aside>
 
         <section class="image-area">
-            <section class="image-shell" id="imageShell" aria-label="Impressionist time image">
-                <img class="time-image" src="2.png" alt="Early morning impression">
-                <img class="time-image" src="1.png" alt="Morning impression">
-                <img class="time-image" src="3.png" alt="Noon impression">
-                <img class="time-image" src="4.png" alt="Afternoon impression">
-                <img class="time-image" src="5.png" alt="Early evening impression">
-                <img class="time-image" src="6.png" alt="Evening impression">
-                <img class="time-image" src="7.png" alt="Late evening impression">
-            </section>
+            <figure class="easel" aria-label="Impressionist painting">
+                <section class="image-shell" id="imageShell" aria-label="Impressionist time image">
+                    <img class="time-image" src="2.png" alt="Early morning impression">
+                    <img class="time-image" src="1.png" alt="Morning impression">
+                    <img class="time-image" src="3.png" alt="Noon impression">
+                    <img class="time-image" src="4.png" alt="Afternoon impression">
+                    <img class="time-image" src="5.png" alt="Early evening impression">
+                    <img class="time-image" src="6.png" alt="Evening impression">
+                    <img class="time-image" src="7.png" alt="Late evening impression">
+                </section>
+            </figure>
         </section>
 
         <section class="controls" aria-label="Time flow controls">
@@ -411,18 +456,19 @@
                     <span id="flowState">time is moving forward</span>
                 </div>
             </div>
-
             <div class="timeline">
                 <input class="scrubber" id="timeScrubber" type="range" min="0" max="6" value="0" step="0.001" aria-label="Pull the daylight through the day">
                 <div class="time-track" id="timeTrack" aria-hidden="true"></div>
             </div>
-
-            <div class="temperature">
-                <label for="temperatureSlider">Temperature</label>
-                <input id="temperatureSlider" type="range" min="-5" max="5" value="0" step="1">
-            </div>
         </section>
     </main>
+
+    <!-- Temperature panel fixed to right side -->
+    <div class="temperature-panel" role="group" aria-label="Temperature control">
+        <span class="temp-label temp-label--warm">Warm</span>
+        <input id="temperatureSlider" type="range" min="-5" max="5" value="0" step="1" aria-label="Color temperature">
+        <span class="temp-label temp-label--cool">Cool</span>
+    </div>
 
     <script>
         (() => {
@@ -465,14 +511,6 @@
 
             const markers = Array.from(document.querySelectorAll('.time-marker'));
 
-            function wrap(value) {
-                const max = images.length - 1;
-                if (value < 0) {
-                    return max + (value % max);
-                }
-                return value % max;
-            }
-
             function updateTemperature() {
                 const temperature = Number(temperatureSlider.value);
                 const warm = Math.max(temperature, 0);
@@ -499,19 +537,9 @@
 
                 images.forEach((image, index) => {
                     let opacity = 0;
-
-                    if (index === lower) {
-                        opacity = 1 - blend;
-                    }
-
-                    if (index === upper) {
-                        opacity = Math.max(opacity, blend);
-                    }
-
-                    if (lower === upper && index === lower) {
-                        opacity = 1;
-                    }
-
+                    if (index === lower) opacity = 1 - blend;
+                    if (index === upper) opacity = Math.max(opacity, blend);
+                    if (lower === upper && index === lower) opacity = 1;
                     image.style.opacity = opacity.toFixed(3);
                 });
 
@@ -531,10 +559,7 @@
 
                 if (playing) {
                     timeValue += delta * ((images.length - 1) / secondsPerCycle);
-
-                    if (timeValue > images.length - 1) {
-                        timeValue = 0;
-                    }
+                    if (timeValue > images.length - 1) timeValue = 0;
                 }
 
                 render();

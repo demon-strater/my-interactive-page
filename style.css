@@ -52,6 +52,29 @@ button {
     overflow: hidden;
 }
 
+body.measuring .interaction-screen {
+    display: flex !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: visible !important;
+}
+
+.hub-screen {
+    position: absolute;
+    inset: 0;
+}
+
+.hub-bg-tint {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-color: transparent;
+    -webkit-mask-image: radial-gradient(ellipse 88% 72% at 50% 50%, transparent 0%, transparent 22%, black 100%);
+    mask-image: radial-gradient(ellipse 88% 72% at 50% 50%, transparent 0%, transparent 22%, black 100%);
+    transition: background-color 1000ms cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: 0;
+}
+
 .hub-screen {
     display: flex;
     flex-direction: column;
@@ -59,7 +82,8 @@ button {
     gap: clamp(22px, 4vh, 42px);
     padding: 34px 18px;
     overflow-y: hidden;
-    background: #fff;
+    background-color: #fff !important;
+    transition: background-color 1.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 body.view-interaction .hub-screen {
@@ -229,6 +253,7 @@ body.view-interaction .hub-screen {
     font-size: clamp(0.82rem, min(1.1vw, 1.7svh), 1.02rem);
     font-weight: 700;
     text-transform: uppercase;
+    margin-top: 10px;
 }
 
 .timeline-rail {
@@ -317,7 +342,7 @@ body.view-interaction .hub-screen {
     cursor: pointer;
     text-align: left;
     overflow: hidden;
-    transition: transform 280ms ease, filter 280ms ease, box-shadow 280ms ease, opacity 280ms ease;
+    transition: box-shadow 280ms ease;
 }
 
 .timeline-card:nth-child(1) { --feature-color: #ff4d5a; }
@@ -392,14 +417,18 @@ body.view-interaction .hub-screen {
     left: 0;
     top: 0;
     bottom: 0;
-    width: 64%;
+    width: 84%;
     z-index: -1;
     background: transparent var(--art-image) center / contain no-repeat;
 }
 
 .timeline-card.surrealism-card,
-.timeline-card.impressionism-card {
+.timeline-card.impressionism-card,
+.timeline-card.renaissance-card,
+.timeline-card.romanticism-card,
+.timeline-card.bauhaus-card {
     --art-image: url('morning.png');
+    --artwork-left: 77%;
     color: #201915;
     background: transparent;
     box-shadow: none;
@@ -408,33 +437,59 @@ body.view-interaction .hub-screen {
 
 .timeline-card.impressionism-card {
     --art-image: url('1.png');
+    --artwork-left: 73%;
 }
 
+.timeline-card.renaissance-card {
+    --art-image: url('아테네 학당.jpg');
+    --artwork-left: 89%;
+}
+
+.timeline-card.romanticism-card {
+    --art-image: url('낭만주의.png');
+}
+
+
+.timeline-card.bauhaus-card {
+    --art-image: url('바우하우스.png');
+    --artwork-left: 73%;
+}
+
+
 .timeline-card.surrealism-card .card-hour,
-.timeline-card.impressionism-card .card-hour {
+.timeline-card.impressionism-card .card-hour,
+.timeline-card.renaissance-card .card-hour,
+.timeline-card.romanticism-card .card-hour,
+.timeline-card.bauhaus-card .card-hour {
     display: none;
 }
 
 .timeline-card.surrealism-card strong,
-.timeline-card.impressionism-card strong {
+.timeline-card.impressionism-card strong,
+.timeline-card.renaissance-card strong,
+.timeline-card.romanticism-card strong,
+.timeline-card.bauhaus-card strong {
     display: none;
 }
 
 .timeline-card.surrealism-card small,
-.timeline-card.impressionism-card small {
+.timeline-card.impressionism-card small,
+.timeline-card.renaissance-card small,
+.timeline-card.romanticism-card small,
+.timeline-card.bauhaus-card small {
     display: none;
 }
 
 .card-artwork {
     position: absolute;
-    left: 68%;
-    right: clamp(12px, 1.4vw, 20px);
+    left: var(--artwork-left, 88%);
+    right: clamp(8px, 1vw, 14px);
     top: 50%;
     z-index: 1;
     width: auto;
     transform: translateY(-50%);
     color: rgba(25, 20, 16, 0.86);
-    font-size: clamp(0.82rem, 1.08vw, 1.18rem);
+    font-size: clamp(0.72rem, 0.92vw, 1.02rem);
     line-height: 1.32;
     font-weight: 700;
     text-align: left;
@@ -446,13 +501,27 @@ body.view-interaction .hub-screen {
     display: block;
 }
 
+.card-artwork span:first-child {
+    margin-bottom: 8px;
+}
+
+.card-artwork span:last-child {
+    margin-top: 8px;
+}
+
 .card-artwork em {
-    margin: 6px 0;
+    margin: 0;
     color: #5b2f24;
     font-family: 'Playfair Display', Georgia, serif;
-    font-size: 1.42em;
+    font-size: 1.32em;
     font-style: italic;
     line-height: 1.08;
+}
+
+body.artwork-opening .hub-screen {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 260ms cubic-bezier(0.22, 0.8, 0.22, 1);
 }
 
 body.artwork-opening .hub-header,
@@ -476,7 +545,7 @@ body.artwork-opening .timeline-card.transition-source {
 
 body.artwork-opening.view-interaction .interaction-screen {
     opacity: 0;
-    transition: opacity 720ms cubic-bezier(0.22, 0.8, 0.22, 1);
+    transition: opacity 680ms cubic-bezier(0.22, 0.8, 0.22, 1);
 }
 
 body.artwork-opening.artwork-arrived.view-interaction .interaction-screen {
@@ -561,23 +630,16 @@ body.artwork-opening.artwork-arrived.view-particle .particle-site {
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
-    box-shadow: 0 26px 78px rgba(0, 0, 0, 0.28);
-    transform-origin: center;
+    transform-origin: 50% 50%;
+    will-change: transform, opacity;
     transition:
-        left 820ms cubic-bezier(0.18, 0.86, 0.25, 1),
-        top 820ms cubic-bezier(0.18, 0.86, 0.25, 1),
-        width 820ms cubic-bezier(0.18, 0.86, 0.25, 1),
-        height 820ms cubic-bezier(0.18, 0.86, 0.25, 1),
-        opacity 520ms cubic-bezier(0.22, 0.8, 0.22, 1),
-        box-shadow 820ms ease;
-}
-
-.artwork-transition-clone.settled {
-    box-shadow: 0 34px 110px rgba(0, 0, 0, 0.34);
+        transform 820ms cubic-bezier(0.18, 0.86, 0.25, 1),
+        opacity 440ms cubic-bezier(0.22, 0.8, 0.22, 1);
 }
 
 .artwork-transition-clone.leaving {
     opacity: 0;
+    transition-delay: 120ms;
 }
 
 

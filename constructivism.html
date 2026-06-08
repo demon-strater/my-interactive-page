@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Constructivism Assembly</title>
+<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07110b;color:#e7ffe9;font-family:Georgia,serif}#app{position:fixed;inset:0}.hud{position:fixed;left:24px;bottom:20px;pointer-events:none}h1{margin:0;color:#98ff9f;font-size:clamp(2rem,6vw,5rem);font-style:italic;font-weight:400;line-height:.9}p{max-width:410px;margin:10px 0 0;color:rgba(231,255,233,.62);font-size:12px;line-height:1.5}.actions{position:fixed;right:24px;top:24px;display:flex;gap:8px;z-index:3}.actions button{min-height:34px;border:1px solid rgba(152,255,159,.28);border-radius:999px;color:#98ff9f;background:rgba(7,17,11,.62);padding:0 11px;font:700 10px system-ui;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}</style></head>
+<body><div id="app"></div><div class="actions" onpointerdown="event.stopPropagation()" onclick="event.stopPropagation()"><button data-part="a">Beam</button><button data-part="s">Gear</button><button data-part="d">Pipe</button><button data-part="f">Joint</button></div><section class="hud"><h1>Constructivism</h1><p>Press A/S/D/F or tap the buttons to drop industrial modules. Drag them into snapping range to approve the machine tower.</p></section>
+<script type="module">
+import * as THREE from 'https://unpkg.com/three@0.164.1/build/three.module.js';
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x07110b);const camera=new THREE.PerspectiveCamera(48,innerWidth/innerHeight,.1,100);camera.position.set(0,4,16);
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);document.getElementById('app').appendChild(renderer.domElement);
+scene.add(new THREE.AmbientLight(0x9dff9d,1.2));const l=new THREE.DirectionalLight(0xffffff,2);l.position.set(4,9,6);scene.add(l);
+const parts=[],tower=new THREE.Group();scene.add(tower);const ray=new THREE.Raycaster(),mouse=new THREE.Vector2(),plane=new THREE.Plane(new THREE.Vector3(0,0,1),0);let grabbed=null,hit=new THREE.Vector3();
+function make(type){let geo;if(type==='a')geo=new THREE.BoxGeometry(3,.35,.35);else if(type==='s')geo=new THREE.TorusGeometry(.75,.16,16,48);else if(type==='d')geo=new THREE.CylinderGeometry(.22,.22,2.4,18);else geo=new THREE.BoxGeometry(.8,.8,.8);const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:{a:0xff3b30,s:0xf7d047,d:0x34d399,f:0x60a5fa}[type],roughness:.5,metalness:.35}));m.position.set((Math.random()-.5)*8,7,0);m.userData={vel:new THREE.Vector3(0,-.035,0),snapped:false};scene.add(m);parts.push(m)}
+addEventListener('keydown',e=>{if('asdf'.includes(e.key.toLowerCase()))make(e.key.toLowerCase())});
+document.querySelectorAll('[data-part]').forEach(btn=>btn.addEventListener('click',()=>make(btn.dataset.part)));
+function pick(e){mouse.set(e.clientX/innerWidth*2-1,-e.clientY/innerHeight*2+1);ray.setFromCamera(mouse,camera)}
+addEventListener('pointerdown',e=>{pick(e);grabbed=ray.intersectObjects(parts)[0]?.object||null});
+addEventListener('pointermove',e=>{pick(e);if(grabbed){ray.ray.intersectPlane(plane,hit);grabbed.position.lerp(hit,.6)}});
+addEventListener('pointerup',()=>grabbed=null);addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+function snap(m){for(const o of parts){if(o===m||!o.userData.snapped)continue;if(m.position.distanceTo(o.position)<1.25){m.position.copy(o.position).add(new THREE.Vector3(0,.75,0));m.rotation.set(0,Math.round(m.rotation.y/(Math.PI/2))*Math.PI/2,0);m.userData.snapped=true;tower.add(m);return}}if(m.position.y<-3){m.position.y=-3;m.userData.snapped=true;tower.add(m)}}
+function animate(){requestAnimationFrame(animate);parts.forEach(m=>{if(m!==grabbed&&!m.userData.snapped){m.userData.vel.y-=.001;m.position.add(m.userData.vel);snap(m)}else if(!m.userData.snapped&&m===grabbed)snap(m)});tower.rotation.y+=.002;renderer.render(scene,camera)}animate();
+</script></body></html>

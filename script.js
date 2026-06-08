@@ -30,6 +30,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const baroqueFrame = document.querySelector('.baroque-frame');
     const romanticismFrame = document.querySelector('.romanticism-frame');
     const impressionismTimeFrame = document.querySelector('.impressionism-time-frame');
+    const hubBgTint = document.getElementById('hubBgTint');
+
+    const hubTintColors = {
+        'renaissance-card':  'rgba(205, 158, 64, 0.22)',
+        'surrealism-card':   'rgba(48, 74, 152, 0.18)',
+        'impressionism-card':'rgba(196, 148, 172, 0.20)',
+        'bauhaus-card':      'rgba(208, 58, 38, 0.15)',
+        'romanticism-card':  'rgba(108, 130, 152, 0.19)',
+    };
+
+    function updateHubTint(card) {
+        if (!hubBgTint) return;
+        const key = Object.keys(hubTintColors).find(c => card.classList.contains(c));
+        hubBgTint.style.backgroundColor = key ? hubTintColors[key] : 'transparent';
+    }
 
     const scenes = {
         morning: document.getElementById('morningScene'),
@@ -92,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let timelineStartOffset = 0;
     let carouselOffset = 0;
     let carouselTargetOffset = 0;
-    let scrollSnapTimer = null;
+    let lastSelectedHour = -1;
 
     const interactions = [
         { hour: 1, title: 'RENAISSANCE', meta: 'c. 1400-1600', status: 'Available', site: 'renaissance', top: '#c8a86b', bottom: '#3a2510' },
@@ -233,6 +248,11 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedHour = Number(timelineCards[activeIndex].dataset.hour);
         const interaction = selectedInteraction();
 
+        if (selectedHour !== lastSelectedHour) {
+            lastSelectedHour = selectedHour;
+            updateHubTint(timelineCards[activeIndex]);
+        }
+
         featureHour.textContent = interaction.hour.toString().padStart(2, '0');
         featureTitle.textContent = interaction.title;
         featureMeta.textContent = interaction.meta;
@@ -347,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ? {
                 left: cardRect.left,
                 top: cardRect.top,
-                width: cardRect.width * 0.64,
+                width: cardRect.width * 0.84,
                 height: cardRect.height
             }
             : {
@@ -380,12 +400,22 @@ document.addEventListener('DOMContentLoaded', () => {
             backdrop.classList.add('visible');
         });
 
-        return { backdrop, clone, imageRatio };
+        return { backdrop, clone, imageRatio, startRect };
     }
 
     function getInteractionArtworkRect(interaction) {
         if (interaction.site === 'impressionism') {
-            return document.querySelector('.impressionism-site .window-reveal')?.getBoundingClientRect();
+            const reveal = document.querySelector('.impressionism-site .window-reveal');
+            if (reveal) {
+                const rect = reveal.getBoundingClientRect();
+                // Surrealism site (.window-reveal .scene) has 14px inset in CSS
+                return {
+                    left: rect.left + 14,
+                    top: rect.top + 14,
+                    width: rect.width - 28,
+                    height: rect.height - 28
+                };
+            }
         }
 
         if (interaction.site === 'impressionism-time' && impressionismTimeFrame) {
@@ -409,12 +439,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        const activeContent = document.querySelector(`.view-${interaction.site} .interaction-content, body.view-${interaction.site} .interaction-content`);
-        const fallbackRect = activeContent?.getBoundingClientRect();
+        const siteElement = document.querySelector(`.${interaction.site}-site`);
+        // If the site has a specific artwork container, use it. 
+        // Otherwise use the whole site container but constrained.
+        const artworkContainer = siteElement?.querySelector('.player-shell, .artwork-target, .easel');
+        const targetElement = artworkContainer || siteElement;
+        const rect = targetElement?.getBoundingClientRect();
+
+        if (rect && rect.width > 0) {
+            return rect;
+        }
+
         const targetWidth = Math.min(window.innerWidth * 0.64, 920);
         const targetHeight = Math.min(window.innerHeight * 0.72, 680);
 
-        return fallbackRect || {
+        return {
             left: (window.innerWidth - targetWidth) / 2,
             top: (window.innerHeight - targetHeight) / 2,
             width: targetWidth,
@@ -422,16 +461,15 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    function moveCloneToRect(clone, rect) {
-        clone.classList.add('settled');
-        clone.style.left = `${rect.left}px`;
-        clone.style.top = `${rect.top}px`;
-        clone.style.width = `${rect.width}px`;
-        clone.style.height = `${rect.height}px`;
+    function moveCloneToRect(clone, startRect, targetRect) {
+        const scale = targetRect.width / startRect.width;
+        const dx = (targetRect.left + targetRect.width / 2) - (startRect.left + startRect.width / 2);
+        const dy = (targetRect.top + targetRect.height / 2) - (startRect.top + startRect.height / 2);
+        clone.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(${scale.toFixed(4)})`;
     }
 
     function revealInteraction(interaction) {
-        body.classList.remove('view-hub');
+        body.classList.remove('view-hub', 'measuring');
         body.classList.remove('view-impressionism', 'view-particle', 'view-schema-architecture', 'view-fluid-collision', 'view-renaissance', 'view-baroque', 'view-romanticism', 'view-impressionism-time');
         body.classList.add('view-interaction', `view-${interaction.site}`);
 
@@ -471,6 +509,12 @@ document.addEventListener('DOMContentLoaded', () => {
         isInteractionOpening = true;
         card.classList.add('transition-source');
         body.classList.add('artwork-opening');
+
+        // Pre-load iframes immediately
+        if (interaction.site === 'impressionism-time' && impressionismTimeFrame && !impressionismTimeFrame.src) {
+            impressionismTimeFrame.src = impressionismTimeFrame.dataset.src || 'impressionism.html';
+        }
+
         createArtworkTransition(card).then(transition => {
             if (!isInteractionOpening) {
                 transition.backdrop.remove();
@@ -478,30 +522,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            setTimeout(() => {
-                revealInteraction(interaction);
-
+            // Temporarily show the interaction screen to measure its layout
+            body.classList.add('measuring');
+            
+            requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        const targetRect = containRect(getInteractionArtworkRect(interaction), transition.imageRatio);
-                        moveCloneToRect(transition.clone, targetRect);
-                    });
-                });
-
-                setTimeout(() => {
-                    body.classList.add('artwork-arrived');
-                    transition.backdrop.classList.add('leaving');
-                    transition.clone.classList.add('leaving');
-
+                    const targetRect = containRect(getInteractionArtworkRect(interaction), transition.imageRatio);
+                    
+                    // Start movement
+                    moveCloneToRect(transition.clone, transition.startRect, targetRect);
+                    
                     setTimeout(() => {
-                        transition.backdrop.remove();
-                        transition.clone.remove();
-                        card.classList.remove('transition-source');
-                        body.classList.remove('artwork-opening', 'artwork-arrived');
-                        isInteractionOpening = false;
-                    }, 620);
-                }, 860);
-            }, 520);
+                        revealInteraction(interaction);
+
+                        setTimeout(() => {
+                            body.classList.add('artwork-arrived');
+                            transition.backdrop.classList.add('leaving');
+                            transition.clone.classList.add('leaving');
+
+                            setTimeout(() => {
+                                transition.backdrop.remove();
+                                transition.clone.remove();
+                                card.classList.remove('transition-source');
+                                body.classList.remove('artwork-opening', 'artwork-arrived');
+                                isInteractionOpening = false;
+                            }, 680);
+                        }, 50); // Small overlap
+                    }, 820); // Wait for transition duration
+                });
+            });
         });
     }
 
@@ -568,14 +617,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        impressionismTimeFrame.src = impressionismTimeFrame.dataset.src || 'impressionism.html';
+        if (!impressionismTimeFrame.src) {
+            impressionismTimeFrame.src = impressionismTimeFrame.dataset.src || 'impressionism.html';
+        }
     }
 
     function closeInteraction() {
         pauseAllMusic();
         body.classList.remove('view-interaction', 'view-impressionism', 'view-particle', 'view-schema-architecture', 'view-fluid-collision', 'view-renaissance', 'view-baroque', 'view-romanticism', 'view-impressionism-time', 'night-background');
+        body.classList.remove('artwork-opening', 'artwork-arrived');
         body.classList.add('view-hub');
         isNight = false;
+        isInteractionOpening = false;
         updateScenes();
         requestTimelineState();
     }
@@ -663,16 +716,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const rawDelta = Math.abs(event.deltaY) > Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
         // 기기별 deltaY 편차 제한 (트랙패드/마우스 동일 감도 보장)
         const capped = Math.sign(rawDelta) * Math.min(Math.abs(rawDelta), 120);
-        carouselTargetOffset -= capped * 0.003;
+        carouselTargetOffset -= capped * 0.0015;
         recenterCarouselOffsets(timelineCards.length);
         requestTimelineState();
 
-        // 스크롤 멈춘 후 가장 가까운 카드 위치로 스냅
-        clearTimeout(scrollSnapTimer);
-        scrollSnapTimer = setTimeout(() => {
-            carouselTargetOffset = Math.round(carouselTargetOffset);
-            requestTimelineState();
-        }, 180);
     }, { passive: false });
 
     timelineRail.addEventListener('pointerdown', event => {
@@ -756,8 +803,8 @@ document.addEventListener('DOMContentLoaded', () => {
         audio.addEventListener('timeupdate', updateProgress);
     });
 
-    leftArrow.addEventListener('click', goLeft);
-    rightArrow.addEventListener('click', goRight);
+    if (leftArrow) leftArrow.addEventListener('click', goLeft);
+    if (rightArrow) rightArrow.addEventListener('click', goRight);
 
     let touchStartX = 0;
     let touchEndX = 0;
@@ -779,4 +826,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateScenes();
     requestTimelineState();
+    updateHubTint(document.querySelector('.timeline-card.active') || timelineCards[0]);
+
+    async function updateArtworkPositions() {
+        const artCards = document.querySelectorAll('.timeline-card.art-card');
+        const beforeWidthRatio = 0.84;
+
+        for (const card of artCards) {
+            const cardW = card.offsetWidth;
+            const cardH = card.offsetHeight;
+            if (!cardW || !cardH) continue;
+
+            const artImageValue = window.getComputedStyle(card).getPropertyValue('--art-image').trim();
+            const match = artImageValue.match(/url\(["']?(.+?)["']?\)/);
+            if (!match) continue;
+
+            const imgSize = await loadImageSize(match[1]);
+            if (!imgSize) continue;
+
+            const containerRatio = (cardW * beforeWidthRatio) / cardH;
+            const imgRatio = imgSize.width / imgSize.height;
+
+            const renderedFraction = imgRatio >= containerRatio
+                ? beforeWidthRatio
+                : (cardH * imgRatio) / cardW;
+
+            let gapRatio;
+            if (card.classList.contains('renaissance-card')) {
+                gapRatio = 0.05;
+            } else if (card.classList.contains('bauhaus-card')) {
+                gapRatio = -0.11;
+            } else if (card.classList.contains('impressionism-card')) {
+                gapRatio = -0.11;
+            } else if (card.classList.contains('surrealism-card')) {
+                gapRatio = -0.08;
+            } else {
+                gapRatio = -0.07;
+            }
+            card.style.setProperty('--artwork-left', `${((renderedFraction + gapRatio) * 100).toFixed(1)}%`);
+        }
+    }
+
+    updateArtworkPositions();
+    window.addEventListener('resize', updateArtworkPositions);
 });

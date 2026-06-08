@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Realism Balance</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#171512;color:#e5ded4;font-family:Georgia,serif}
+#app{position:fixed;inset:0}.hud{position:fixed;left:24px;bottom:20px;pointer-events:none}
+h1{margin:0;color:#d7c7b5;font-size:clamp(2rem,6vw,5rem);font-style:italic;font-weight:400;line-height:.9}
+p{max-width:380px;margin:10px 0 0;color:rgba(229,222,212,.62);font-size:12px;line-height:1.5}
+.actions{position:fixed;right:24px;top:24px;display:flex;gap:8px;z-index:3}.actions button{min-height:34px;border:1px solid rgba(229,222,212,.28);border-radius:999px;color:#e5ded4;background:rgba(23,21,18,.62);padding:0 12px;font:700 10px system-ui;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;backdrop-filter:blur(12px)}
+</style>
+</head>
+<body><div id="app"></div><div class="actions" onpointerdown="event.stopPropagation()" onclick="event.stopPropagation()"><button id="resetBtn" type="button">Reset</button><button id="dropBtn" type="button">Drop Weight</button></div><section class="hud"><h1>Realism</h1><p>A cruel balance: mouse position tilts the fulcrum. Nothing is stabilized for you. Scroll changes gravity.</p></section>
+<script type="module">
+import * as THREE from 'https://unpkg.com/three@0.164.1/build/three.module.js';
+import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js';
+const resetBtn=document.getElementById('resetBtn');
+const dropBtn=document.getElementById('dropBtn');
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x171512);
+const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,100);camera.position.set(0,8,18);camera.lookAt(0,0,0);
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);document.getElementById('app').appendChild(renderer.domElement);
+scene.add(new THREE.AmbientLight(0x8f8678,1.2));const sun=new THREE.DirectionalLight(0xfff2de,2);sun.position.set(5,12,7);scene.add(sun);
+const world=new CANNON.World({gravity:new CANNON.Vec3(0,-9.82,0)});world.broadphase=new CANNON.SAPBroadphase(world);
+const mat=new THREE.MeshStandardMaterial({color:0x8b8378,roughness:.72});
+const plank=new THREE.Mesh(new THREE.BoxGeometry(12,.35,6),mat);scene.add(plank);
+const plankBody=new CANNON.Body({mass:0,type:CANNON.Body.KINEMATIC,shape:new CANNON.Box(new CANNON.Vec3(6,.175,3))});world.addBody(plankBody);
+const fulcrum=new THREE.Mesh(new THREE.ConeGeometry(1.2,2,4),new THREE.MeshStandardMaterial({color:0x655f57,roughness:.8}));fulcrum.position.y=-1.2;fulcrum.rotation.y=Math.PI/4;scene.add(fulcrum);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(40,40),new THREE.MeshStandardMaterial({color:0x211f1b,roughness:1}));floor.rotation.x=-Math.PI/2;floor.position.y=-4;scene.add(floor);
+const floorBody=new CANNON.Body({mass:0,shape:new CANNON.Plane(),position:new CANNON.Vec3(0,-4,0)});
+floorBody.quaternion.setFromEuler(-Math.PI/2,0,0);
+world.addBody(floorBody);
+const objects=[];
+const geos=[new THREE.BoxGeometry(.9,.9,.9),new THREE.SphereGeometry(.55,32,16),new THREE.CylinderGeometry(.35,.35,1.1,24)];
+function spawnObject(i,x=(Math.random()-.5)*6,z=(Math.random()-.5)*2.6,y=1+i*.32){const mesh=new THREE.Mesh(geos[i%3],new THREE.MeshStandardMaterial({color:[0x9f6b4b,0xb7ad9c,0x5e6b71][i%3],roughness:.65}));
+ mesh.position.set(x,y,z);scene.add(mesh);
+ const shape=i%3===1?new CANNON.Sphere(.55):new CANNON.Box(new CANNON.Vec3(.45,.45,.45));
+ const body=new CANNON.Body({mass:1,shape,position:new CANNON.Vec3(x,y,z),angularDamping:.02,linearDamping:.01});world.addBody(body);objects.push({mesh,body});return {mesh,body}}
+for(let i=0;i<18;i++)spawnObject(i);
+let tiltX=0,tiltZ=0;
+addEventListener('pointermove',e=>{tiltZ=(e.clientX/innerWidth-.5)*.55;tiltX=-(e.clientY/innerHeight-.5)*.42});
+addEventListener('wheel',e=>{world.gravity.y=THREE.MathUtils.clamp(world.gravity.y+(e.deltaY>0?-1.2:1.2),-20,-2)},{passive:true});
+resetBtn.addEventListener('click',()=>objects.forEach((o,i)=>{o.body.position.set((Math.random()-.5)*6,1+i*.28,(Math.random()-.5)*2.6);o.body.velocity.set(0,0,0);o.body.angularVelocity.set(0,0,0)}));
+dropBtn.addEventListener('click',()=>spawnObject(objects.length,0,0,7));
+addEventListener('deviceorientation',e=>{if(e.gamma!=null){tiltZ=THREE.MathUtils.clamp(e.gamma/45,-.55,.55);tiltX=THREE.MathUtils.clamp(e.beta/65,-.42,.42)}});
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+function animate(){requestAnimationFrame(animate);plank.rotation.set(tiltX,0,tiltZ);plankBody.quaternion.setFromEuler(tiltX,0,tiltZ);world.step(1/60);
+ objects.forEach(o=>{o.mesh.position.copy(o.body.position);o.mesh.quaternion.copy(o.body.quaternion)});renderer.render(scene,camera)}
+animate();
+</script></body></html>

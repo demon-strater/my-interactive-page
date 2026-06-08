@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post Impressionism Vector Field</title>
+<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07130d;color:#eaffd8;font-family:Georgia,serif}#app{position:fixed;inset:0}.hud{position:fixed;left:24px;bottom:20px;pointer-events:none}h1{margin:0;color:#b7ff6a;font-size:clamp(2rem,6vw,5rem);font-style:italic;font-weight:400;line-height:.9}p{max-width:390px;margin:10px 0 0;color:rgba(234,255,216,.62);font-size:12px;line-height:1.5}.actions{position:fixed;right:24px;top:24px;display:flex;gap:8px;z-index:3}.actions button{min-height:34px;border:1px solid rgba(183,255,106,.28);border-radius:999px;color:#b7ff6a;background:rgba(7,19,13,.62);padding:0 12px;font:700 10px system-ui;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}</style>
+</head>
+<body><div id="app"></div><div class="actions" onpointerdown="event.stopPropagation()" onclick="event.stopPropagation()"><button id="clearBtn" type="button">Clear Field</button><button id="burstBtn" type="button">Paint Burst</button></div><section class="hud"><h1>Post Impressionism</h1><p>Violent drags write permanent emotional currents. Paint particles obey your old gestures forever. Scroll changes viscosity.</p></section>
+<script type="module">
+import * as THREE from 'https://unpkg.com/three@0.164.1/build/three.module.js';
+const clearBtn=document.getElementById('clearBtn');
+const burstBtn=document.getElementById('burstBtn');
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x07130d);const camera=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,.1,80);camera.position.z=24;
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);document.getElementById('app').appendChild(renderer.domElement);
+const grid=48,field=Array.from({length:grid*grid},()=>({x:0,y:0}));const count=9000,pos=new Float32Array(count*3),col=new Float32Array(count*3),vel=new Float32Array(count*2);
+for(let i=0;i<count;i++){pos[i*3]=(Math.random()-.5)*28;pos[i*3+1]=(Math.random()-.5)*16;pos[i*3+2]=(Math.random()-.5)*4;col[i*3]=.4+Math.random()*.6;col[i*3+1]=.25+Math.random()*.55;col[i*3+2]=.05+Math.random()*.18}
+const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(pos,3));geo.setAttribute('color',new THREE.BufferAttribute(col,3));
+scene.add(new THREE.Points(geo,new THREE.PointsMaterial({size:.08,vertexColors:true,transparent:true,opacity:.72,blending:THREE.AdditiveBlending})));
+let down=false,last=null,viscosity=.985;
+function cell(x,y){const gx=Math.floor((x/innerWidth)*grid),gy=Math.floor((y/innerHeight)*grid);return Math.max(0,Math.min(grid*grid-1,gy*grid+gx))}
+addEventListener('pointerdown',e=>{down=true;last={x:e.clientX,y:e.clientY,t:performance.now()}});
+addEventListener('pointermove',e=>{if(!down||!last)return;const now=performance.now(),dx=e.clientX-last.x,dy=e.clientY-last.y,dt=Math.max(16,now-last.t),mag=Math.min(8,Math.hypot(dx,dy)/dt*5);const c=cell(e.clientX,e.clientY);for(let oy=-2;oy<=2;oy++)for(let ox=-2;ox<=2;ox++){const id=c+oy*grid+ox;if(field[id]){field[id].x+=dx*.005*mag;field[id].y-=dy*.005*mag}}last={x:e.clientX,y:e.clientY,t:now}});
+addEventListener('pointerup',()=>down=false);addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+addEventListener('wheel',e=>{viscosity=THREE.MathUtils.clamp(viscosity+(e.deltaY>0?-.01:.01),.92,.998)},{passive:true});
+clearBtn.addEventListener('click',()=>field.forEach(v=>{v.x=0;v.y=0}));
+burstBtn.addEventListener('click',()=>field.forEach((v,i)=>{const a=i*.37;v.x+=Math.cos(a)*.8;v.y+=Math.sin(a)*.8}));
+function sample(x,y){const gx=Math.max(0,Math.min(grid-1,Math.floor((x+14)/28*grid))),gy=Math.max(0,Math.min(grid-1,Math.floor((y+8)/16*grid)));return field[gy*grid+gx]}
+function animate(){requestAnimationFrame(animate);for(let i=0;i<count;i++){const ix=i*3,iv=i*2,f=sample(pos[ix],pos[ix+1]);vel[iv]=(vel[iv]+f.x*.035)*viscosity;vel[iv+1]=(vel[iv+1]+f.y*.035)*viscosity;pos[ix]+=vel[iv];pos[ix+1]+=vel[iv+1];pos[ix+2]=Math.sin(pos[ix]*.4+pos[ix+1])*.8;if(pos[ix]>14)pos[ix]=-14;if(pos[ix]<-14)pos[ix]=14;if(pos[ix+1]>8)pos[ix+1]=-8;if(pos[ix+1]<-8)pos[ix+1]=8}geo.attributes.position.needsUpdate=true;renderer.render(scene,camera)}
+animate();
+</script></body></html>
