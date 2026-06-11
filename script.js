@@ -355,28 +355,156 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    async function createArtworkTransition(card) {
+    function containRectWithAngle(bounds, ratio) {
+        const contained = containRect(bounds, ratio);
+        contained.angle = bounds.angle || 0;
+        return contained;
+    }
+
+    function readElementAngle(element) {
+        if (!element) {
+            return 0;
+        }
+
+        const transform = window.getComputedStyle(element).transform;
+        if (!transform || transform === 'none') {
+            return 0;
+        }
+
+        try {
+            const matrix = new DOMMatrixReadOnly(transform);
+            const angle = Math.atan2(matrix.b, matrix.a) * 180 / Math.PI;
+            return Number.isFinite(angle) ? angle : 0;
+        } catch (error) {
+            return 0;
+        }
+    }
+
+    function getStageRect() {
+        const stage = document.querySelector('.interaction-screen') || document.querySelector('.hub-screen');
+        const rect = stage?.getBoundingClientRect();
+
+        if (rect && rect.width > 0 && rect.height > 0) {
+            return rect;
+        }
+
+        return {
+            left: 0,
+            top: 0,
+            width: window.innerWidth,
+            height: window.innerHeight
+        };
+    }
+
+    function getFallbackArtworkTarget(interaction, imageRatio) {
+        const stage = getStageRect();
+        const presets = {
+            renaissance: { width: 0.58, height: 0.58, x: 0.5, y: 0.48, angle: 0 },
+            romanticism: { width: 0.62, height: 0.7, x: 0.5, y: 0.5, angle: 0 },
+            particle: { width: 0.7, height: 0.72, x: 0.5, y: 0.5, angle: 0 },
+            'fluid-collision': { width: 0.7, height: 0.72, x: 0.5, y: 0.5, angle: 0 }
+        };
+        const preset = presets[interaction.site] || { width: 0.62, height: 0.66, x: 0.5, y: 0.5, angle: 0 };
+        const bounds = {
+            left: stage.left + stage.width * (preset.x - preset.width / 2),
+            top: stage.top + stage.height * (preset.y - preset.height / 2),
+            width: stage.width * preset.width,
+            height: stage.height * preset.height,
+            angle: preset.angle
+        };
+
+        return containRectWithAngle(bounds, imageRatio);
+    }
+
+    function readCardAngle(card) {
+        const value = window.getComputedStyle(card).getPropertyValue('--card-rotate').trim();
+        const angle = Number.parseFloat(value);
+        return Number.isFinite(angle) ? angle : 0;
+    }
+
+    function readCardScale(card) {
+        const value = window.getComputedStyle(card).getPropertyValue('--card-scale').trim();
+        const scale = Number.parseFloat(value);
+        return Number.isFinite(scale) ? scale : 1;
+    }
+
+    function rotatePoint(x, y, degrees) {
+        const radians = degrees * Math.PI / 180;
+        const cos = Math.cos(radians);
+        const sin = Math.sin(radians);
+
+        return {
+            x: x * cos - y * sin,
+            y: x * sin + y * cos
+        };
+    }
+
+    function parseBackgroundSize(value, boxWidth, boxHeight, imageRatio) {
+        const normalized = value.trim();
+
+        if (!imageRatio || !Number.isFinite(imageRatio)) {
+            return { width: boxWidth, height: boxHeight };
+        }
+
+        if (normalized.includes('72%')) {
+            const width = boxWidth * 0.72;
+            return { width, height: width / imageRatio };
+        }
+
+        const percentMatch = normalized.match(/auto\s+([\d.]+)%/);
+        if (percentMatch) {
+            const height = boxHeight * (Number.parseFloat(percentMatch[1]) / 100);
+            return { width: height * imageRatio, height };
+        }
+
+        return containRect({ left: 0, top: 0, width: boxWidth, height: boxHeight }, imageRatio);
+    }
+
+    function getArtworkStartRect(card, imageRatio, isArtCard, startAngle) {
         const cardStyle = window.getComputedStyle(card);
         const cardRect = card.getBoundingClientRect();
+        const scale = readCardScale(card);
+        const cardWidth = card.offsetWidth * scale;
+        const cardHeight = card.offsetHeight * scale;
+        let artworkWidth = cardWidth;
+        let artworkHeight = cardHeight;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        if (isArtCard && card.classList.contains('renaissance-card')) {
+            const containerWidth = cardWidth * 0.84;
+            const contained = containRect({ left: 0, top: 0, width: containerWidth, height: cardHeight }, imageRatio);
+            artworkWidth = contained.width;
+            artworkHeight = contained.height;
+            offsetX = -cardWidth / 2 + containerWidth / 2;
+        } else if (isArtCard) {
+            const rendered = parseBackgroundSize(cardStyle.getPropertyValue('--art-bg-size') || 'auto 85%', cardWidth, cardHeight, imageRatio);
+            artworkWidth = rendered.width;
+            artworkHeight = rendered.height;
+            offsetX = -cardWidth / 2 + artworkWidth / 2;
+        }
+
+        const rotatedOffset = rotatePoint(offsetX, offsetY, startAngle);
+        const centerX = cardRect.left + cardRect.width / 2 + rotatedOffset.x;
+        const centerY = cardRect.top + cardRect.height / 2 + rotatedOffset.y;
+
+        return {
+            left: centerX - artworkWidth / 2,
+            top: centerY - artworkHeight / 2,
+            width: artworkWidth,
+            height: artworkHeight
+        };
+    }
+
+    async function createArtworkTransition(card) {
+        const cardStyle = window.getComputedStyle(card);
         const artImage = cardStyle.getPropertyValue('--art-image').trim();
         const isArtCard = artImage && artImage !== 'none';
         const imageSrc = parseCssUrl(artImage);
         const imageSize = await loadImageSize(imageSrc);
         const imageRatio = imageSize ? imageSize.width / imageSize.height : null;
-        const sourceBounds = isArtCard
-            ? {
-                left: cardRect.left,
-                top: cardRect.top,
-                width: cardRect.width * 0.84,
-                height: cardRect.height
-            }
-            : {
-                left: cardRect.left,
-                top: cardRect.top,
-                width: cardRect.width,
-                height: cardRect.height
-            };
-        const startRect = isArtCard ? containRect(sourceBounds, imageRatio) : sourceBounds;
+        const startAngle = readCardAngle(card);
+        const startRect = getArtworkStartRect(card, imageRatio, isArtCard, startAngle);
         const backdrop = document.createElement('div');
         const clone = document.createElement('div');
 
@@ -386,6 +514,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clone.style.top = `${startRect.top}px`;
         clone.style.width = `${startRect.width}px`;
         clone.style.height = `${startRect.height}px`;
+        clone.style.transform = `rotate(${startAngle.toFixed(2)}deg)`;
 
         if (isArtCard) {
             clone.style.backgroundImage = artImage;
@@ -400,20 +529,20 @@ document.addEventListener('DOMContentLoaded', () => {
             backdrop.classList.add('visible');
         });
 
-        return { backdrop, clone, imageRatio, startRect };
+        return { backdrop, clone, imageRatio, startRect, startAngle };
     }
 
     function getInteractionArtworkRect(interaction) {
         if (interaction.site === 'impressionism') {
-            const reveal = document.querySelector('.impressionism-site .window-reveal');
-            if (reveal) {
-                const rect = reveal.getBoundingClientRect();
-                // Surrealism site (.window-reveal .scene) has 14px inset in CSS
+            const scene = document.querySelector('.impressionism-site .window-reveal .scene');
+            if (scene) {
+                const rect = scene.getBoundingClientRect();
                 return {
-                    left: rect.left + 14,
-                    top: rect.top + 14,
-                    width: rect.width - 28,
-                    height: rect.height - 28
+                    left: rect.left,
+                    top: rect.top,
+                    width: rect.width,
+                    height: rect.height,
+                    angle: readElementAngle(scene)
                 };
             }
         }
@@ -429,13 +558,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         left: frameRect.left + imageRect.left,
                         top: frameRect.top + imageRect.top,
                         width: imageRect.width,
-                        height: imageRect.height
+                        height: imageRect.height,
+                        angle: readElementAngle(imageShell)
                     };
                 }
 
-                return frameRect;
+                return { ...frameRect, angle: readElementAngle(impressionismTimeFrame) };
             } catch (error) {
-                return impressionismTimeFrame.getBoundingClientRect();
+                const rect = impressionismTimeFrame.getBoundingClientRect();
+                return { ...rect, angle: readElementAngle(impressionismTimeFrame) };
             }
         }
 
@@ -446,30 +577,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const targetElement = artworkContainer || siteElement;
         const rect = targetElement?.getBoundingClientRect();
 
-        if (rect && rect.width > 0) {
-            return rect;
+        if (rect && rect.width > 0 && rect.width < window.innerWidth * 0.96 && rect.height < window.innerHeight * 0.96) {
+            return {
+                left: rect.left,
+                top: rect.top,
+                width: rect.width,
+                height: rect.height,
+                angle: readElementAngle(targetElement)
+            };
         }
 
-        const targetWidth = Math.min(window.innerWidth * 0.64, 920);
-        const targetHeight = Math.min(window.innerHeight * 0.72, 680);
-
-        return {
-            left: (window.innerWidth - targetWidth) / 2,
-            top: (window.innerHeight - targetHeight) / 2,
-            width: targetWidth,
-            height: targetHeight
-        };
+        return getFallbackArtworkTarget(interaction, null);
     }
 
-    function moveCloneToRect(clone, startRect, targetRect) {
+    function moveCloneToRect(clone, startRect, targetRect, targetAngle = 0) {
         const scale = targetRect.width / startRect.width;
         const dx = (targetRect.left + targetRect.width / 2) - (startRect.left + startRect.width / 2);
         const dy = (targetRect.top + targetRect.height / 2) - (startRect.top + startRect.height / 2);
-        clone.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(${scale.toFixed(4)})`;
+        clone.classList.add('moving');
+        clone.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) rotate(${targetAngle.toFixed(2)}deg) scale(${scale.toFixed(4)})`;
     }
 
     function revealInteraction(interaction) {
-        body.classList.remove('view-hub', 'measuring');
+        if (!body.classList.contains('artwork-opening')) {
+            body.classList.remove('view-hub');
+        }
+
+        body.classList.remove('measuring');
         body.classList.remove('view-impressionism', 'view-particle', 'view-schema-architecture', 'view-fluid-collision', 'view-renaissance', 'view-baroque', 'view-romanticism', 'view-impressionism-time');
         body.classList.add('view-interaction', `view-${interaction.site}`);
 
@@ -523,32 +657,36 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Temporarily show the interaction screen to measure its layout
-            body.classList.add('measuring');
-            
+            body.classList.add('measuring', `view-${interaction.site}`);
+
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
-                    const targetRect = containRect(getInteractionArtworkRect(interaction), transition.imageRatio);
-                    
-                    // Start movement
-                    moveCloneToRect(transition.clone, transition.startRect, targetRect);
-                    
+                    const targetRect = containRectWithAngle(getInteractionArtworkRect(interaction), transition.imageRatio);
+                    body.classList.remove('measuring', `view-${interaction.site}`);
+
+                    // Let the hub details dissolve first, then reveal the target site while the artwork travels into it.
                     setTimeout(() => {
                         revealInteraction(interaction);
+                        requestAnimationFrame(() => {
+                            body.classList.add('site-revealing');
+                            transition.backdrop.classList.add('revealing-site');
+                        });
+                        moveCloneToRect(transition.clone, transition.startRect, targetRect, targetRect.angle);
+                    }, 900);
+
+                    setTimeout(() => {
+                        body.classList.add('artwork-arrived');
+                        transition.backdrop.classList.add('leaving');
+                        transition.clone.classList.add('leaving');
 
                         setTimeout(() => {
-                            body.classList.add('artwork-arrived');
-                            transition.backdrop.classList.add('leaving');
-                            transition.clone.classList.add('leaving');
-
-                            setTimeout(() => {
-                                transition.backdrop.remove();
-                                transition.clone.remove();
-                                card.classList.remove('transition-source');
-                                body.classList.remove('artwork-opening', 'artwork-arrived');
-                                isInteractionOpening = false;
-                            }, 680);
-                        }, 50); // Small overlap
-                    }, 820); // Wait for transition duration
+                            transition.backdrop.remove();
+                            transition.clone.remove();
+                            card.classList.remove('transition-source');
+                            body.classList.remove('view-hub', 'artwork-opening', 'artwork-arrived', 'site-revealing');
+                            isInteractionOpening = false;
+                        }, 1100); // wait for clone/backdrop to leave + site reveal animations to finish
+                    }, 2060);
                 });
             });
         });
@@ -837,6 +975,36 @@ document.addEventListener('DOMContentLoaded', () => {
             const cardH = card.offsetHeight;
             if (!cardW || !cardH) continue;
 
+            // Non-renaissance cards use background-image directly — size based on actual image ratio
+            if (!card.classList.contains('renaissance-card')) {
+                const artImageValue = window.getComputedStyle(card).getPropertyValue('--art-image').trim();
+                const match = artImageValue.match(/url\(["']?(.+?)["']?\)/);
+                if (match) {
+                    const imgSize = await loadImageSize(match[1]);
+                    if (imgSize) {
+                        const imgRatio = imgSize.width / imgSize.height;
+                        const bgH = 0.95; // 95% of card height
+                        const renderedW = bgH * cardH * imgRatio;
+
+                        if (renderedW <= cardW * 0.72) {
+                            // portrait / near-square: height-constrained, fits in left portion
+                            const renderedFraction = renderedW / cardW;
+                            card.style.setProperty('--art-bg-size', `auto ${(bgH * 100).toFixed(0)}%`);
+                            card.style.setProperty('--artwork-left', `${((renderedFraction + 0.05) * 100).toFixed(1)}%`);
+                        } else {
+                            // landscape: width-constrained at 72% so text still has room
+                            card.style.setProperty('--art-bg-size', '72% auto');
+                            card.style.setProperty('--artwork-left', '77%');
+                        }
+                        continue;
+                    }
+                }
+                card.style.setProperty('--art-bg-size', 'auto 95%');
+                card.style.setProperty('--artwork-left', '60%');
+                continue;
+            }
+
+            // Renaissance card uses ::before with contain sizing — compute dynamically
             const artImageValue = window.getComputedStyle(card).getPropertyValue('--art-image').trim();
             const match = artImageValue.match(/url\(["']?(.+?)["']?\)/);
             if (!match) continue;
@@ -851,19 +1019,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? beforeWidthRatio
                 : (cardH * imgRatio) / cardW;
 
-            let gapRatio;
-            if (card.classList.contains('renaissance-card')) {
-                gapRatio = 0.05;
-            } else if (card.classList.contains('bauhaus-card')) {
-                gapRatio = -0.11;
-            } else if (card.classList.contains('impressionism-card')) {
-                gapRatio = -0.11;
-            } else if (card.classList.contains('surrealism-card')) {
-                gapRatio = -0.08;
-            } else {
-                gapRatio = -0.07;
-            }
-            card.style.setProperty('--artwork-left', `${((renderedFraction + gapRatio) * 100).toFixed(1)}%`);
+            card.style.setProperty('--artwork-left', `${((renderedFraction + 0.05) * 100).toFixed(1)}%`);
         }
     }
 

@@ -4,6 +4,8 @@ services:
     restart: unless-stopped
     ports:
       - "8004:80"
+    volumes:
+      - .:/usr/share/nginx/html:ro
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
       interval: 30s
