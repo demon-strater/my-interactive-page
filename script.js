@@ -8,10 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const featureTitle = document.getElementById('featureTitle');
     const featureMeta = document.getElementById('featureMeta');
     const siteTransition = document.getElementById('siteTransition');
-    const transitionPanel = document.getElementById('transitionPanel');
-    const transitionHour = document.getElementById('transitionHour');
-    const transitionTitle = document.getElementById('transitionTitle');
-    const transitionMeta = document.getElementById('transitionMeta');
     const backToShelf = document.getElementById('backToShelf');
     const pullChain = document.getElementById('pullChain');
     const leftArrow = document.getElementById('leftArrow');
@@ -31,6 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const romanticismFrame = document.querySelector('.romanticism-frame');
     const impressionismTimeFrame = document.querySelector('.impressionism-time-frame');
     const hubBgTint = document.getElementById('hubBgTint');
+    const cinematicStage = document.getElementById('cinematicStage');
+    const hubScreen = document.getElementById('hubScreen');
+    const interactionScreen = document.getElementById('interactionScreen');
 
     const hubTintColors = {
         'renaissance-card':  'rgba(205, 158, 64, 0.22)',
@@ -81,15 +80,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const tracks = {
         morning: {
-            title: 'Morning Music',
-            info: 'Bright dream image',
-            tag: 'Morning',
+            title: 'Surreal 1',
+            info: 'Surreal image sequence',
+            tag: 'Surreal 1',
             audio: morningMusic
         },
         night: {
-            title: 'Night Music',
-            info: 'Dark dream image',
-            tag: 'Night',
+            title: 'Surreal 2',
+            info: 'Surreal image sequence',
+            tag: 'Surreal 2',
             audio: nightMusic
         }
     };
@@ -103,11 +102,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let timelineFrame = null;
     let isTimelineDragging = false;
     let hasTimelineDragged = false;
+    let pointerDownCardSnapshot = null;
     let timelineStartX = 0;
     let timelineStartOffset = 0;
     let carouselOffset = 0;
     let carouselTargetOffset = 0;
     let lastSelectedHour = -1;
+    const artworkMoveDuration = 1200;
 
     const interactions = [
         { hour: 1, title: 'RENAISSANCE', meta: 'c. 1400-1600', status: 'Available', site: 'renaissance', top: '#c8a86b', bottom: '#3a2510' },
@@ -298,13 +299,13 @@ document.addEventListener('DOMContentLoaded', () => {
         requestTimelineState();
     }
 
-    function openCard(card) {
+    function openCard(card, snapshot = null) {
         const interactionHour = Number(card.dataset.hour);
         const interaction = interactions.find(item => item.hour === interactionHour) || interactions[0];
         selectedHour = interactionHour;
 
         if (interaction.site) {
-            openInteraction(card, interaction);
+            openInteraction(card, interaction, snapshot);
         } else {
             rotateCardToFront(card);
         }
@@ -381,8 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getStageRect() {
-        const stage = document.querySelector('.interaction-screen') || document.querySelector('.hub-screen');
-        const rect = stage?.getBoundingClientRect();
+        const rect = cinematicStage?.getBoundingClientRect();
 
         if (rect && rect.width > 0 && rect.height > 0) {
             return rect;
@@ -416,16 +416,78 @@ document.addEventListener('DOMContentLoaded', () => {
         return containRectWithAngle(bounds, imageRatio);
     }
 
-    function readCardAngle(card) {
-        const value = window.getComputedStyle(card).getPropertyValue('--card-rotate').trim();
-        const angle = Number.parseFloat(value);
-        return Number.isFinite(angle) ? angle : 0;
+    function rectToArtworkRect(rect, angle = 0) {
+        return {
+            left: rect.left,
+            top: rect.top,
+            width: rect.width,
+            height: rect.height,
+            angle
+        };
+    }
+
+    function fitRectToRatio(rect, ratio) {
+        if (!ratio || !Number.isFinite(ratio) || !rect || rect.width <= 0 || rect.height <= 0) {
+            return rect;
+        }
+
+        const rectRatio = rect.width / rect.height;
+        let width = rect.width;
+        let height = rect.height;
+
+        if (rectRatio > ratio) {
+            width = height * ratio;
+        } else {
+            height = width / ratio;
+        }
+
+        return {
+            left: rect.left + (rect.width - width) / 2,
+            top: rect.top + (rect.height - height) / 2,
+            width,
+            height,
+            angle: rect.angle || 0
+        };
+    }
+
+    function scaleRectFromCenter(rect, scale) {
+        if (!rect || !Number.isFinite(scale) || scale <= 0) {
+            return rect;
+        }
+
+        const width = rect.width * scale;
+        const height = rect.height * scale;
+
+        return {
+            left: rect.left + (rect.width - width) / 2,
+            top: rect.top + (rect.height - height) / 2,
+            width,
+            height,
+            angle: rect.angle || 0
+        };
     }
 
     function readCardScale(card) {
         const value = window.getComputedStyle(card).getPropertyValue('--card-scale').trim();
         const scale = Number.parseFloat(value);
         return Number.isFinite(scale) ? scale : 1;
+    }
+
+    function createCardSnapshot(card) {
+        const cardStyle = window.getComputedStyle(card);
+
+        return {
+            rect: card.getBoundingClientRect(),
+            scale: readCardScale(card),
+            angle: readElementAngle(card),
+            offsetWidth: card.offsetWidth,
+            offsetHeight: card.offsetHeight,
+            artBgSize: cardStyle.getPropertyValue('--art-bg-size') || 'auto 85%',
+            artImage: cardStyle.getPropertyValue('--art-image').trim(),
+            backgroundColor: cardStyle.backgroundColor || cardStyle.getPropertyValue('--feature-color'),
+            isRenaissance: card.classList.contains('renaissance-card'),
+            title: card.querySelector('strong')?.textContent || ''
+        };
     }
 
     function rotatePoint(x, y, degrees) {
@@ -460,25 +522,24 @@ document.addEventListener('DOMContentLoaded', () => {
         return containRect({ left: 0, top: 0, width: boxWidth, height: boxHeight }, imageRatio);
     }
 
-    function getArtworkStartRect(card, imageRatio, isArtCard, startAngle) {
-        const cardStyle = window.getComputedStyle(card);
-        const cardRect = card.getBoundingClientRect();
-        const scale = readCardScale(card);
-        const cardWidth = card.offsetWidth * scale;
-        const cardHeight = card.offsetHeight * scale;
+    function getArtworkStartRect(snapshot, imageRatio, isArtCard) {
+        const cardRect = snapshot.rect;
+        const startAngle = snapshot.angle;
+        const cardWidth = snapshot.offsetWidth * snapshot.scale;
+        const cardHeight = snapshot.offsetHeight * snapshot.scale;
         let artworkWidth = cardWidth;
         let artworkHeight = cardHeight;
         let offsetX = 0;
         let offsetY = 0;
 
-        if (isArtCard && card.classList.contains('renaissance-card')) {
+        if (isArtCard && snapshot.isRenaissance) {
             const containerWidth = cardWidth * 0.84;
             const contained = containRect({ left: 0, top: 0, width: containerWidth, height: cardHeight }, imageRatio);
             artworkWidth = contained.width;
             artworkHeight = contained.height;
             offsetX = -cardWidth / 2 + containerWidth / 2;
         } else if (isArtCard) {
-            const rendered = parseBackgroundSize(cardStyle.getPropertyValue('--art-bg-size') || 'auto 85%', cardWidth, cardHeight, imageRatio);
+            const rendered = parseBackgroundSize(snapshot.artBgSize, cardWidth, cardHeight, imageRatio);
             artworkWidth = rendered.width;
             artworkHeight = rendered.height;
             offsetX = -cardWidth / 2 + artworkWidth / 2;
@@ -496,17 +557,16 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    async function createArtworkTransition(card) {
-        const cardStyle = window.getComputedStyle(card);
-        const artImage = cardStyle.getPropertyValue('--art-image').trim();
+    async function createArtworkTransition(card, snapshot = createCardSnapshot(card)) {
+        const artImage = snapshot.artImage;
         const isArtCard = artImage && artImage !== 'none';
         const imageSrc = parseCssUrl(artImage);
         const imageSize = await loadImageSize(imageSrc);
         const imageRatio = imageSize ? imageSize.width / imageSize.height : null;
-        const startAngle = readCardAngle(card);
-        const startRect = getArtworkStartRect(card, imageRatio, isArtCard, startAngle);
+        const startAngle = snapshot.angle;
+        const startRect = getArtworkStartRect(snapshot, imageRatio, isArtCard);
         const backdrop = document.createElement('div');
-        const clone = document.createElement('div');
+        const clone = document.createElement(isArtCard && imageSrc ? 'img' : 'div');
 
         backdrop.className = 'artwork-transition-backdrop';
         clone.className = 'artwork-transition-clone';
@@ -517,13 +577,19 @@ document.addEventListener('DOMContentLoaded', () => {
         clone.style.transform = `rotate(${startAngle.toFixed(2)}deg)`;
 
         if (isArtCard) {
-            clone.style.backgroundImage = artImage;
+            if (clone instanceof HTMLImageElement) {
+                clone.src = imageSrc;
+                clone.alt = '';
+                clone.decoding = 'async';
+            } else {
+                clone.style.backgroundImage = artImage;
+            }
         } else {
-            clone.style.background = cardStyle.backgroundColor || cardStyle.getPropertyValue('--feature-color');
-            clone.textContent = card.querySelector('strong')?.textContent || '';
+            clone.style.background = snapshot.backgroundColor;
+            clone.textContent = snapshot.title;
         }
 
-        document.body.append(backdrop, clone);
+        cinematicStage.append(backdrop, clone);
 
         requestAnimationFrame(() => {
             backdrop.classList.add('visible');
@@ -533,17 +599,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getInteractionArtworkRect(interaction) {
+        const stage = getStageRect();
+
         if (interaction.site === 'impressionism') {
             const scene = document.querySelector('.impressionism-site .window-reveal .scene');
-            if (scene) {
-                const rect = scene.getBoundingClientRect();
-                return {
-                    left: rect.left,
-                    top: rect.top,
-                    width: rect.width,
-                    height: rect.height,
-                    angle: readElementAngle(scene)
-                };
+            const windowReveal = document.querySelector('.impressionism-site .window-reveal');
+            const targetElement = scene || windowReveal;
+
+            if (targetElement) {
+                const rect = targetElement.getBoundingClientRect();
+                if (rect.width > 0 && rect.height > 0) {
+                    return {
+                        left: rect.left,
+                        top: rect.top,
+                        width: rect.width,
+                        height: rect.height,
+                        angle: readElementAngle(targetElement)
+                    };
+                }
             }
         }
 
@@ -563,17 +636,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     };
                 }
 
-                return { ...frameRect, angle: readElementAngle(impressionismTimeFrame) };
+                return rectToArtworkRect(frameRect, readElementAngle(impressionismTimeFrame));
             } catch (error) {
                 const rect = impressionismTimeFrame.getBoundingClientRect();
-                return { ...rect, angle: readElementAngle(impressionismTimeFrame) };
+                return rectToArtworkRect(rect, readElementAngle(impressionismTimeFrame));
             }
+        }
+
+        if (interaction.site === 'renaissance' && renaissanceFrame) {
+            const rect = renaissanceFrame.getBoundingClientRect();
+            return rectToArtworkRect(rect, readElementAngle(renaissanceFrame));
+        }
+
+        if (interaction.site === 'romanticism' && romanticismFrame) {
+            const rect = romanticismFrame.getBoundingClientRect();
+            return rectToArtworkRect(rect, readElementAngle(romanticismFrame));
         }
 
         const siteElement = document.querySelector(`.${interaction.site}-site`);
         // If the site has a specific artwork container, use it. 
         // Otherwise use the whole site container but constrained.
-        const artworkContainer = siteElement?.querySelector('.player-shell, .artwork-target, .easel');
+        const artworkContainer = siteElement?.querySelector('.window-reveal .scene, .window-reveal, iframe, .player-shell, .artwork-target, .easel');
         const targetElement = artworkContainer || siteElement;
         const rect = targetElement?.getBoundingClientRect();
 
@@ -590,12 +673,57 @@ document.addEventListener('DOMContentLoaded', () => {
         return getFallbackArtworkTarget(interaction, null);
     }
 
-    function moveCloneToRect(clone, startRect, targetRect, targetAngle = 0) {
-        const scale = targetRect.width / startRect.width;
-        const dx = (targetRect.left + targetRect.width / 2) - (startRect.left + startRect.width / 2);
-        const dy = (targetRect.top + targetRect.height / 2) - (startRect.top + startRect.height / 2);
+    async function moveCloneToRect(clone, startRect, targetRect, targetAngle = 0) {
+        if (!targetRect || !Number.isFinite(targetRect.left) || !Number.isFinite(targetRect.top) || !Number.isFinite(targetRect.width) || !Number.isFinite(targetRect.height) || targetRect.width <= 0 || targetRect.height <= 0) {
+            targetRect = getFallbackArtworkTarget({ site: 'fallback' }, null);
+            targetAngle = 0;
+        }
+
+        const fromTransform = clone.style.transform || 'rotate(0deg)';
+        const toTransform = `rotate(${targetAngle.toFixed(2)}deg)`;
+
+        clone.getBoundingClientRect();
         clone.classList.add('moving');
-        clone.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) rotate(${targetAngle.toFixed(2)}deg) scale(${scale.toFixed(4)})`;
+
+        const animation = clone.animate([
+            {
+                left: `${startRect.left}px`,
+                top: `${startRect.top}px`,
+                width: `${startRect.width}px`,
+                height: `${startRect.height}px`,
+                transform: fromTransform
+            },
+            {
+                left: `${targetRect.left}px`,
+                top: `${targetRect.top}px`,
+                width: `${targetRect.width}px`,
+                height: `${targetRect.height}px`,
+                transform: toTransform
+            }
+        ], {
+            duration: artworkMoveDuration,
+            easing: 'cubic-bezier(0.22, 0.8, 0.22, 1)',
+            fill: 'forwards'
+        });
+
+        try {
+            await animation.finished;
+        } catch (error) {
+            // If the animation is interrupted, still place the artwork at the target.
+        }
+
+        clone.style.left = `${targetRect.left}px`;
+        clone.style.top = `${targetRect.top}px`;
+        clone.style.width = `${targetRect.width}px`;
+        clone.style.height = `${targetRect.height}px`;
+        clone.style.transform = toTransform;
+    }
+
+    async function moveCloneToArtworkRect(clone, transition, targetRect) {
+        const startRect = fitRectToRatio(transition.startRect, transition.imageRatio);
+        const fittedTargetRect = fitRectToRatio(scaleRectFromCenter(targetRect, 0.7), transition.imageRatio);
+        fittedTargetRect.top -= targetRect.height * 0.07;
+        return moveCloneToRect(clone, startRect, fittedTargetRect, fittedTargetRect.angle || 0);
     }
 
     function revealInteraction(interaction) {
@@ -608,7 +736,8 @@ document.addEventListener('DOMContentLoaded', () => {
         body.classList.add('view-interaction', `view-${interaction.site}`);
 
         if (interaction.site === 'impressionism') {
-            updateScenes();
+            isNight = false;
+            // No longer auto-triggering music here
         } else {
             pauseAllMusic();
             body.classList.remove('night-background');
@@ -635,61 +764,65 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function openInteraction(card, interaction) {
+    function updateSiteTransition(interaction) {
+        featureHour.textContent = String(interaction.hour).padStart(2, '0');
+        featureTitle.textContent = interaction.title;
+        featureMeta.textContent = interaction.meta;
+        siteTransition.style.setProperty('--transition-color', interaction.top || '#405478');
+    }
+
+    async function openInteraction(card, interaction, snapshot = null) {
         if (isInteractionOpening || body.classList.contains('view-interaction')) {
             return;
         }
 
         isInteractionOpening = true;
         card.classList.add('transition-source');
-        body.classList.add('artwork-opening');
 
         // Pre-load iframes immediately
         if (interaction.site === 'impressionism-time' && impressionismTimeFrame && !impressionismTimeFrame.src) {
             impressionismTimeFrame.src = impressionismTimeFrame.dataset.src || 'impressionism.html';
         }
 
-        createArtworkTransition(card).then(transition => {
-            if (!isInteractionOpening) {
-                transition.backdrop.remove();
-                transition.clone.remove();
-                return;
-            }
+        if (interaction.site === 'impressionism') {
+            isNight = false;
+            isMusicPlaying = false; // Ensure it's false during transition
+            nightMusic.pause();
+            nightMusic.currentTime = 0;
+        }
 
-            // Temporarily show the interaction screen to measure its layout
-            body.classList.add('measuring', `view-${interaction.site}`);
+        // Phase 1: Fade to white
+        siteTransition.classList.remove('leaving');
+        siteTransition.classList.add('show');
+        body.classList.add('artwork-opening');
 
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    const targetRect = containRectWithAngle(getInteractionArtworkRect(interaction), transition.imageRatio);
-                    body.classList.remove('measuring', `view-${interaction.site}`);
+        // Phase 2: Wait for white-out before swapping content
+        setTimeout(() => {
+            // Screen is now white, swap the content behind the veil
+            body.classList.add('view-interaction', `view-${interaction.site}`);
+            revealInteraction(interaction);
+            requestAnimationFrame(() => body.classList.add('site-revealing'));
 
-                    // Let the hub details dissolve first, then reveal the target site while the artwork travels into it.
-                    setTimeout(() => {
-                        revealInteraction(interaction);
-                        requestAnimationFrame(() => {
-                            body.classList.add('site-revealing');
-                            transition.backdrop.classList.add('revealing-site');
-                        });
-                        moveCloneToRect(transition.clone, transition.startRect, targetRect, targetRect.angle);
-                    }, 900);
+            // Phase 3: Fade from white
+            setTimeout(() => {
+                siteTransition.classList.add('leaving');
+            }, 50);
 
-                    setTimeout(() => {
-                        body.classList.add('artwork-arrived');
-                        transition.backdrop.classList.add('leaving');
-                        transition.clone.classList.add('leaving');
+            // Phase 4: Final cleanup
+            setTimeout(() => {
+                siteTransition.classList.remove('show', 'leaving');
+                card.classList.remove('transition-source');
+                body.classList.remove('view-hub', 'artwork-opening', 'artwork-arrived', 'site-revealing');
+                isInteractionOpening = false;
 
-                        setTimeout(() => {
-                            transition.backdrop.remove();
-                            transition.clone.remove();
-                            card.classList.remove('transition-source');
-                            body.classList.remove('view-hub', 'artwork-opening', 'artwork-arrived', 'site-revealing');
-                            isInteractionOpening = false;
-                        }, 1100); // wait for clone/backdrop to leave + site reveal animations to finish
-                    }, 2060);
-                });
-            });
-        });
+                // Play music only after the interaction site is fully revealed
+                if (interaction.site === 'impressionism') {
+                    isMusicPlaying = true;
+                    updateScenes(); // This triggers managePlayback() -> audio.play()
+                }
+            }, 900);
+
+        }, 450); // Slightly more than the 400ms CSS transition
     }
 
     function resetRenaissanceFrame() {
@@ -861,8 +994,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: false });
 
     timelineRail.addEventListener('pointerdown', event => {
+        const target = document.elementFromPoint(event.clientX, event.clientY);
+        const card = target ? target.closest('.timeline-card') : null;
+
         isTimelineDragging = true;
         hasTimelineDragged = false;
+        pointerDownCardSnapshot = card ? { card, snapshot: createCardSnapshot(card) } : null;
         timelineStartX = event.clientX;
         timelineStartOffset = carouselTargetOffset;
         timelineRail.classList.add('dragging');
@@ -895,8 +1032,11 @@ document.addEventListener('DOMContentLoaded', () => {
         timelineRail.releasePointerCapture(event.pointerId);
 
         if (card && !hasTimelineDragged) {
-            openCard(card);
+            const snapshot = pointerDownCardSnapshot?.card === card ? pointerDownCardSnapshot.snapshot : createCardSnapshot(card);
+            openCard(card, snapshot);
         }
+
+        pointerDownCardSnapshot = null;
 
         setTimeout(() => {
             hasTimelineDragged = false;
@@ -906,6 +1046,7 @@ document.addEventListener('DOMContentLoaded', () => {
     timelineRail.addEventListener('pointercancel', () => {
         isTimelineDragging = false;
         hasTimelineDragged = false;
+        pointerDownCardSnapshot = null;
         timelineRail.classList.remove('dragging');
     });
 
@@ -926,7 +1067,7 @@ document.addEventListener('DOMContentLoaded', () => {
         playSound(clickSound, 'Audio');
         isNight = !isNight;
         pullChain.classList.add('pulled');
-        setTimeout(() => pullChain.classList.remove('pulled'), 150);
+        setTimeout(() => pullChain.classList.remove('pulled'), body.classList.contains('view-impressionism') ? 260 : 150);
         setTimeout(updateScenes, 280);
     });
 

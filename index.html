@@ -4,110 +4,106 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Five Art Movements</title>
-    <link rel="stylesheet" href="style.css?v=transition-20260612-verify">
+    <link rel="stylesheet" href="style.css?v=refresh-20260612-14">
 </head>
 <body class="view-hub">
-    <section class="hub-screen" id="hubScreen" aria-label="Interaction hub">
-        <div class="hub-bg-tint" id="hubBgTint" aria-hidden="true"></div>
-        <main class="clock-hub timeline-hub" aria-label="Circular timeline of art movement sites">
-            <header class="hub-header">
-                <p>Interactive Art Movements</p>
-                <h1>Five Art Movements That Shaped Me</h1>
-            </header>
+    <div class="cinematic-stage" id="cinematicStage">
+        <section class="hub-screen" id="hubScreen" aria-label="Interaction hub">
+            <div class="hub-bg-tint" id="hubBgTint" aria-hidden="true"></div>
+            <main class="clock-hub timeline-hub" aria-label="Circular timeline of art movement sites">
+                <header class="hub-header">
+                    <p>Interactive Art Movements</p>
+                    <h1>Five Art Movements That Shaped Me</h1>
+                </header>
 
-            <section class="clock-stage timeline-clock" aria-label="Current art movement">
-                <div class="clock-readout feature-readout">
-                    <span id="featureHour">01</span>
-                    <strong id="featureTitle">RENAISSANCE</strong>
-                    <small id="featureMeta">c. 1400-1600</small>
-                </div>
-            </section>
-
-            <section class="timeline-rail" aria-label="Scroll interaction cards">
-                <div class="timeline-track" id="timelineTrack">
-                    <button class="timeline-card art-card renaissance-card active" type="button" data-hour="1" data-site="renaissance">
-                        <span class="card-hour">01</span>
-                        <strong>RENAISSANCE</strong>
-                        <small>c. 1400-1600</small>
-                        <span class="card-artwork">
-                            <span>Raffaello Sanzio</span>
-                            <em>The School of Athens</em>
-                            <span>1509–1511</span>
-                        </span>
-                    </button>
-                    <button class="timeline-card art-card surrealism-card" type="button" data-hour="2" data-site="impressionism">
-                        <span class="card-hour">02</span>
-                        <strong>SURREALISM</strong>
-                        <small>1924-1966</small>
-                        <span class="card-artwork">
-                            <span>Rene Magritte</span>
-                            <em>The Empire of Light</em>
-                            <span>1956</span>
-                        </span>
-                    </button>
-                    <button class="timeline-card art-card impressionism-card" type="button" data-hour="4" data-site="impressionism-time">
-                        <span class="card-hour">04</span>
-                        <strong>IMPRESSIONISM</strong>
-                        <small>c. 1874-1886</small>
-                        <span class="card-artwork">
-                            <span>Claude Monet</span>
-                            <em>Rouen Cathedral</em>
-                            <span>1894</span>
-                        </span>
-                    </button>
-                    <button class="timeline-card art-card bauhaus-card" type="button" data-hour="3">
-                        <span class="card-hour">03</span>
-                        <strong>BAUHAUS</strong>
-                        <small>1919-1933</small>
-                        <span class="card-artwork">
-                            <span>Bauhaus Workshop</span>
-                            <em>Lage der Ebenen zu Einander</em>
-                            <span>c. 1923</span>
-                        </span>
-                    </button>
-                    <button class="timeline-card art-card romanticism-card" type="button" data-hour="5" data-site="romanticism">
-                        <span class="card-hour">05</span>
-                        <strong>ROMANTICISM</strong>
-                        <small>c. 1798-1850</small>
-                        <span class="card-artwork">
-                            <span>Caspar David<br>Friedrich</span>
-                            <em>Wanderer above<br>the Sea of Fog</em>
-                            <span>1818</span>
-                        </span>
-                    </button>
-                </div>
-            </section>
-        </main>
-    </section>
-
-    <div class="site-transition" id="siteTransition" aria-hidden="true">
-        <div class="transition-ripple"></div>
-        <div class="transition-panel" id="transitionPanel">
-            <span class="transition-hour" id="transitionHour">01</span>
-            <strong id="transitionTitle">RENAISSANCE</strong>
-            <small id="transitionMeta">c. 1400-1600</small>
-        </div>
-    </div>
-
-    <section class="interaction-screen" id="interactionScreen" aria-label="Art movement interaction">
-        <button class="back-button" id="backToShelf" type="button" aria-label="Return home">
-            <span class="home-label">Home</span>
-        </button>
-
-        <div class="interaction-content impressionism-site">
-            <header class="site-header">
-                <h1>SURREALISM</h1>
-            </header>
-
-            <main class="main-container surreal-room" aria-label="Surrealism room window">
-                <section class="music-player side-player" id="musicPlayer" aria-label="Music control">
-                    <div class="now-playing">
-                        <div>
-                            <h2 class="track-title" id="trackTitle">Morning Music</h2>
-                            <p class="track-info" id="trackInfo">Surrealism Study</p>
-                        </div>
-                        <button id="playPauseBtn" class="player-button" aria-label="Play">&#9654;</button>
+                <section class="clock-stage timeline-clock" aria-label="Current art movement">
+                    <div class="clock-readout feature-readout">
+                        <span id="featureHour">01</span>
+                        <strong id="featureTitle">RENAISSANCE</strong>
+                        <small id="featureMeta">c. 1400-1600</small>
                     </div>
+                </section>
+
+                <section class="timeline-rail" aria-label="Scroll interaction cards">
+                    <div class="timeline-track" id="timelineTrack">
+                        <button class="timeline-card art-card renaissance-card active" type="button" data-hour="1" data-site="renaissance">
+                            <span class="card-hour">01</span>
+                            <strong>RENAISSANCE</strong>
+                            <small>c. 1400-1600</small>
+                            <span class="card-artwork">
+                                <span>Raffaello Sanzio</span>
+                                <em>The School of Athens</em>
+                                <span>1509–1511</span>
+                            </span>
+                        </button>
+                        <button class="timeline-card art-card surrealism-card" type="button" data-hour="2" data-site="impressionism">
+                            <span class="card-hour">02</span>
+                            <strong>SURREALISM</strong>
+                            <small>1924-1966</small>
+                            <span class="card-artwork">
+                                <span>Rene Magritte</span>
+                                <em>The Empire of Light</em>
+                                <span>1956</span>
+                            </span>
+                        </button>
+                        <button class="timeline-card art-card impressionism-card" type="button" data-hour="4" data-site="impressionism-time">
+                            <span class="card-hour">04</span>
+                            <strong>IMPRESSIONISM</strong>
+                            <small>c. 1874-1886</small>
+                            <span class="card-artwork">
+                                <span>Claude Monet</span>
+                                <em>Rouen Cathedral</em>
+                                <span>1894</span>
+                            </span>
+                        </button>
+                        <button class="timeline-card art-card bauhaus-card" type="button" data-hour="3">
+                            <span class="card-hour">03</span>
+                            <strong>BAUHAUS</strong>
+                            <small>1919-1933</small>
+                            <span class="card-artwork">
+                                <span>Bauhaus Workshop</span>
+                                <em>Lage der Ebenen zu Einander</em>
+                                <span>c. 1923</span>
+                            </span>
+                        </button>
+                        <button class="timeline-card art-card romanticism-card" type="button" data-hour="5" data-site="romanticism">
+                            <span class="card-hour">05</span>
+                            <strong>ROMANTICISM</strong>
+                            <small>c. 1798-1850</small>
+                            <span class="card-artwork">
+                                <span>Caspar David<br>Friedrich</span>
+                                <em>Wanderer above<br>the Sea of Fog</em>
+                                <span>1818</span>
+                            </span>
+                        </button>
+                    </div>
+                </section>
+            </main>
+        </section>
+
+        <div class="site-transition" id="siteTransition" aria-hidden="true">
+            <div class="transition-ripple"></div>
+        </div>
+
+        <section class="interaction-screen" id="interactionScreen" aria-label="Art movement interaction">
+            <button class="back-button" id="backToShelf" type="button" aria-label="Return home">
+                <span class="home-label">Home</span>
+            </button>
+
+            <div class="interaction-content impressionism-site">
+                <header class="site-header">
+                    <h1>SURREALISM</h1>
+                </header>
+
+                <main class="main-container surreal-room" aria-label="Surrealism room window">
+                    <section class="music-player side-player" id="musicPlayer" aria-label="Music control">
+                        <div class="now-playing">
+                            <div>
+                                <h2 class="track-title" id="trackTitle">Morning Music</h2>
+                                <p class="track-info" id="trackInfo">Surrealism Study</p>
+                            </div>
+                            <button id="playPauseBtn" class="player-button" aria-label="Play">&#9654;</button>
+                        </div>
 
                     <div class="progress-panel" aria-hidden="true">
                         <div class="time-row">
@@ -208,7 +204,8 @@
             </main>
         </div>
     </section>
+    </div>
 
-    <script src="script.js?v=transition-20260612-verify"></script>
+    <script src="script.js?v=refresh-20260612-15"></script>
 </body>
 </html>
