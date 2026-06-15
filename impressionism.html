@@ -13,54 +13,131 @@
             --brightness: 1;
             --saturate: 1;
             --day-progress: 0%;
-            --wood: #7a5028;
-            --wood-dark: #4e3010;
-            --wood-light: #a07040;
+            --sun-left: 8%;
+            --sun-top: 64%;
+            --sun-size: clamp(54px, 8vw, 96px);
+            --paper-light-x: 8%;
+            --sky-top: #8ba8cf;
+            --sky-mid: #f3c88a;
+            --sky-bottom: #f9e7ba;
+            --field-light: #92b968;
+            --field-dark: #315b34;
+            --wood: #7b4c25;
+            --wood-dark: #43250f;
+            --paper: #f6ead5;
+            --ink: #201a13;
         }
 
-        html, body {
+        html,
+        body {
             margin: 0;
             width: 100%;
-            height: 100%;
+            min-height: 100%;
             overflow: hidden;
-            background: #cdc6bc;
-            color: #1e1a14;
+            color: var(--ink);
             font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
         body {
+            min-height: 100svh;
             display: grid;
             place-items: center;
-            padding: clamp(12px, 1.6vw, 22px) clamp(68px, 8vw, 96px) clamp(12px, 1.6vw, 22px) clamp(12px, 1.6vw, 22px);
+            padding: clamp(12px, 2vw, 28px);
+            background:
+                linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 45%, var(--sky-bottom) 63%, var(--field-light) 64%, var(--field-dark) 100%);
+            transition: background 900ms ease;
+        }
+
+        .plein-air-scene {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .sun {
+            position: absolute;
+            left: var(--sun-left);
+            top: var(--sun-top);
+            width: var(--sun-size);
+            height: var(--sun-size);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            background:
+                radial-gradient(circle at 35% 34%, #fff8bf 0 12%, #ffd773 33%, #f39b46 68%, rgba(224, 102, 57, 0.92) 100%);
+            box-shadow:
+                0 0 34px rgba(255, 210, 98, 0.72),
+                0 0 90px rgba(245, 148, 82, 0.42);
+            transition: left 850ms ease, top 850ms ease, filter 850ms ease, opacity 850ms ease;
+        }
+
+        .sun-path {
+            position: absolute;
+            left: 8%;
+            right: 8%;
+            top: 13%;
+            height: 48%;
+            border-top: 1px solid rgba(255, 248, 209, 0.26);
+            border-radius: 50% 50% 0 0;
+            opacity: 0.52;
+        }
+
+        .distant-trees {
+            position: absolute;
+            left: -4%;
+            right: -4%;
+            bottom: 28%;
+            height: 13%;
+            background:
+                radial-gradient(ellipse at 8% 100%, rgba(48, 88, 54, 0.72) 0 24%, transparent 25%),
+                radial-gradient(ellipse at 18% 100%, rgba(41, 82, 48, 0.7) 0 28%, transparent 29%),
+                radial-gradient(ellipse at 34% 100%, rgba(65, 104, 54, 0.68) 0 25%, transparent 26%),
+                radial-gradient(ellipse at 48% 100%, rgba(40, 82, 52, 0.74) 0 31%, transparent 32%),
+                radial-gradient(ellipse at 63% 100%, rgba(72, 112, 63, 0.64) 0 25%, transparent 26%),
+                radial-gradient(ellipse at 80% 100%, rgba(37, 76, 48, 0.74) 0 29%, transparent 30%),
+                radial-gradient(ellipse at 94% 100%, rgba(63, 98, 58, 0.7) 0 25%, transparent 26%);
+            filter: blur(1px);
+        }
+
+        .grass {
+            position: absolute;
+            left: -8%;
+            right: -8%;
+            bottom: -8%;
+            height: 44%;
+            background:
+                linear-gradient(115deg, transparent 0 47%, rgba(255, 242, 172, 0.16) 48% 50%, transparent 51%) 0 0 / 34px 34px,
+                linear-gradient(67deg, transparent 0 46%, rgba(33, 81, 35, 0.26) 47% 51%, transparent 52%) 0 0 / 27px 30px,
+                radial-gradient(ellipse at 50% 18%, rgba(176, 203, 104, 0.85), rgba(66, 114, 52, 0.84) 42%, rgba(29, 71, 38, 0.96) 100%);
         }
 
         .stage {
-            width: 100%;
-            max-width: 1160px;
-            height: min(calc(100% - 8px), 960px);
+            position: relative;
+            z-index: 1;
+            width: min(100%, 1180px);
+            min-height: min(860px, calc(100svh - 32px));
             display: grid;
-            grid-template-columns: 1fr;
-            grid-template-rows: auto minmax(0, 1fr) auto;
-            row-gap: clamp(10px, 1.4vh, 18px);
-            align-items: stretch;
+            grid-template-columns: minmax(250px, 0.72fr) minmax(360px, 1fr);
+            grid-template-rows: 1fr auto;
+            column-gap: clamp(18px, 4vw, 58px);
+            row-gap: clamp(14px, 2vh, 24px);
+            align-items: center;
         }
 
-        /* ── Top header row ── */
         .intro {
-            display: flex;
-            flex-direction: row;
-            align-items: flex-end;
-            gap: clamp(18px, 2.6vw, 40px);
-            min-height: 0;
-            padding-bottom: clamp(8px, 1.2vh, 14px);
-            border-bottom: 1px solid rgba(30, 26, 20, 0.12);
+            align-self: start;
+            display: grid;
+            gap: clamp(14px, 2.2vh, 24px);
+            max-width: 360px;
+            padding-top: clamp(18px, 7vh, 78px);
         }
 
-        .title-block { display: grid; gap: 6px; }
+        .title-block { display: grid; gap: 9px; }
 
         .eyebrow {
             margin: 0;
-            color: rgba(30, 26, 20, 0.48);
+            color: rgba(32, 26, 19, 0.58);
             font-size: 0.72rem;
             font-weight: 800;
             text-transform: uppercase;
@@ -70,59 +147,142 @@
         .title {
             margin: 0;
             font-family: Georgia, "Times New Roman", serif;
-            font-size: clamp(1.5rem, 2.2vw, 2.4rem);
-            line-height: 0.88;
-            color: #1e1a14;
+            font-size: clamp(2.4rem, 5.8vw, 5.8rem);
+            line-height: 0.86;
+            color: #24180f;
+            text-shadow: 0 2px 26px rgba(255, 242, 196, 0.48);
         }
 
         .time-readout {
             display: grid;
-            gap: 6px;
-            padding-left: clamp(16px, 2vw, 28px);
-            border-left: 1px solid rgba(30, 26, 20, 0.16);
+            gap: 8px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(32, 26, 19, 0.18);
         }
 
         .time-name {
             font-family: Georgia, "Times New Roman", serif;
-            font-size: clamp(1rem, 1.6vw, 1.6rem);
+            font-size: clamp(1.2rem, 2.1vw, 2rem);
             line-height: 1;
-            color: #1e1a14;
+            color: #24180f;
         }
 
         .time-note {
-            color: rgba(30, 26, 20, 0.56);
-            font-size: clamp(0.7rem, 0.85vw, 0.84rem);
-            line-height: 1.52;
+            max-width: 32ch;
+            color: rgba(32, 26, 19, 0.66);
+            font-size: clamp(0.76rem, 1vw, 0.94rem);
+            line-height: 1.56;
+            font-weight: 650;
         }
 
-        /* ── Easel area ── */
         .image-area {
             min-width: 0;
             min-height: 0;
             display: flex;
             align-items: center;
             justify-content: center;
+            align-self: stretch;
         }
 
         .easel {
+            --painting-width: min(42vw, 480px);
+            position: relative;
+            width: min(100%, 620px);
+            min-height: clamp(560px, 78svh, 790px);
+            margin: 0;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex-shrink: 0;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: clamp(14px, 3vh, 42px);
+            filter: drop-shadow(0 28px 38px rgba(42, 31, 18, 0.3));
+        }
+
+        .easel::before,
+        .easel::after,
+        .center-leg {
+            content: "";
+            position: absolute;
+            top: clamp(116px, 18svh, 178px);
+            width: clamp(12px, 1.35vw, 17px);
+            height: clamp(420px, 62svh, 620px);
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--wood-dark), var(--wood), #a06935, var(--wood-dark));
+            transform-origin: top center;
+            z-index: 0;
+        }
+
+        .easel::before {
+            left: 25%;
+            transform: rotate(11deg);
+        }
+
+        .easel::after {
+            right: 25%;
+            transform: rotate(-11deg);
+        }
+
+        .center-leg {
+            left: 50%;
+            transform: translateX(-50%) rotate(2deg);
+            opacity: 0.9;
+        }
+
+        .easel-crossbar {
+            position: absolute;
+            left: 13%;
+            right: 13%;
+            top: clamp(455px, 62svh, 610px);
+            height: clamp(18px, 2.3vw, 26px);
+            border-radius: 999px;
+            background: linear-gradient(180deg, #aa7137, #5c3518 80%);
+            transform: rotate(-1.5deg);
+            z-index: 1;
+            box-shadow: 0 8px 18px rgba(37, 21, 9, 0.26);
+        }
+
+        .paper-clip {
+            position: absolute;
+            top: clamp(32px, 5.5svh, 64px);
+            left: 50%;
+            width: clamp(52px, 7vw, 82px);
+            height: clamp(22px, 3vw, 34px);
+            border-radius: 3px;
+            transform: translateX(-50%);
+            background: linear-gradient(180deg, #a16a31, #5b3415);
+            z-index: 4;
+            box-shadow: inset 0 2px 0 rgba(255, 232, 178, 0.32), 0 6px 14px rgba(42, 26, 12, 0.26);
         }
 
         .image-shell {
             position: relative;
-            width: auto;
-            height: min(72svh, 640px);
-            max-width: min(calc(100vw - 200px), 700px);
+            width: var(--painting-width);
+            max-width: min(calc(100vw - 58px), 500px);
             aspect-ratio: 2 / 3;
-            min-height: 0;
             overflow: hidden;
-            border-radius: 1px;
-            background: #f4ede0;
+            border-radius: 2px;
+            padding: clamp(13px, 1.5vw, 20px);
+            background:
+                linear-gradient(135deg, rgba(255,255,255,0.72), transparent 36%),
+                var(--paper);
+            border: 1px solid rgba(74, 50, 28, 0.24);
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 255, 255, 0.64),
+                0 10px 18px rgba(63, 42, 20, 0.22),
+                0 28px 55px rgba(36, 27, 16, 0.22);
             filter: sepia(var(--sepia)) hue-rotate(var(--hue)) brightness(var(--brightness)) saturate(var(--saturate));
-            transition: filter 1.2s ease;
+            transition: filter 1.2s ease, box-shadow 1.2s ease;
+            z-index: 3;
+        }
+
+        .image-shell::before {
+            content: "";
+            position: absolute;
+            inset: clamp(13px, 1.5vw, 20px);
+            z-index: 1;
+            background:
+                radial-gradient(circle at 50% 42%, transparent 57%, rgba(49, 30, 14, 0.08) 100%),
+                linear-gradient(90deg, rgba(72, 46, 24, 0.12), transparent 13% 87%, rgba(72, 46, 24, 0.1));
+            pointer-events: none;
         }
 
         .image-shell::after {
@@ -131,165 +291,190 @@
             inset: 0;
             z-index: 2;
             pointer-events: none;
-            background: radial-gradient(circle at 50% 50%, transparent 60%, rgba(0, 0, 0, 0.06) 100%);
+            background:
+                linear-gradient(0deg, rgba(255, 255, 255, 0.06), transparent 34%),
+                radial-gradient(circle at var(--paper-light-x) 14%, rgba(255, 235, 165, 0.18), transparent 34%);
+            mix-blend-mode: soft-light;
         }
 
         .time-image {
             position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
+            inset: clamp(13px, 1.5vw, 20px);
+            width: calc(100% - clamp(26px, 3vw, 40px));
+            height: calc(100% - clamp(26px, 3vw, 40px));
             object-fit: contain;
             background: transparent;
             opacity: 0;
             will-change: opacity;
+            transition: opacity 360ms linear;
         }
 
-        /* ── Controls bar (transport + timeline only) ── */
         .controls {
             grid-column: 1 / -1;
+            justify-self: center;
+            width: min(780px, 100%);
+            min-height: 188px;
+            position: relative;
             display: grid;
-            grid-template-columns: minmax(150px, 190px) minmax(0, 1fr);
-            gap: clamp(14px, 2vw, 28px);
+            grid-template-columns: 118px minmax(0, 1fr);
+            gap: clamp(14px, 2.4vw, 24px);
             align-items: center;
-            padding: clamp(12px, 1.6vw, 18px) clamp(14px, 1.8vw, 22px);
-            border: 1px solid rgba(30, 26, 20, 0.12);
-            border-radius: 10px;
-            background: rgba(30, 26, 20, 0.05);
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+            padding: 26px clamp(22px, 4.2vw, 52px) 24px 112px;
+            color: #28180d;
+            border-radius: 50% 46% 48% 52% / 54% 48% 52% 46%;
+            background:
+                radial-gradient(circle at 21% 48%, transparent 0 32px, rgba(118, 74, 33, 0.28) 33px 36px, transparent 37px),
+                radial-gradient(circle at 74% 27%, rgba(255, 222, 117, 0.9) 0 14px, transparent 15px),
+                radial-gradient(circle at 82% 49%, rgba(199, 86, 51, 0.9) 0 13px, transparent 14px),
+                radial-gradient(circle at 65% 68%, rgba(67, 127, 82, 0.86) 0 15px, transparent 16px),
+                radial-gradient(circle at 50% 31%, rgba(88, 130, 181, 0.75) 0 12px, transparent 13px),
+                linear-gradient(135deg, #d9ae73, #9d6937 58%, #71431f);
+            box-shadow:
+                inset 10px 12px 28px rgba(255, 237, 190, 0.28),
+                inset -12px -14px 28px rgba(56, 31, 12, 0.28),
+                0 18px 36px rgba(43, 31, 14, 0.24);
         }
 
         .transport {
             display: grid;
-            grid-template-columns: 42px 1fr;
+            grid-template-columns: 46px minmax(0, 1fr);
             gap: 12px;
             align-items: center;
+            z-index: 1;
         }
 
-        .flow-copy { display: grid; gap: 3px; }
+        .flow-copy { display: grid; gap: 4px; }
 
         .flow-copy strong {
             font-family: Georgia, "Times New Roman", serif;
-            font-size: 0.88rem;
+            font-size: 0.96rem;
             line-height: 1;
-            color: #1e1a14;
+            color: #25150b;
         }
 
         .flow-copy span {
-            color: rgba(30, 26, 20, 0.5);
-            font-size: 0.64rem;
-            font-weight: 700;
+            color: rgba(37, 21, 11, 0.62);
+            font-size: 0.66rem;
+            font-weight: 800;
         }
 
         button {
-            min-height: 40px;
+            min-height: 42px;
             padding: 0 14px;
-            border: 1px solid rgba(30, 26, 20, 0.22);
-            border-radius: 999px;
-            color: #1e1a14;
-            background: rgba(30, 26, 20, 0.06);
+            border: 1px solid rgba(52, 29, 12, 0.24);
+            border-radius: 50%;
+            color: #26160b;
+            background: rgba(255, 240, 198, 0.42);
             font: inherit;
             font-size: 0.76rem;
-            font-weight: 800;
+            font-weight: 900;
             cursor: pointer;
             transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
         }
 
         button:hover {
             transform: translateY(-1px);
-            border-color: rgba(122, 80, 40, 0.6);
-            background: rgba(122, 80, 40, 0.1);
+            border-color: rgba(70, 40, 18, 0.55);
+            background: rgba(255, 246, 218, 0.62);
         }
 
         .play-button {
-            width: 42px;
+            width: 46px;
             padding: 0;
             display: grid;
             place-items: center;
-            font-size: 0.95rem;
         }
 
-        .timeline { display: grid; gap: 10px; min-width: 0; }
+        .timeline {
+            display: grid;
+            gap: 12px;
+            min-width: 0;
+            z-index: 1;
+        }
 
         .scrubber {
             appearance: none;
             width: 100%;
-            height: 30px;
+            height: 34px;
             border-radius: 999px;
             background:
-                linear-gradient(90deg, rgba(99, 130, 175, 0.7), rgba(245, 200, 120, 0.9) 48%, rgba(180, 100, 70, 0.7)),
-                rgba(30, 26, 20, 0.1);
-            accent-color: #7a5028;
+                linear-gradient(90deg, rgba(91, 119, 171, 0.78), rgba(255, 220, 121, 0.94) 48%, rgba(205, 92, 63, 0.76)),
+                rgba(47, 26, 12, 0.16);
+            accent-color: #6d411e;
             cursor: pointer;
+            box-shadow: inset 0 2px 7px rgba(50, 28, 12, 0.24);
         }
 
         .scrubber::-webkit-slider-thumb {
             appearance: none;
-            width: 24px;
-            height: 24px;
-            border: 2px solid rgba(255, 255, 255, 0.9);
+            width: 26px;
+            height: 26px;
+            border: 2px solid rgba(255, 248, 225, 0.95);
             border-radius: 50%;
-            background: #7a5028;
-            box-shadow: 0 0 0 6px rgba(122, 80, 40, 0.15), 0 8px 20px rgba(0, 0, 0, 0.22);
+            background: #5f391b;
+            box-shadow: 0 0 0 7px rgba(255, 238, 191, 0.2), 0 8px 18px rgba(35, 20, 9, 0.28);
         }
 
         .scrubber::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
-            border: 2px solid rgba(255, 255, 255, 0.9);
+            width: 26px;
+            height: 26px;
+            border: 2px solid rgba(255, 248, 225, 0.95);
             border-radius: 50%;
-            background: #7a5028;
-            box-shadow: 0 0 0 6px rgba(122, 80, 40, 0.15), 0 8px 20px rgba(0, 0, 0, 0.22);
+            background: #5f391b;
+            box-shadow: 0 0 0 7px rgba(255, 238, 191, 0.2), 0 8px 18px rgba(35, 20, 9, 0.28);
         }
 
         .time-track {
             position: relative;
-            height: 28px;
+            height: 34px;
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             align-items: start;
-            color: rgba(30, 26, 20, 0.46);
-            font-size: clamp(0.52rem, 0.7vw, 0.66rem);
-            font-weight: 800;
+            color: rgba(38, 22, 11, 0.54);
+            font-size: clamp(0.5rem, 0.68vw, 0.65rem);
+            font-weight: 900;
             text-transform: uppercase;
         }
 
         .time-track::before {
             content: "";
             position: absolute;
-            left: 0; right: 0; top: 14px;
+            left: 0;
+            right: 0;
+            top: 16px;
             height: 1px;
-            background: rgba(30, 26, 20, 0.14);
+            background: rgba(38, 22, 11, 0.18);
         }
 
         .time-marker {
             position: relative;
             display: grid;
-            gap: 5px;
+            gap: 6px;
             justify-items: center;
             text-align: center;
         }
 
         .time-marker::after {
             content: "";
-            width: 6px;
-            height: 6px;
+            width: 7px;
+            height: 7px;
             border-radius: 999px;
-            background: rgba(30, 26, 20, 0.34);
-            box-shadow: 0 0 0 3px rgba(30, 26, 20, 0.06);
+            background: rgba(38, 22, 11, 0.38);
+            box-shadow: 0 0 0 4px rgba(255, 237, 190, 0.16);
         }
 
-        .time-marker.active { color: #7a5028; }
+        .time-marker.active {
+            color: #27160a;
+        }
 
         .time-marker.active::after {
-            background: #7a5028;
-            box-shadow: 0 0 0 4px rgba(122, 80, 40, 0.18);
+            background: #fff0bc;
+            box-shadow: 0 0 0 4px rgba(84, 49, 21, 0.22), 0 0 18px rgba(255, 235, 164, 0.82);
         }
 
-        /* ── Temperature panel (right side, vertical) ── */
         .temperature-panel {
             position: fixed;
-            right: clamp(16px, 2.2vw, 32px);
+            right: clamp(12px, 2vw, 28px);
             top: 50%;
             transform: translateY(-50%);
             display: flex;
@@ -297,26 +482,26 @@
             align-items: center;
             gap: 10px;
             z-index: 10;
-            padding: 16px 10px;
-            border: 1px solid rgba(30, 26, 20, 0.12);
+            padding: 15px 10px;
+            border: 1px solid rgba(39, 22, 10, 0.16);
             border-radius: 999px;
-            background: rgba(205, 198, 188, 0.72);
+            background: rgba(255, 236, 194, 0.38);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 24px rgba(44, 30, 13, 0.15);
         }
 
         .temp-label {
             font-size: 0.6rem;
-            font-weight: 800;
+            font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 0.06em;
-            color: rgba(30, 26, 20, 0.52);
+            color: rgba(38, 22, 11, 0.58);
             writing-mode: vertical-rl;
         }
 
-        .temp-label--warm { color: rgba(180, 100, 40, 0.8); }
-        .temp-label--cool { color: rgba(70, 110, 170, 0.8); }
+        .temp-label--warm { color: rgba(177, 82, 34, 0.82); }
+        .temp-label--cool { color: rgba(62, 89, 154, 0.82); }
 
         #temperatureSlider {
             -webkit-appearance: slider-vertical;
@@ -326,14 +511,14 @@
             width: 28px;
             height: clamp(100px, 18vh, 180px);
             cursor: pointer;
-            accent-color: #7a5028;
+            accent-color: #6d411e;
             background: transparent;
         }
 
         #temperatureSlider::-webkit-slider-runnable-track {
             width: 6px;
             border-radius: 3px;
-            background: linear-gradient(to top, rgba(99, 130, 175, 0.6), rgba(245, 200, 120, 0.7) 50%, rgba(180, 100, 70, 0.6));
+            background: linear-gradient(to top, rgba(91, 119, 171, 0.7), rgba(255, 220, 121, 0.8) 50%, rgba(205, 92, 63, 0.75));
         }
 
         #temperatureSlider::-webkit-slider-thumb {
@@ -341,63 +526,90 @@
             width: 22px;
             height: 22px;
             margin-left: -8px;
-            border: 2px solid rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 248, 225, 0.95);
             border-radius: 50%;
-            background: #7a5028;
-            box-shadow: 0 0 0 5px rgba(122, 80, 40, 0.15), 0 4px 12px rgba(0, 0, 0, 0.2);
+            background: #5f391b;
+            box-shadow: 0 0 0 5px rgba(255, 238, 191, 0.2), 0 4px 12px rgba(35, 20, 9, 0.22);
         }
 
         #temperatureSlider::-moz-range-thumb {
             width: 22px;
             height: 22px;
-            border: 2px solid rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 248, 225, 0.95);
             border-radius: 50%;
-            background: #7a5028;
-            box-shadow: 0 0 0 5px rgba(122, 80, 40, 0.15), 0 4px 12px rgba(0, 0, 0, 0.2);
+            background: #5f391b;
+            box-shadow: 0 0 0 5px rgba(255, 238, 191, 0.2), 0 4px 12px rgba(35, 20, 9, 0.22);
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 920px) {
+            html,
             body {
                 overflow: auto;
-                align-items: start;
-                padding-right: clamp(14px, 2vw, 28px);
+            }
+
+            body {
+                padding: 14px;
+                place-items: start center;
             }
 
             .stage {
-                height: auto;
-                row-gap: 18px;
+                min-height: auto;
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+                row-gap: 16px;
             }
 
-            .title { font-size: clamp(1.4rem, 8vw, 2.4rem); }
             .intro {
-                flex-direction: column;
-                align-items: flex-start;
+                max-width: none;
+                padding-top: 4px;
                 gap: 10px;
-                padding-bottom: 10px;
+            }
+
+            .title {
+                font-size: clamp(2.3rem, 12vw, 4.4rem);
             }
 
             .time-readout {
-                padding-left: 0;
-                border-left: none;
-                border-top: 1px solid rgba(30, 26, 20, 0.14);
-                padding-top: 8px;
+                padding-top: 10px;
             }
 
-            .image-shell {
-                width: min(100%, 320px);
-                height: auto;
-                max-width: 100%;
-                aspect-ratio: 2 / 3;
+            .image-area {
+                min-height: 540px;
+            }
+
+            .easel {
+                --painting-width: min(78vw, 340px);
+                min-height: 540px;
+                padding-top: 12px;
+            }
+
+            .easel::before,
+            .easel::after,
+            .center-leg {
+                top: 112px;
+                height: 420px;
+            }
+
+            .easel-crossbar {
+                top: 422px;
             }
 
             .controls {
+                min-height: 0;
                 grid-template-columns: 1fr;
-                gap: 14px;
-                padding: 14px;
+                border-radius: 34px 42px 36px 46px;
+                padding: 22px 18px;
+                width: 100%;
             }
 
-            .transport { grid-template-columns: 42px minmax(0, 1fr); }
-            .time-track { font-size: 0.52rem; }
+            .transport {
+                grid-template-columns: 46px minmax(0, 1fr);
+                max-width: 290px;
+            }
+
+            .time-track {
+                font-size: 0.48rem;
+            }
 
             .temperature-panel {
                 position: static;
@@ -405,23 +617,33 @@
                 flex-direction: row;
                 border-radius: 999px;
                 padding: 10px 16px;
-                margin-top: 8px;
+                justify-self: center;
+                margin-top: 6px;
             }
 
-            .temp-label { writing-mode: horizontal-tb; }
+            .temp-label {
+                writing-mode: horizontal-tb;
+            }
 
             #temperatureSlider {
                 -webkit-appearance: auto;
                 appearance: auto;
                 writing-mode: horizontal-tb;
                 direction: ltr;
-                width: clamp(100px, 40vw, 200px);
+                width: clamp(110px, 46vw, 220px);
                 height: 28px;
             }
         }
     </style>
 </head>
 <body>
+    <div class="plein-air-scene" aria-hidden="true">
+        <div class="sun-path"></div>
+        <div class="sun" id="sun"></div>
+        <div class="distant-trees"></div>
+        <div class="grass"></div>
+    </div>
+
     <main class="stage">
         <aside class="intro" aria-label="Impressionism overview">
             <div class="title-block">
@@ -430,12 +652,15 @@
             </div>
             <div class="time-readout" aria-live="polite">
                 <strong class="time-name" id="timeName">Early Morning</strong>
-                <span class="time-note" id="timeNote">The first light slowly gathers on the cathedral surface.</span>
+                <span class="time-note" id="timeNote">The first light slowly gathers on the paper.</span>
             </div>
         </aside>
 
         <section class="image-area">
-            <figure class="easel" aria-label="Impressionist painting">
+            <figure class="easel" aria-label="Impressionist painting on an easel">
+                <span class="center-leg" aria-hidden="true"></span>
+                <span class="easel-crossbar" aria-hidden="true"></span>
+                <span class="paper-clip" aria-hidden="true"></span>
                 <section class="image-shell" id="imageShell" aria-label="Impressionist time image">
                     <img class="time-image" src="2.png" alt="Early morning impression">
                     <img class="time-image" src="1.png" alt="Morning impression">
@@ -448,7 +673,7 @@
             </figure>
         </section>
 
-        <section class="controls" aria-label="Time flow controls">
+        <section class="controls" aria-label="Time flow controls on a painter palette">
             <div class="transport">
                 <button class="play-button" id="playButton" type="button" aria-label="Pause time">II</button>
                 <div class="flow-copy">
@@ -463,7 +688,6 @@
         </section>
     </main>
 
-    <!-- Temperature panel fixed to right side -->
     <div class="temperature-panel" role="group" aria-label="Temperature control">
         <span class="temp-label temp-label--warm">Warm</span>
         <input id="temperatureSlider" type="range" min="-5" max="5" value="0" step="1" aria-label="Color temperature">
@@ -472,6 +696,7 @@
 
     <script>
         (() => {
+            const root = document.documentElement;
             const shell = document.getElementById('imageShell');
             const images = Array.from(document.querySelectorAll('.time-image'));
             const playButton = document.getElementById('playButton');
@@ -483,13 +708,23 @@
             const flowState = document.getElementById('flowState');
 
             const moments = [
-                ['Early Morning', 'The first light slowly gathers on the cathedral surface.'],
-                ['Morning', 'Blue shadows lift as the facade begins to warm.'],
-                ['Noon', 'The surface dissolves into brighter color and vibrating air.'],
-                ['Afternoon', 'The architecture turns softer as light slides sideways.'],
-                ['Early Evening', 'Warm color thickens and the stone starts to glow.'],
-                ['Evening', 'The image cools again as daylight thins.'],
-                ['Late Evening', 'Forms nearly disappear into atmosphere and memory.']
+                ['Early Morning', 'The sun rises low over the grass while the first image appears on the paper.'],
+                ['Morning', 'Blue shadows lift and the easel catches a warmer outdoor light.'],
+                ['Noon', 'The sun reaches its highest point and the painting glows with clear color.'],
+                ['Afternoon', 'Light slides sideways across the paper and the field becomes softer.'],
+                ['Early Evening', 'Warm color thickens as the sun starts to descend.'],
+                ['Evening', 'The horizon cools and the painting fades toward dusk.'],
+                ['Late Evening', 'The sun drops out of sight and the scene settles into violet air.']
+            ];
+
+            const skies = [
+                ['#6f90bf', '#f0bd7a', '#f9dfaa', '#86ad64', '#2f5e38'],
+                ['#78a9d0', '#f5d28e', '#f7e9bc', '#98bf6d', '#356b3a'],
+                ['#82b7db', '#f7de92', '#fff1c8', '#a8c977', '#3e773e'],
+                ['#88afd0', '#f3c377', '#f8e1a8', '#96bd68', '#356739'],
+                ['#8f8fb5', '#e89463', '#f0c583', '#7fa95d', '#2d5535'],
+                ['#56698e', '#c47a62', '#d4a172', '#557a4c', '#243f31'],
+                ['#24314f', '#6d4c72', '#a46d68', '#314937', '#182c28']
             ];
 
             if (!shell || images.length === 0 || !playButton || !scrubber || !temperatureSlider || !timeName || !timeNote || !timeTrack || !flowState) {
@@ -511,6 +746,15 @@
 
             const markers = Array.from(document.querySelectorAll('.time-marker'));
 
+            function mixHex(a, b, amount) {
+                const from = a.replace('#', '').match(/.{2}/g).map(value => parseInt(value, 16));
+                const to = b.replace('#', '').match(/.{2}/g).map(value => parseInt(value, 16));
+                const mixed = from.map((value, index) => {
+                    return Math.round(value + (to[index] - value) * amount).toString(16).padStart(2, '0');
+                });
+                return `#${mixed.join('')}`;
+            }
+
             function updateTemperature() {
                 const temperature = Number(temperatureSlider.value);
                 const warm = Math.max(temperature, 0);
@@ -526,6 +770,25 @@
                 shell.style.setProperty('--saturate', saturate.toFixed(2));
             }
 
+            function updateScene(clamped, lower, upper, blend) {
+                const progress = clamped / (images.length - 1);
+                const arc = Math.sin(progress * Math.PI);
+                const sunLeft = 8 + progress * 84;
+                const sunTop = 68 - arc * 50 + Math.max(0, progress - 0.88) * 36;
+                const skyA = skies[lower];
+                const skyB = skies[upper];
+
+                root.style.setProperty('--sun-left', `${sunLeft.toFixed(2)}%`);
+                root.style.setProperty('--sun-top', `${sunTop.toFixed(2)}%`);
+                root.style.setProperty('--day-progress', `${(progress * 100).toFixed(2)}%`);
+                root.style.setProperty('--paper-light-x', `${(8 + progress * 84).toFixed(2)}%`);
+                root.style.setProperty('--sky-top', mixHex(skyA[0], skyB[0], blend));
+                root.style.setProperty('--sky-mid', mixHex(skyA[1], skyB[1], blend));
+                root.style.setProperty('--sky-bottom', mixHex(skyA[2], skyB[2], blend));
+                root.style.setProperty('--field-light', mixHex(skyA[3], skyB[3], blend));
+                root.style.setProperty('--field-dark', mixHex(skyA[4], skyB[4], blend));
+            }
+
             function render() {
                 const max = images.length - 1;
                 const clamped = Math.max(0, Math.min(max, timeValue));
@@ -533,7 +796,6 @@
                 const upper = Math.min(lower + 1, max);
                 const blend = clamped - lower;
                 const activeMoment = Math.round(clamped);
-                const progress = (clamped / max) * 100;
 
                 images.forEach((image, index) => {
                     let opacity = 0;
@@ -547,7 +809,7 @@
                     marker.classList.toggle('active', index === activeMoment);
                 });
 
-                shell.style.setProperty('--day-progress', `${progress}%`);
+                updateScene(clamped, lower, upper, blend);
                 scrubber.value = clamped.toFixed(3);
                 timeName.textContent = moments[activeMoment][0];
                 timeNote.textContent = moments[activeMoment][1];

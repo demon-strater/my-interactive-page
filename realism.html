@@ -5,10 +5,10 @@
 <title>Realism Balance</title>
 <style>
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#171512;color:#e5ded4;font-family:Georgia,serif}
-#app{position:fixed;inset:0}.hud{position:fixed;left:24px;bottom:20px;pointer-events:none}
-h1{margin:0;color:#d7c7b5;font-size:clamp(2rem,6vw,5rem);font-style:italic;font-weight:400;line-height:.9}
-p{max-width:380px;margin:10px 0 0;color:rgba(229,222,212,.62);font-size:12px;line-height:1.5}
-.actions{position:fixed;right:24px;top:24px;display:flex;gap:8px;z-index:3}.actions button{min-height:34px;border:1px solid rgba(229,222,212,.28);border-radius:999px;color:#e5ded4;background:rgba(23,21,18,.62);padding:0 12px;font:700 10px system-ui;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;backdrop-filter:blur(12px)}
+#app{position:fixed;inset:0}.hud{position:fixed;left:clamp(14px,2.4vw,24px);bottom:clamp(14px,2.4vw,22px);max-width:min(420px,calc(100vw - 32px));padding:13px 14px;border:1px solid rgba(229,222,212,.18);border-radius:8px;background:rgba(23,21,18,.54);box-shadow:0 18px 52px rgba(0,0,0,.26);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);pointer-events:none}
+h1{margin:0;color:#d7c7b5;font-size:clamp(2rem,6vw,5rem);font-style:italic;font-weight:400;line-height:.9;text-wrap:balance}
+p{max-width:380px;margin:9px 0 0;color:rgba(229,222,212,.68);font:700 12px/1.45 Inter,system-ui,sans-serif}
+.actions{position:fixed;right:clamp(14px,2.4vw,24px);top:clamp(14px,2.4vw,24px);display:flex;flex-wrap:wrap;gap:8px;z-index:3;padding:6px;border:1px solid rgba(229,222,212,.16);border-radius:8px;background:rgba(23,21,18,.5);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}.actions button{min-height:36px;border:1px solid rgba(229,222,212,.28);border-radius:8px;color:#e5ded4;background:rgba(23,21,18,.62);padding:0 11px;font:800 10px Inter,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}@media(max-width:560px){.hud{right:14px}.actions{left:14px;justify-content:flex-end}}
 </style>
 </head>
 <body><div id="app"></div><div class="actions" onpointerdown="event.stopPropagation()" onclick="event.stopPropagation()"><button id="resetBtn" type="button">Reset</button><button id="dropBtn" type="button">Drop Weight</button></div><section class="hud"><h1>Realism</h1><p>A cruel balance: mouse position tilts the fulcrum. Nothing is stabilized for you. Scroll changes gravity.</p></section>

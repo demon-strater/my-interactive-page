@@ -108,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let carouselOffset = 0;
     let carouselTargetOffset = 0;
     let lastSelectedHour = -1;
+    let themeRevealTimer = null;
     const artworkMoveDuration = 1200;
 
     const interactions = [
@@ -124,6 +125,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function activeTrack() {
         return tracks[activeKey()];
+    }
+
+    function triggerThemeReveal(activeCard) {
+        if (themeRevealTimer) {
+            clearTimeout(themeRevealTimer);
+            themeRevealTimer = null;
+        }
+
+        timelineCards.forEach(card => card.classList.remove('theme-reveal'));
+        activeCard.classList.add('theme-reveal');
+
+        themeRevealTimer = setTimeout(() => {
+            activeCard.classList.remove('theme-reveal');
+            themeRevealTimer = null;
+        }, 760);
     }
 
     function formatTime(seconds) {
@@ -175,6 +191,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return interactions.find(item => item.hour === selectedHour) || interactions[0];
     }
 
+    function movementKey(title) {
+        return String(title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    }
+
     function recenterCarouselOffsets(cardCount) {
         const limit = cardCount * 40;
 
@@ -209,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!isTimelineDragging) {
             const distanceToTarget = carouselTargetOffset - carouselOffset;
-            carouselOffset += distanceToTarget * 0.12;
+            carouselOffset += distanceToTarget * 0.09;
 
             if (Math.abs(distanceToTarget) < 0.0008) {
                 carouselOffset = carouselTargetOffset;
@@ -218,32 +238,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const railRect = timelineRail.getBoundingClientRect();
         const compactScreen = window.matchMedia('(max-width: 900px), (max-height: 820px)').matches;
-        const radiusX = compactScreen
-            ? Math.min(railRect.width * 0.34, Math.max(railRect.width * 0.29, 230))
-            : Math.max(railRect.width * 0.4, 370);
-        const radiusY = compactScreen
-            ? Math.max(railRect.height * 0.76, 500)
-            : Math.max(railRect.height * 0.84, 640);
         const activeIndex = ((Math.round(carouselOffset) % cardCount) + cardCount) % cardCount;
+        const radiusX = compactScreen
+            ? Math.min(railRect.width * 0.48, Math.max(railRect.width * 0.4, 300))
+            : Math.max(railRect.width * 0.58, 520);
+        const radiusY = compactScreen
+            ? Math.max(railRect.height * 0.82, 560)
+            : Math.max(railRect.height * 0.92, 740);
+        const orbitCenterX = railRect.width * 0.5;
+        const orbitCenterY = railRect.height * 0.5;
+
+        function wrapDelta(index, offset, count) {
+            let delta = index - offset;
+            delta = ((delta + count / 2) % count + count) % count - count / 2;
+            return delta;
+        }
 
         timelineCards.forEach((card, index) => {
             const angle = Math.PI - ((index - carouselOffset) / cardCount) * Math.PI * 2;
             const baseX = Math.cos(angle) * radiusX;
-            const rightLift = baseX * 0.58 * smoothstep(0, radiusX * 0.92, baseX);
-            const x = baseX + rightLift;
-            const y = Math.sin(angle) * radiusY + (compactScreen ? 98 : 190);
+            const baseY = Math.sin(angle) * radiusY;
+            const x = orbitCenterX + baseX;
+            const y = orbitCenterY + baseY;
             const front = (1 - Math.cos(angle)) / 2;
-            const easedFront = front * front * (3 - 2 * front);
-            const tilt = Math.sin(angle) * -5;
-
+            const emphasis = front * front * (3 - 2 * front);
+            const scale = 0.2 + emphasis * 0.8;
+            const distance = Math.abs(index - carouselOffset);
+            const presence = 0.18 + emphasis * 0.82;
+            const ribbonTilt = Math.sin(angle) * -6;
             card.style.setProperty('--card-x', `${x.toFixed(1)}px`);
             card.style.setProperty('--card-y', `${y.toFixed(1)}px`);
-            card.style.setProperty('--card-scale', (0.26 + easedFront * 0.78).toFixed(3));
-            card.style.setProperty('--card-gray', (0.76 - easedFront * 0.76).toFixed(3));
-            card.style.setProperty('--card-saturation', (0.45 + easedFront * 0.9).toFixed(3));
-            card.style.setProperty('--card-opacity', (0.2 + easedFront * 0.8).toFixed(3));
-            card.style.setProperty('--card-rotate', `${tilt.toFixed(2)}deg`);
-            card.style.zIndex = String(Math.round(easedFront * 1000));
+            card.style.setProperty('--card-scale', scale.toFixed(3));
+            card.style.setProperty('--card-scale-x', '1');
+            card.style.setProperty('--card-scale-y', '1');
+            card.style.setProperty('--art-pan-x', '0px');
+            card.style.setProperty('--art-pan-y', '0px');
+            card.style.setProperty('--art-scale', '1');
+            card.style.setProperty('--card-gray', (0.82 - emphasis * 0.82).toFixed(3));
+            card.style.setProperty('--card-saturation', (0.4 + emphasis * 0.95).toFixed(3));
+            card.style.setProperty('--card-opacity', Math.min(1, 0.22 + emphasis * 0.78).toFixed(3));
+            card.style.setProperty('--card-rotate', `${ribbonTilt.toFixed(2)}deg`);
+            card.style.zIndex = String(Math.round(emphasis * 1000));
         });
 
         selectedHour = Number(timelineCards[activeIndex].dataset.hour);
@@ -252,11 +287,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (selectedHour !== lastSelectedHour) {
             lastSelectedHour = selectedHour;
             updateHubTint(timelineCards[activeIndex]);
+            triggerThemeReveal(timelineCards[activeIndex]);
         }
 
         featureHour.textContent = interaction.hour.toString().padStart(2, '0');
         featureTitle.textContent = interaction.title;
         featureMeta.textContent = interaction.meta;
+        if (hubScreen) {
+            hubScreen.dataset.movement = movementKey(interaction.title);
+        }
         if (timelineHand) {
             timelineHand.style.transform = `translateX(-50%) rotate(${selectedHour * 30}deg)`;
         }
@@ -987,7 +1026,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const rawDelta = Math.abs(event.deltaY) > Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
         // 기기별 deltaY 편차 제한 (트랙패드/마우스 동일 감도 보장)
         const capped = Math.sign(rawDelta) * Math.min(Math.abs(rawDelta), 120);
-        carouselTargetOffset -= capped * 0.0015;
+        carouselTargetOffset -= capped * 0.00135;
         recenterCarouselOffsets(timelineCards.length);
         requestTimelineState();
 
@@ -1017,7 +1056,7 @@ document.addEventListener('DOMContentLoaded', () => {
             hasTimelineDragged = true;
         }
 
-        carouselTargetOffset = timelineStartOffset + distance * 0.01;
+        carouselTargetOffset = timelineStartOffset + distance * 0.0068;
         carouselOffset = carouselTargetOffset;
         recenterCarouselOffsets(timelineCards.length);
         requestTimelineState();

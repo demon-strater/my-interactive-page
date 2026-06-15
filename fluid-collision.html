@@ -18,6 +18,7 @@
             background:
                 radial-gradient(circle at 50% 50%, rgba(118, 61, 255, 0.18), transparent 32%),
                 linear-gradient(135deg, #02010a, #090312 48%, #03020a);
+            font-family: Inter, ui-sans-serif, system-ui, sans-serif;
         }
 
         canvas {
@@ -37,10 +38,47 @@
             letter-spacing: 0;
             background: #02010a;
         }
+
+        .hud {
+            position: fixed;
+            left: 50%;
+            bottom: clamp(14px, 3vh, 24px);
+            z-index: 3;
+            width: min(520px, calc(100vw - 32px));
+            min-height: 42px;
+            transform: translateX(-50%);
+            display: grid;
+            grid-template-columns: max-content 1fr;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border: 1px solid rgba(232, 220, 255, 0.16);
+            border-radius: 8px;
+            color: rgba(247, 237, 255, 0.84);
+            background: rgba(6, 2, 14, 0.52);
+            box-shadow: 0 18px 52px rgba(0, 0, 0, 0.28);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            pointer-events: none;
+        }
+
+        .hud strong {
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .hud span {
+            color: rgba(247, 237, 255, 0.6);
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1.35;
+        }
     </style>
 </head>
 <body>
     <div class="fallback" id="fallback">WebGL not available</div>
+    <div class="hud" aria-hidden="true"><strong>Flow</strong><span>Drag to disturb the collision field</span></div>
     <script>
         (() => {
             const fallback = document.getElementById('fallback');
