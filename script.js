@@ -245,8 +245,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const radiusY = compactScreen
             ? Math.max(railRect.height * 0.82, 560)
             : Math.max(railRect.height * 0.92, 740);
-        const orbitCenterX = railRect.width * 0.5;
-        const orbitCenterY = railRect.height * 0.5;
+        // Card positions are translated from CSS left: 50%, so a negative offset
+        // places the orbit center in the left half of the viewport.
+        const orbitCenterX = railRect.width * 0.12;
+        const orbitCenterY = railRect.height * 0.42;
 
         function wrapDelta(index, offset, count) {
             let delta = index - offset;

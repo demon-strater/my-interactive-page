@@ -2552,22 +2552,13 @@ body.view-interaction.night-background .handle {
     --poster-red: #d82e25;
     --poster-blue: #1757a6;
     --poster-yellow: #f1bd25;
-    background:
-        linear-gradient(90deg, transparent calc(25% - 1px), var(--poster-rule) calc(25% - 1px), var(--poster-rule) 25%, transparent 25%),
-        linear-gradient(90deg, transparent calc(50% - 1px), rgba(16, 16, 16, 0.26) calc(50% - 1px), rgba(16, 16, 16, 0.26) 50%, transparent 50%),
-        linear-gradient(90deg, transparent calc(75% - 1px), var(--poster-rule) calc(75% - 1px), var(--poster-rule) 75%, transparent 75%),
-        linear-gradient(0deg, transparent calc(20% - 1px), rgba(16, 16, 16, 0.1) calc(20% - 1px), rgba(16, 16, 16, 0.1) 20%, transparent 20%),
-        linear-gradient(0deg, transparent calc(80% - 1px), rgba(16, 16, 16, 0.1) calc(80% - 1px), rgba(16, 16, 16, 0.1) 80%, transparent 80%),
-        var(--poster-paper);
+    background: var(--poster-paper);
     color: var(--poster-ink);
 }
 
 .hub-screen::before,
 .hub-screen::after {
-    content: "";
-    position: absolute;
-    z-index: 0;
-    pointer-events: none;
+    content: none;
 }
 
 .hub-screen::before {
@@ -2591,8 +2582,7 @@ body.view-interaction.night-background .handle {
 }
 
 .hub-bg-tint {
-    mix-blend-mode: multiply;
-    opacity: 0.68;
+    display: none;
 }
 
 .clock-hub {
@@ -2669,48 +2659,39 @@ body.view-interaction.night-background .handle {
 }
 
 .timeline-track::before {
-    left: 5.9%;
-    right: auto;
-    top: 4%;
-    bottom: 4%;
-    width: 72%;
-    height: auto;
-    border: 2px solid rgba(16, 16, 16, 0.12);
-    border-radius: 50%;
-    background:
-        radial-gradient(circle, transparent 0 61%, rgba(16, 16, 16, 0.09) 61% 62%, transparent 62% 100%);
-    transform: rotate(-8deg);
-    z-index: -2;
+    content: none;
 }
 
 .timeline-track::after {
-    left: 14%;
-    right: auto;
-    top: 8%;
-    bottom: 8%;
-    width: 34%;
-    height: auto;
-    border-radius: 50%;
-    background:
-        radial-gradient(circle, var(--poster-red) 0 12%, transparent 12% 25%, var(--poster-blue) 25% 40%, transparent 40% 60%, var(--poster-yellow) 60% 72%, transparent 72% 100%);
-    filter: none;
-    opacity: 0.22;
-    transform: rotate(14deg);
-    z-index: -1;
+    content: none;
 }
 
 .timeline-card {
     width: clamp(430px, 42vw, min(720px, 76svh));
     height: clamp(310px, 30vw, min(500px, 55svh));
     border-radius: 0;
-    box-shadow: 0 22px 0 rgba(16, 16, 16, 0.1);
+    box-shadow: inset 0 0 0 1px rgba(16, 16, 16, 0.18);
     will-change: transform, opacity, filter;
     transition: transform 300ms cubic-bezier(0.2, 0.72, 0.22, 1), box-shadow 220ms ease, filter 220ms ease, opacity 220ms ease;
     transform-origin: center center;
 }
 
 .timeline-card.active {
-    box-shadow: 0 0 0 2px var(--poster-ink), 24px 18px 0 rgba(16, 16, 16, 0.13);
+    box-shadow: inset 0 0 0 2px var(--poster-ink);
+}
+
+@media (hover: hover) {
+    .timeline-card:hover {
+        box-shadow:
+            inset 0 0 0 1px rgba(16, 16, 16, 0.18),
+            24px 18px 0 rgba(16, 16, 16, 0.16) !important;
+    }
+
+    .timeline-card.active:hover {
+        box-shadow:
+            inset 0 0 0 2px var(--poster-ink),
+            24px 18px 0 rgba(16, 16, 16, 0.18) !important;
+    }
 }
 
 .timeline-card.theme-reveal {
@@ -3549,17 +3530,17 @@ body.view-interaction.night-background .handle {
 @keyframes revealFrame {
     0% {
         filter: saturate(0.92) contrast(1.04);
-        box-shadow: 0 16px 34px rgba(16, 16, 16, 0.08);
+        box-shadow: inset 0 0 0 2px var(--poster-ink);
     }
 
     46% {
         filter: saturate(1.02) contrast(1.01);
-        box-shadow: 0 22px 0 rgba(16, 16, 16, 0.1);
+        box-shadow: inset 0 0 0 2px var(--poster-ink);
     }
 
     100% {
         filter: saturate(1) contrast(1);
-        box-shadow: 0 22px 0 rgba(16, 16, 16, 0.1);
+        box-shadow: inset 0 0 0 2px var(--poster-ink);
     }
 }
 
