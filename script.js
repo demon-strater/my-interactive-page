@@ -236,19 +236,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        const railRect = timelineRail.getBoundingClientRect();
-        const compactScreen = window.matchMedia('(max-width: 900px), (max-height: 820px)').matches;
+        // The rail lives inside a fixed-ratio 16:9 stage. Using its own layout
+        // size keeps the orbit proportional when the browser is letterboxed.
+        const railWidth = timelineRail.clientWidth;
+        const railHeight = timelineRail.clientHeight;
         const activeIndex = ((Math.round(carouselOffset) % cardCount) + cardCount) % cardCount;
-        const radiusX = compactScreen
-            ? Math.min(railRect.width * 0.48, Math.max(railRect.width * 0.4, 300))
-            : Math.max(railRect.width * 0.58, 520);
-        const radiusY = compactScreen
-            ? Math.max(railRect.height * 0.82, 560)
-            : Math.max(railRect.height * 0.92, 740);
+        const radiusX = railWidth * 0.58;
+        const radiusY = railHeight * 0.92;
         // Card positions are translated from CSS left: 50%, so a negative offset
         // places the orbit center in the left half of the viewport.
-        const orbitCenterX = railRect.width * 0.12;
-        const orbitCenterY = railRect.height * 0.42;
+        const orbitCenterX = railWidth * 0.33;
+        const orbitCenterY = railHeight * 0.42;
 
         function wrapDelta(index, offset, count) {
             let delta = index - offset;

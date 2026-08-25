@@ -32,6 +32,7 @@ body {
     position: relative;
     width: var(--stage-width);
     height: var(--stage-height);
+    container-type: size;
     overflow: hidden;
     outline: 500vw solid #000;
     z-index: 100;
@@ -2695,15 +2696,15 @@ body.view-interaction.night-background .handle {
 }
 
 .timeline-card.theme-reveal {
-    animation: revealFrame 760ms cubic-bezier(0.2, 0.72, 0.22, 1) both;
+    animation: none;
 }
 
 .timeline-card.theme-reveal::before {
-    animation: revealIris 760ms cubic-bezier(0.16, 0.88, 0.2, 1) both;
+    animation: none;
 }
 
 .timeline-card.theme-reveal::after {
-    animation: revealPanel 760ms cubic-bezier(0.2, 0.72, 0.22, 1) both;
+    animation: none;
 }
 
 .timeline-card.surrealism-card,
@@ -3596,7 +3597,104 @@ body.view-interaction.night-background .handle {
 }
 
 .feature-readout {
-    --movement-title-size: clamp(2.7rem, min(5.7vw, 8.8svh), 7.2rem);
+    --movement-title-size: 5.7cqw;
+}
+
+/*
+ * Keep the exhibition hub as one proportional 16:9 composition.
+ * Container units follow the cinematic stage, unlike vw/svh which follow the
+ * browser window (including the letterboxed area around the stage).
+ */
+.hub-screen {
+    gap: 2.6cqh;
+    padding: 0;
+    justify-content: center;
+}
+
+.hub-screen .clock-hub {
+    display: grid;
+    width: 100%;
+    min-height: 100%;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: repeat(8, minmax(0, 1fr));
+    align-content: center;
+    align-items: start;
+    gap: 0;
+    padding: 0;
+}
+
+.hub-screen .hub-header {
+    grid-column: 8 / 12;
+    grid-row: 2 / 4;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    transform: translateX(-2.5cqw);
+}
+
+.hub-screen .hub-header p {
+    max-width: 31ch;
+    margin-bottom: 1cqw;
+    font-size: 0.78cqw;
+}
+
+.hub-screen .hub-header h1 {
+    max-width: 8.5em;
+    font-size: 5.15cqw;
+}
+
+.hub-screen .clock-stage {
+    grid-column: 8 / 12;
+    grid-row: 5 / 8;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    place-items: start;
+    transform: translateX(-2.5cqw);
+}
+
+.hub-screen .clock-readout {
+    gap: 0.75cqw;
+    padding-top: 1.125cqw;
+    border-top: 0.125cqw solid var(--poster-ink);
+    text-align: left;
+}
+
+.hub-screen .timeline-rail {
+    inset: 0;
+}
+
+.hub-screen .clock-readout strong {
+    max-width: 6.8em;
+    font-size: var(--movement-title-size, 5.7cqw);
+}
+
+.hub-screen .clock-readout small {
+    margin-top: 0.625cqw;
+    font-size: 0.82cqw;
+}
+
+.hub-screen .timeline-card {
+    --card-pad-x: 2.125cqw;
+    --card-pad-y: 1.75cqw;
+    width: 42cqw;
+    height: 30cqw;
+    padding: 1.75cqw;
+    border-width: 0.125cqw;
+}
+
+.hub-screen .timeline-card .card-artwork {
+    left: calc(60% + 1.375cqw) !important;
+    right: calc(var(--card-pad-x) + 1.125cqw) !important;
+    top: calc(var(--card-pad-y) + 1.125cqw) !important;
+    bottom: calc(var(--card-pad-y) + 1.125cqw) !important;
+    padding: 0 !important;
+    font-size: 0.86cqw !important;
+    box-shadow: 0 0 0 0.875cqw var(--poster-paper) !important;
+}
+
+.hub-screen .timeline-card .card-artwork em {
+    font-size: 1.68cqw !important;
 }
 
 .feature-readout strong {
