@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Five Art Movements</title>
-    <link rel="stylesheet" href="style.css?v=exhibition-20260826-32">
+    <link rel="stylesheet" href="style.css?v=hand-ux-state-1">
 </head>
 <body class="view-hub">
     <div class="cinematic-stage" id="cinematicStage">
@@ -206,6 +206,20 @@
     </section>
     </div>
 
-    <script src="script.js?v=exhibition-20260826-37"></script>
+    <aside class="hand-tracker" id="handTracker" aria-label="Hand gesture controls">
+        <button class="hand-tracker-toggle" id="handTrackerToggle" type="button" aria-pressed="false">
+            <span class="hand-tracker-dot" aria-hidden="true"></span>
+            <span id="handTrackerLabel">HAND</span>
+        </button>
+        <div class="hand-tracker-preview" id="handTrackerPreview" hidden>
+            <video id="handTrackerVideo" playsinline muted aria-hidden="true"></video>
+            <canvas id="handTrackerCanvas" aria-hidden="true"></canvas>
+            <p class="hand-tracker-status" id="handTrackerStatus" role="status">CAMERA READY</p>
+        </div>
+    </aside>
+    <div class="hand-cursor" id="handCursor" aria-hidden="true"></div>
+
+    <script src="script.js?v=hand-ux-state-1"></script>
+    <script type="module" src="hand-tracking.js?v=hand-ux-state-1"></script>
 </body>
 </html>

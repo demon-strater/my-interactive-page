@@ -808,6 +808,7 @@ document.addEventListener('DOMContentLoaded', () => {
         featureTitle.textContent = interaction.title;
         featureMeta.textContent = interaction.meta;
         siteTransition.style.setProperty('--transition-color', interaction.top || '#405478');
+        siteTransition.style.setProperty('--transition-color-deep', interaction.bottom || '#111827');
     }
 
     async function openInteraction(card, interaction, snapshot = null) {
@@ -817,6 +818,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         isInteractionOpening = true;
         card.classList.add('transition-source');
+        updateSiteTransition(interaction);
 
         // Pre-load iframes immediately
         if (interaction.site === 'impressionism-time' && impressionismTimeFrame && !impressionismTimeFrame.src) {
@@ -830,19 +832,19 @@ document.addEventListener('DOMContentLoaded', () => {
             nightMusic.currentTime = 0;
         }
 
-        // Phase 1: Fade to white
+        // Phase 1: let the selected movement's color fill the stage.
         siteTransition.classList.remove('leaving');
         siteTransition.classList.add('show');
         body.classList.add('artwork-opening');
 
-        // Phase 2: Wait for white-out before swapping content
+        // Phase 2: swap content once the color veil covers the stage.
         setTimeout(() => {
-            // Screen is now white, swap the content behind the veil
+            // The site is revealed behind the movement-colored veil.
             body.classList.add('view-interaction', `view-${interaction.site}`);
             revealInteraction(interaction);
             requestAnimationFrame(() => body.classList.add('site-revealing'));
 
-            // Phase 3: Fade from white
+            // Phase 3: dissolve the veil into the site.
             setTimeout(() => {
                 siteTransition.classList.add('leaving');
             }, 50);
@@ -1095,6 +1097,258 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Hand tracking is isolated in hand-tracking.js and communicates through
+    // these events so mouse, touch and wheel controls continue to work.
+    window.addEventListener('handnavigate', event => {
+        if (!body.classList.contains('view-hub') || isInteractionOpening) return;
+        carouselTargetOffset += Number(event.detail?.delta || 0);
+        recenterCarouselOffsets(timelineCards.length);
+        requestTimelineState();
+    });
+
+    window.addEventListener('handhome', () => {
+        if (!body.classList.contains('view-hub')) closeInteraction();
+    });
+
+    window.addEventListener('handback', () => {
+        if (!body.classList.contains('view-hub')) closeInteraction();
+    });
+
+    let handPointerTarget = null;
+    let handHoverCandidate = null;
+    let handHoverCandidateSince = 0;
+    let handHoverTarget = null;
+    let handDidDrag = false;
+    let handScrollLastY = null;
+    const handHoverDwellMs = 120;
+
+    function nearbyInteractiveTarget(targetDocument, x, y, radius = 56) {
+        const interactiveSelector = 'button, a, input, select, textarea, [role="button"], [tabindex], canvas';
+        const offsets = [
+            [0, 0], [-radius, 0], [radius, 0], [0, -radius], [0, radius],
+            [-radius * 0.7, -radius * 0.7], [radius * 0.7, -radius * 0.7],
+            [-radius * 0.7, radius * 0.7], [radius * 0.7, radius * 0.7]
+        ];
+        let exactTarget = null;
+
+        for (const [offsetX, offsetY] of offsets) {
+            const element = targetDocument.elementFromPoint(x + offsetX, y + offsetY);
+            if (!exactTarget) exactTarget = element;
+            const interactive = element?.closest?.(interactiveSelector);
+            if (interactive) return interactive;
+        }
+
+        return exactTarget || targetDocument.body;
+    }
+
+    function handEventTarget(screenX, screenY) {
+        const topElement = document.elementFromPoint(screenX, screenY);
+        if (!topElement) return null;
+
+        if (topElement instanceof HTMLIFrameElement) {
+            try {
+                const frameRect = topElement.getBoundingClientRect();
+                const frameWindow = topElement.contentWindow;
+                const frameDocument = topElement.contentDocument;
+                if (!frameWindow || !frameDocument) return null;
+                const x = (screenX - frameRect.left) * (frameWindow.innerWidth / frameRect.width);
+                const y = (screenY - frameRect.top) * (frameWindow.innerHeight / frameRect.height);
+                const radius = 56 * (frameWindow.innerWidth / frameRect.width);
+                return { target: nearbyInteractiveTarget(frameDocument, x, y, radius), view: frameWindow, x, y };
+            } catch (error) {
+                return null;
+            }
+        }
+
+        return { target: nearbyInteractiveTarget(document, screenX, screenY), view: window, x: screenX, y: screenY };
+    }
+
+    function dispatchHandEvent(destination, type, EventClass, buttons) {
+        if (!destination?.target) return;
+        const EventConstructor = destination.view[EventClass] || window[EventClass];
+        destination.target.dispatchEvent(new EventConstructor(type, {
+            bubbles: true,
+            cancelable: true,
+            view: destination.view,
+            clientX: destination.x,
+            clientY: destination.y,
+            button: 0,
+            buttons,
+            pointerId: 91,
+            pointerType: 'touch',
+            isPrimary: true
+        }));
+    }
+
+    function sameHandTarget(first, second) {
+        return Boolean(first && second && first.target === second.target && first.view === second.view);
+    }
+
+    function ensureHandFeedbackStyles(targetDocument) {
+        if (targetDocument.getElementById('hand-feedback-styles')) return;
+        const style = targetDocument.createElement('style');
+        style.id = 'hand-feedback-styles';
+        style.textContent = `
+            .hand-hover-target:not(canvas):not(body) {
+                outline: 2px solid rgba(215, 181, 124, 0.9) !important;
+                outline-offset: 5px !important;
+                filter: brightness(1.06) !important;
+            }
+            .hand-commit-target:not(canvas):not(body) {
+                outline: 3px solid rgba(255, 244, 222, 0.96) !important;
+                outline-offset: 3px !important;
+                filter: brightness(1.12) !important;
+            }
+        `;
+        targetDocument.head?.appendChild(style);
+    }
+
+    function clearHandTargetFeedback(destination, className) {
+        destination?.target?.classList?.remove(className);
+    }
+
+    function setStableHandTarget(destination, now) {
+        const cursor = document.getElementById('handCursor');
+        if (!sameHandTarget(destination, handHoverCandidate)) {
+            handHoverCandidate = destination;
+            handHoverCandidateSince = now;
+            if (!sameHandTarget(destination, handHoverTarget)) {
+                clearHandTargetFeedback(handHoverTarget, 'hand-hover-target');
+                handHoverTarget = null;
+                cursor?.classList.remove('has-target');
+            }
+            return;
+        }
+
+        if (!handHoverTarget && now - handHoverCandidateSince >= handHoverDwellMs) {
+            handHoverTarget = destination;
+            ensureHandFeedbackStyles(destination.view.document);
+            destination.target.classList?.add('hand-hover-target');
+            cursor?.classList.add('has-target');
+        }
+    }
+
+    function resetHandTargeting() {
+        clearHandTargetFeedback(handHoverTarget, 'hand-hover-target');
+        clearHandTargetFeedback(handPointerTarget, 'hand-commit-target');
+        handHoverCandidate = null;
+        handHoverTarget = null;
+        handHoverCandidateSince = 0;
+        handDidDrag = false;
+        document.getElementById('handCursor')?.classList.remove('has-target', 'is-committed', 'is-dragging');
+    }
+
+    window.addEventListener('handpointer', event => {
+        if (body.classList.contains('view-hub')) {
+            handScrollLastY = null;
+        }
+        const detail = event.detail;
+        const currentTarget = handEventTarget(detail.x, detail.y);
+        const gestureEvents = Array.isArray(detail.events) ? detail.events : [];
+        const pinchEntered = gestureEvents.find(item => item.type === 'pinch' && item.state === 'entered');
+        const pinchReleased = gestureEvents.find(item => item.type === 'pinch' && item.state === 'released');
+        const dragEvent = gestureEvents.find(item => item.type === 'drag');
+
+        if (detail.fist) {
+            if (handPointerTarget) {
+                dispatchHandEvent(handPointerTarget, 'pointerup', 'PointerEvent', 0);
+                dispatchHandEvent(handPointerTarget, 'mouseup', 'MouseEvent', 0);
+            }
+            handPointerTarget = null;
+            handScrollLastY = null;
+            resetHandTargeting();
+            return;
+        }
+
+        if (!detail.pinching) setStableHandTarget(currentTarget, performance.now());
+
+        if (pinchEntered) {
+            handScrollLastY = detail.y;
+            handPointerTarget = handHoverTarget;
+            handDidDrag = false;
+            if (handPointerTarget) {
+                clearHandTargetFeedback(handPointerTarget, 'hand-hover-target');
+                handPointerTarget.target.classList?.add('hand-commit-target');
+                document.getElementById('handCursor')?.classList.add('is-committed');
+                if (!body.classList.contains('view-hub')) {
+                    dispatchHandEvent(handPointerTarget, 'pointerdown', 'PointerEvent', 1);
+                    dispatchHandEvent(handPointerTarget, 'mousedown', 'MouseEvent', 1);
+                }
+            }
+        } else if (detail.pinching && handPointerTarget) {
+            const dragTarget = handPointerTarget || currentTarget;
+            if (dragTarget && currentTarget) {
+                dragTarget.x = currentTarget.x;
+                dragTarget.y = currentTarget.y;
+            }
+            if (dragEvent || detail.dragging) {
+                handDidDrag = true;
+                document.getElementById('handCursor')?.classList.add('is-dragging');
+
+                const supportsWheelGesture = body.classList.contains('view-romanticism') ||
+                    body.classList.contains('view-baroque') ||
+                    body.classList.contains('view-fluid-collision');
+                const verticalDelta = handScrollLastY === null ? 0 : detail.y - handScrollLastY;
+                if (supportsWheelGesture && Math.abs(verticalDelta) > 2.5 && currentTarget?.target) {
+                    const WheelConstructor = currentTarget.view.WheelEvent || window.WheelEvent;
+                    currentTarget.target.dispatchEvent(new WheelConstructor('wheel', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: currentTarget.view,
+                        clientX: currentTarget.x,
+                        clientY: currentTarget.y,
+                        deltaY: -verticalDelta * 2.8,
+                        deltaMode: 0
+                    }));
+                }
+                handScrollLastY = detail.y;
+            }
+            dispatchHandEvent(dragTarget, 'pointermove', 'PointerEvent', 1);
+            dispatchHandEvent(dragTarget, 'mousemove', 'MouseEvent', 1);
+        } else {
+            dispatchHandEvent(currentTarget, 'pointermove', 'PointerEvent', 0);
+            dispatchHandEvent(currentTarget, 'mousemove', 'MouseEvent', 0);
+        }
+
+        if (pinchReleased) {
+            if (body.classList.contains('view-hub') && !pinchReleased.dragged && !isInteractionOpening) {
+                const hoveredCard = handPointerTarget?.target?.closest?.('.timeline-card');
+                const activeCard = hoveredCard || document.querySelector('.timeline-card.active');
+                if (activeCard) openCard(activeCard, createCardSnapshot(activeCard));
+            }
+            const releaseTarget = handPointerTarget || currentTarget;
+            if (releaseTarget && currentTarget) {
+                releaseTarget.x = currentTarget.x;
+                releaseTarget.y = currentTarget.y;
+            }
+            if (!body.classList.contains('view-hub')) {
+                dispatchHandEvent(releaseTarget, 'pointerup', 'PointerEvent', 0);
+                dispatchHandEvent(releaseTarget, 'mouseup', 'MouseEvent', 0);
+                if (!pinchReleased.dragged && !handDidDrag) {
+                    dispatchHandEvent(releaseTarget, 'click', 'MouseEvent', 0);
+                    playSound(plingSound, 'Hand selection');
+                }
+            }
+            clearHandTargetFeedback(handPointerTarget, 'hand-commit-target');
+            document.getElementById('handCursor')?.classList.remove('is-committed', 'is-dragging');
+            handPointerTarget = null;
+            handScrollLastY = null;
+            handHoverTarget = null;
+            handHoverCandidate = null;
+            handDidDrag = false;
+        }
+    });
+
+    window.addEventListener('handcancel', () => {
+        if (handPointerTarget) {
+            dispatchHandEvent(handPointerTarget, 'pointerup', 'PointerEvent', 0);
+            dispatchHandEvent(handPointerTarget, 'mouseup', 'MouseEvent', 0);
+        }
+        handPointerTarget = null;
+        handScrollLastY = null;
+        resetHandTargeting();
+    });
+
     window.addEventListener('resize', requestTimelineState);
 
     playPauseBtn.addEventListener('click', () => {
@@ -1102,13 +1356,97 @@ document.addEventListener('DOMContentLoaded', () => {
         managePlayback();
     });
 
+    const pullChainPositionKey = 'surrealism-pull-chain-position';
+    let pullChainClickTimer = null;
+    let pullChainMovable = false;
+    let pullChainDragging = false;
+    let pullChainMoved = false;
+    let pullChainDragStartX = 0;
+    let pullChainDragStartY = 0;
+    let pullChainOffsetX = 0;
+    let pullChainOffsetY = 0;
+    let pullChainStartOffsetX = 0;
+    let pullChainStartOffsetY = 0;
+
+    try {
+        const savedPosition = JSON.parse(localStorage.getItem(pullChainPositionKey));
+        if (Number.isFinite(savedPosition?.x) && Number.isFinite(savedPosition?.y)) {
+            pullChainOffsetX = savedPosition.x;
+            pullChainOffsetY = savedPosition.y;
+            pullChain.style.setProperty('--chain-drag-x', `${pullChainOffsetX}px`);
+            pullChain.style.setProperty('--chain-drag-y', `${pullChainOffsetY}px`);
+        }
+    } catch (error) {
+        console.warn('Could not restore lamp chain position.', error);
+    }
+
     pullChain.addEventListener('click', () => {
-        playSound(clickSound, 'Audio');
-        isNight = !isNight;
-        pullChain.classList.add('pulled');
-        setTimeout(() => pullChain.classList.remove('pulled'), body.classList.contains('view-impressionism') ? 260 : 150);
-        setTimeout(updateScenes, 280);
+        if (pullChainMoved || pullChainMovable) return;
+        clearTimeout(pullChainClickTimer);
+        pullChainClickTimer = setTimeout(() => {
+            playSound(clickSound, 'Audio');
+            isNight = !isNight;
+            pullChain.classList.add('pulled');
+            setTimeout(() => pullChain.classList.remove('pulled'), body.classList.contains('view-impressionism') ? 260 : 150);
+            setTimeout(updateScenes, 280);
+        }, 240);
     });
+
+    pullChain.addEventListener('dblclick', event => {
+        if (!body.classList.contains('view-impressionism')) return;
+        event.preventDefault();
+        clearTimeout(pullChainClickTimer);
+        pullChainMovable = !pullChainMovable;
+        pullChain.classList.toggle('is-movable', pullChainMovable);
+        pullChain.setAttribute('aria-label', pullChainMovable
+            ? 'Lamp chain unlocked. Drag to reposition; double-click to lock.'
+            : 'Switch day and night');
+
+        if (!pullChainMovable) {
+            localStorage.setItem(pullChainPositionKey, JSON.stringify({
+                x: pullChainOffsetX,
+                y: pullChainOffsetY
+            }));
+        }
+    });
+
+    pullChain.addEventListener('pointerdown', event => {
+        if (!pullChainMovable || !body.classList.contains('view-impressionism')) return;
+        event.preventDefault();
+        pullChainDragging = true;
+        pullChainMoved = false;
+        pullChainDragStartX = event.clientX;
+        pullChainDragStartY = event.clientY;
+        pullChainStartOffsetX = pullChainOffsetX;
+        pullChainStartOffsetY = pullChainOffsetY;
+        pullChain.classList.add('is-dragging');
+        pullChain.setPointerCapture(event.pointerId);
+    });
+
+    pullChain.addEventListener('pointermove', event => {
+        if (!pullChainDragging) return;
+        const stageRect = cinematicStage.getBoundingClientRect();
+        const scaleX = stageRect.width / cinematicStage.offsetWidth || 1;
+        const scaleY = stageRect.height / cinematicStage.offsetHeight || 1;
+        pullChainOffsetX = pullChainStartOffsetX + (event.clientX - pullChainDragStartX) / scaleX;
+        pullChainOffsetY = pullChainStartOffsetY + (event.clientY - pullChainDragStartY) / scaleY;
+        pullChain.style.setProperty('--chain-drag-x', `${pullChainOffsetX}px`);
+        pullChain.style.setProperty('--chain-drag-y', `${pullChainOffsetY}px`);
+        if (Math.hypot(event.clientX - pullChainDragStartX, event.clientY - pullChainDragStartY) > 3) {
+            pullChainMoved = true;
+        }
+    });
+
+    function finishPullChainDrag(event) {
+        if (!pullChainDragging) return;
+        pullChainDragging = false;
+        pullChain.classList.remove('is-dragging');
+        if (pullChain.hasPointerCapture(event.pointerId)) pullChain.releasePointerCapture(event.pointerId);
+        setTimeout(() => { pullChainMoved = false; }, 100);
+    }
+
+    pullChain.addEventListener('pointerup', finishPullChainDrag);
+    pullChain.addEventListener('pointercancel', finishPullChainDrag);
 
     playlistItems.forEach(item => {
         item.addEventListener('click', () => {
