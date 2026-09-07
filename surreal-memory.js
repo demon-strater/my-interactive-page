@@ -113,8 +113,8 @@
     const direction = x < width * .5 ? 1 : -1;
     clocks.push({ x, y, vx: direction * (90 + Math.random() * 170), vy: 95 + Math.random() * 130,
       size, angle: (Math.random() - .5) * .6, spin: (Math.random() - .5) * .6,
-      age: 0, settled: 0, trail: [], tint: Math.random() });
-    if (clocks.length > 40) clocks.shift();
+      age: 0, settled: 0, melt: 0, melting: false, trail: [], tint: Math.random() });
+    if (clocks.length > 56) clocks.shift();
   }
   canvas.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -126,7 +126,7 @@
   canvas.addEventListener('blur', () => { if (!drag) releaseClocks(); });
   function advance(dt) {
     nextMeteor -= dt;
-    if (nextMeteor <= 0) { spawnClock(); nextMeteor = .55 + Math.random() * 1.15; }
+    if (nextMeteor <= 0) { spawnClock(); nextMeteor = .28 + Math.random() * .72; }
     const gravity = Math.max(220, height * .6);
     if (holding) {
       // The cursor tilts the entire world's down axis; it is not an attractor.
@@ -138,6 +138,12 @@
     for (let i = clocks.length - 1; i >= 0; i--) {
       const c = clocks[i];
       c.age += dt;
+      if (c.melting) {
+        c.melt = Math.min(1, c.melt + dt / 2.15);
+        c.angle += c.spin * dt * (1 + c.melt * 2);
+        if (c.melt >= 1) clocks.splice(i, 1);
+        continue;
+      }
       if (holding) {
         c.vx += gravityDirection.x * gravity * dt;
         c.vy += gravityDirection.y * gravity * dt;
@@ -150,11 +156,10 @@
       const floor = height * .94 - c.size * 1.22;
       if (!holding && c.y >= floor) {
         c.y = floor;
-        if (!holding) {
-          c.vy = Math.abs(c.vy) > 65 ? -Math.abs(c.vy) * .24 : 0;
-          c.vx *= Math.exp(-5 * dt);
-          c.settled += dt;
-        }
+        c.vy = 0;
+        c.vx = 0;
+        c.melting = true;
+        c.melt = 0;
       }
       if (!holding && (c.x < c.size || c.x > width - c.size)) {
         c.x = Math.max(c.size, Math.min(width - c.size, c.x));
@@ -164,22 +169,23 @@
       if (c.trail.length > 32) c.trail.shift();
       const margin = c.size * 5;
       const departed = c.x < -margin || c.x > width + margin || c.y < -margin || c.y > height + margin;
-      if (c.settled > 3 || departed) clocks.splice(i, 1);
+      if (departed) clocks.splice(i, 1);
     }
   }
   function drawClock(c) {
-    const alpha = Math.min(1, c.age * 3, (3 - c.settled) / 1.2);
+    const alpha = Math.min(1, c.age * 3, c.melting ? 1 - c.melt : 1);
     ctx.save(); ctx.globalAlpha = Math.max(0, alpha);
     if (c.trail.length > 1) {
       ctx.lineCap = 'round';
       for (let i = 1; i < c.trail.length; i++) {
         const strength = i / c.trail.length;
         ctx.beginPath();ctx.moveTo(c.trail[i-1].x,c.trail[i-1].y);ctx.lineTo(c.trail[i].x,c.trail[i].y);
-        ctx.strokeStyle = `rgba(164,202,255,${strength * .32})`;
+        ctx.strokeStyle = `rgba(220,177,105,${strength * .34})`;
         ctx.lineWidth = c.size * .16 * strength;ctx.stroke();
       }
     }
-    ctx.translate(c.x,c.y); ctx.rotate(c.angle);
+    ctx.translate(c.x,c.y + c.size * c.melt * .32); ctx.rotate(c.angle);
+    ctx.scale(1 + c.melt * .18, 1 - c.melt * .7);
     const r = c.size;
     const ring = (radius, fill, stroke, line = 1) => {
       ctx.beginPath();ctx.arc(0,0,radius,0,Math.PI*2);
@@ -187,7 +193,7 @@
       if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=line;ctx.stroke();}
     };
     const metal=ctx.createLinearGradient(-r,-r,r,r);
-    for(const [stop,color] of [[0,'#fff1c6'],[.16,'#b68641'],[.3,'#f6dfa0'],[.46,'#725025'],[.57,'#e6bd6c'],[.8,'#8a642e'],[1,'#fff0bb']])metal.addColorStop(stop,color);
+    for(const [stop,color] of [[0,'#fff4ce'],[.16,'#a96f39'],[.3,'#f3d18a'],[.46,'#65401f'],[.57,'#d69a4e'],[.8,'#704720'],[1,'#ffe7a7']])metal.addColorStop(stop,color);
     // Cast shadow, turned winding crown, and a polished suspension bow.
     ctx.shadowColor='#000b';ctx.shadowBlur=r*.38;ctx.shadowOffsetY=r*.16;
     ctx.strokeStyle=metal;ctx.lineWidth=r*.065;
@@ -199,7 +205,7 @@
     ring(r*.955,null,'#fff0be',r*.018);
     ring(r*.90,'#3c2e1c','#72552a',r*.04);
     const face=ctx.createRadialGradient(-r*.28,-r*.3,r*.05,0,0,r*.9);
-    face.addColorStop(0,'#fffdf0');face.addColorStop(.65,'#e9e3cd');face.addColorStop(1,'#a99d7f');
+    face.addColorStop(0,'#fff8df');face.addColorStop(.65,'#e4cf9f');face.addColorStop(1,'#94704c');
     ring(r*.85,face,'#f8dfa1',r*.018);
     ring(r*.78,null,'#93877366',.5);
     ctx.strokeStyle='#302c28';
@@ -234,6 +240,23 @@
     ctx.fillStyle=glass;ctx.fillRect(-r,-r,r*2,r*2);ctx.restore();
     ctx.beginPath();ctx.arc(0,0,r*.925,Math.PI*1.08,Math.PI*1.78);ctx.strokeStyle='#fff6d7bd';ctx.lineWidth=r*.022;ctx.stroke();
     ctx.restore();
+    if (c.melting) {
+      const melt = c.melt;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, (1 - melt) * .72);
+      ctx.translate(c.x, c.y + r * (.48 + melt * .4));
+      ctx.scale(1 + melt * 1.8, .28 + melt * .16);
+      ctx.beginPath();ctx.ellipse(0,0,r*.72,r*.2,0,0,Math.PI*2);
+      ctx.fillStyle='#9b6938';ctx.shadowColor='#20150d88';ctx.shadowBlur=r*.2;ctx.fill();
+      ctx.restore();
+      ctx.save();ctx.globalAlpha=Math.max(0,(1-melt)*.8);ctx.translate(c.x,c.y+r*.35);
+      for(let i=0;i<4;i++){
+        const drip=(i*.37+c.tint)%1;
+        ctx.beginPath();ctx.moveTo((drip-.5)*r*1.45,-r*.1);ctx.quadraticCurveTo((drip-.5)*r*1.35,r*(.35+melt*.4),(drip-.5)*r*1.28,r*(.72+melt*.45));
+        ctx.strokeStyle=i%2?'#d5a057':'#f1d18c';ctx.lineWidth=r*(.045-i*.006);ctx.lineCap='round';ctx.stroke();
+      }
+      ctx.restore();
+    }
   }
   function draw() {
     ctx.setTransform(canvas.width/width,0,0,canvas.height/height,0,0);
