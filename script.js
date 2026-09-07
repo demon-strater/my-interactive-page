@@ -246,7 +246,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Card positions are translated from CSS left: 50%, so a negative offset
         // places the orbit center in the left half of the viewport.
         const orbitCenterX = railWidth * 0.33;
-        const orbitCenterY = railHeight * 0.42;
+        // CSS top: 50% already supplies the vertical center of the rail.
+        const orbitCenterY = 0;
 
         function wrapDelta(index, offset, count) {
             let delta = index - offset;
@@ -1119,6 +1120,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let handHoverCandidateSince = 0;
     let handHoverTarget = null;
     let handDidDrag = false;
+    let handClickDispatched = false;
     let handScrollLastY = null;
     const handHoverDwellMs = 120;
 
@@ -1235,6 +1237,7 @@ document.addEventListener('DOMContentLoaded', () => {
         handHoverTarget = null;
         handHoverCandidateSince = 0;
         handDidDrag = false;
+        handClickDispatched = false;
         document.getElementById('handCursor')?.classList.remove('has-target', 'is-committed', 'is-dragging');
     }
 
@@ -1264,8 +1267,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (pinchEntered) {
             handScrollLastY = detail.y;
-            handPointerTarget = handHoverTarget;
+            // A snap is the commit itself: use the live magnetic target so the
+            // user does not have to hover first or open their fingers to click.
+            handPointerTarget = handHoverTarget || currentTarget;
             handDidDrag = false;
+            handClickDispatched = false;
             if (handPointerTarget) {
                 clearHandTargetFeedback(handPointerTarget, 'hand-hover-target');
                 handPointerTarget.target.classList?.add('hand-commit-target');
@@ -1273,6 +1279,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!body.classList.contains('view-hub')) {
                     dispatchHandEvent(handPointerTarget, 'pointerdown', 'PointerEvent', 1);
                     dispatchHandEvent(handPointerTarget, 'mousedown', 'MouseEvent', 1);
+                    dispatchHandEvent(handPointerTarget, 'click', 'MouseEvent', 0);
+                    playSound(plingSound, 'Hand selection');
+                    handClickDispatched = true;
+                }
+            }
+
+            if (body.classList.contains('view-hub') && !isInteractionOpening) {
+                const hoveredCard = handPointerTarget?.target?.closest?.('.timeline-card');
+                const activeCard = hoveredCard || document.querySelector('.timeline-card.active');
+                if (activeCard) {
+                    openCard(activeCard, createCardSnapshot(activeCard));
+                    handClickDispatched = true;
                 }
             }
         } else if (detail.pinching && handPointerTarget) {
@@ -1311,7 +1329,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (pinchReleased) {
-            if (body.classList.contains('view-hub') && !pinchReleased.dragged && !isInteractionOpening) {
+            if (!handClickDispatched && body.classList.contains('view-hub') && !pinchReleased.dragged && !isInteractionOpening) {
                 const hoveredCard = handPointerTarget?.target?.closest?.('.timeline-card');
                 const activeCard = hoveredCard || document.querySelector('.timeline-card.active');
                 if (activeCard) openCard(activeCard, createCardSnapshot(activeCard));
@@ -1324,7 +1342,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!body.classList.contains('view-hub')) {
                 dispatchHandEvent(releaseTarget, 'pointerup', 'PointerEvent', 0);
                 dispatchHandEvent(releaseTarget, 'mouseup', 'MouseEvent', 0);
-                if (!pinchReleased.dragged && !handDidDrag) {
+                if (!handClickDispatched && !pinchReleased.dragged && !handDidDrag) {
                     dispatchHandEvent(releaseTarget, 'click', 'MouseEvent', 0);
                     playSound(plingSound, 'Hand selection');
                 }
@@ -1336,6 +1354,7 @@ document.addEventListener('DOMContentLoaded', () => {
             handHoverTarget = null;
             handHoverCandidate = null;
             handDidDrag = false;
+            handClickDispatched = false;
         }
     });
 
@@ -1358,6 +1377,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const pullChainPositionKey = 'surrealism-pull-chain-position';
     let pullChainClickTimer = null;
+    const pullChainLongPressDuration = 600;
+    const pullChainLongPressGap = 1200;
+    let pullChainPressStartedAt = 0;
+    let pullChainLongPressCount = 0;
+    let pullChainLastLongPressAt = 0;
+    let pullChainSuppressClick = false;
     let pullChainMovable = false;
     let pullChainDragging = false;
     let pullChainMoved = false;
@@ -1381,6 +1406,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     pullChain.addEventListener('click', () => {
+        if (pullChainSuppressClick) {
+            pullChainSuppressClick = false;
+            return;
+        }
         if (pullChainMoved || pullChainMovable) return;
         clearTimeout(pullChainClickTimer);
         pullChainClickTimer = setTimeout(() => {
@@ -1392,14 +1421,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 240);
     });
 
-    pullChain.addEventListener('dblclick', event => {
-        if (!body.classList.contains('view-impressionism')) return;
-        event.preventDefault();
+    function togglePullChainMovement() {
         clearTimeout(pullChainClickTimer);
         pullChainMovable = !pullChainMovable;
         pullChain.classList.toggle('is-movable', pullChainMovable);
         pullChain.setAttribute('aria-label', pullChainMovable
-            ? 'Lamp chain unlocked. Drag to reposition; double-click to lock.'
+            ? 'Lamp chain unlocked. Drag to reposition; long-press four times to lock.'
             : 'Switch day and night');
 
         if (!pullChainMovable) {
@@ -1408,6 +1435,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 y: pullChainOffsetY
             }));
         }
+    }
+
+    pullChain.addEventListener('pointerdown', () => {
+        if (!body.classList.contains('view-impressionism')) return;
+        pullChainPressStartedAt = performance.now();
+    });
+
+    pullChain.addEventListener('pointerup', () => {
+        if (!pullChainPressStartedAt || !body.classList.contains('view-impressionism')) return;
+        const releasedAt = performance.now();
+        const wasLongPress = releasedAt - pullChainPressStartedAt >= pullChainLongPressDuration;
+        pullChainPressStartedAt = 0;
+        if (!wasLongPress || pullChainMoved) {
+            pullChainLongPressCount = 0;
+            return;
+        }
+
+        pullChainSuppressClick = true;
+        pullChainLongPressCount = releasedAt - pullChainLastLongPressAt <= pullChainLongPressGap
+            ? pullChainLongPressCount + 1
+            : 1;
+        pullChainLastLongPressAt = releasedAt;
+
+        if (pullChainLongPressCount === 4) {
+            pullChainLongPressCount = 0;
+            togglePullChainMovement();
+        }
+    });
+
+    pullChain.addEventListener('pointercancel', () => {
+        pullChainPressStartedAt = 0;
+        pullChainLongPressCount = 0;
     });
 
     pullChain.addEventListener('pointerdown', event => {

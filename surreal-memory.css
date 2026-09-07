@@ -1,0 +1,24 @@
+.impressionism-site{overflow:hidden;touch-action:none}
+body.view-impressionism .surreal-room{translate:var(--memory-slide,0%) 0;transition:translate .9s cubic-bezier(.22,.8,.2,1)}
+.memory-scene{position:absolute;inset:0;translate:calc(100% + var(--memory-slide,0%)) 0;transition:translate .9s cubic-bezier(.22,.8,.2,1);background:#030611;overflow:hidden;color:#dce5f5;isolation:isolate}
+.memory-dragging .surreal-room,.memory-dragging .memory-scene{transition:none!important}
+.memory-scene canvas{position:absolute;width:100%;height:100%;inset:0;touch-action:none;cursor:crosshair}
+.memory-scene canvas:focus-visible{outline:1px solid #b9cfff;outline-offset:-4px}
+.memory-title{position:absolute;top:14%;left:7%;pointer-events:none;text-shadow:0 2px 25px #243b4350}
+.memory-title span,.memory-caption,.memory-nav,.memory-enter{font:10px/1.8 system-ui,sans-serif;letter-spacing:.2em}
+.memory-title h2{font:italic clamp(38px,6vw,92px)/.98 Georgia,serif;font-weight:400;letter-spacing:-.045em;margin:18px 0}
+.memory-title p{font:12px/1.9 system-ui,sans-serif;letter-spacing:.09em;opacity:.75}
+.memory-caption{position:absolute;bottom:9%;left:7%;pointer-events:none;letter-spacing:.08em}
+.memory-caption strong{display:block;font-weight:400;font-size:12px;margin-bottom:7px}
+.memory-nav{position:absolute;bottom:4%;left:7%;right:7%;display:flex;justify-content:space-between;gap:12px;align-items:center}
+.memory-nav button,.memory-enter{color:inherit;border:0;border-bottom:1px solid #eadcc65c;background:transparent;padding:10px 0;cursor:pointer}
+.memory-enter{position:absolute;bottom:5%;right:6%;z-index:5;color:#fff;text-shadow:0 2px 8px #000;transition:opacity .3s}
+.memory-open .memory-enter{opacity:0;pointer-events:none}
+.memory-enter{padding:12px 20px;border:1px solid #ffffff60;border-radius:999px;background:#080e1b66;backdrop-filter:blur(8px);letter-spacing:.1em}
+.room-clock-music{position:absolute;z-index:4;left:6.3%;top:23%;width:18.5%;height:32%;border:0;border-radius:50%;padding:0;background:transparent;cursor:pointer;touch-action:none}
+body.night-background .room-clock-music{top:24%;height:50%;border-radius:48% 48% 45% 45%}
+.room-clock-music:focus-visible{outline:2px solid #f6dfaa;outline-offset:5px;box-shadow:0 0 24px #f6dfaa55}
+body.memory-open #pullChain{visibility:hidden}
+.memory-nav button:focus-visible,.memory-enter:focus-visible{outline:2px solid #f9eed5;outline-offset:6px}
+@media(max-width:600px){body.view-impressionism{--stage-width:100vw;--stage-height:100svh}.memory-title{top:16%}.memory-title h2{font-size:46px}.memory-title p{font-size:10px}.memory-caption{bottom:14%;max-width:85%}.memory-nav{bottom:5%;font-size:8px;letter-spacing:.08em}.memory-enter{font-size:9px}.memory-title span{font-size:8px}}
+@media(prefers-reduced-motion:reduce){.memory-scene,body.view-impressionism .surreal-room{transition:none}}

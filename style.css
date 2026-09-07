@@ -416,7 +416,7 @@ body.artwork-opening.view-interaction .hub-screen {
 }
 
 .timeline-card.renaissance-card {
-    --art-image: url('아테네 학당.jpg');
+    --art-image: none;
     --artwork-left: 89%;
 }
 
@@ -980,6 +980,14 @@ body.view-impressionism-time .pull-chain {
     height: 100%;
     border: 0;
     background: #0a0806;
+}
+
+/* The Renaissance card now introduces the scattered philosopher study; keep
+   the complete School of Athens image out of the composition. */
+.timeline-card.renaissance-card {
+    --art-image: none;
+    background-image: none !important;
+    background-color: var(--poster-paper, #eee8db) !important;
 }
 
 body.view-schema-architecture .interaction-screen {
@@ -3648,7 +3656,7 @@ body.view-interaction.night-background .handle {
 }
 
 .feature-readout {
-    --movement-title-size: 5.7cqw;
+    --movement-title-size: 4.6cqw;
 }
 
 /*
@@ -3758,7 +3766,7 @@ body.view-interaction.night-background .handle {
 }
 
 .feature-readout small {
-    font-size: calc(var(--movement-title-size) * 0.5) !important;
+    font-size: 1.2cqw !important;
     line-height: 0.9;
     max-width: 100%;
     white-space: normal;
@@ -3805,6 +3813,18 @@ body.view-interaction.night-background .handle {
     font-style: normal;
     line-height: 0.8;
     text-transform: uppercase;
+}
+
+/* Renaissance is represented by separate philosopher cutouts in its page;
+   never render the complete School of Athens artwork in the hub card. */
+.timeline-card.renaissance-card::before,
+.timeline-card.renaissance-card::after {
+    display: none !important;
+    background-image: none !important;
+}
+.timeline-card.renaissance-card {
+    background-image: none !important;
+    background: linear-gradient(135deg, #eee8db, #d9d0c0) !important;
 }
 
 /* Local, on-device hand tracking controls */
