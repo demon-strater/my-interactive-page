@@ -416,7 +416,7 @@ body.artwork-opening.view-interaction .hub-screen {
 }
 
 .timeline-card.renaissance-card {
-    --art-image: none;
+    --art-image: url('아테네 학당.jpg');
     --artwork-left: 89%;
 }
 
@@ -3815,16 +3815,17 @@ body.view-interaction.night-background .handle {
     text-transform: uppercase;
 }
 
-/* Renaissance is represented by separate philosopher cutouts in its page;
-   never render the complete School of Athens artwork in the hub card. */
+/* The complete painting belongs to the main hub card. The internal page uses
+   separate philosopher cutouts and does not load this artwork. */
 .timeline-card.renaissance-card::before,
 .timeline-card.renaissance-card::after {
-    display: none !important;
-    background-image: none !important;
+    display: block !important;
 }
 .timeline-card.renaissance-card {
-    background-image: none !important;
-    background: linear-gradient(135deg, #eee8db, #d9d0c0) !important;
+    background-image: url('아테네 학당.jpg') !important;
+    background-size: contain !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
 }
 
 /* Local, on-device hand tracking controls */
