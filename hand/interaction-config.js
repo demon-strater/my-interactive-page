@@ -13,8 +13,8 @@ export const HAND_CONFIG = Object.freeze({
         navigationGain: 5.0
     },
     pinch: {
-        enterRatio: 0.38,
-        exitRatio: 0.55,
+        enterRatio: 0.46,
+        exitRatio: 0.60,
         dragThresholdPx: 14
     },
     fist: {

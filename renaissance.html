@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Renaissance — The Geometry of Thought</title>
-<link rel="stylesheet" href="renaissance.css?v=perspective-2">
+<link rel="stylesheet" href="renaissance.css?v=perspective-10">
 </head>
 <body>
 <main id="atelier" tabindex="0" aria-label="Eight philosophers in disorder. Click to establish a vanishing point and align them in perspective. Press Enter to compose at the center.">
 <canvas id="architecture" aria-hidden="true"></canvas>
 <div id="figures" aria-label="Separate philosopher studies"></div>
-<svg id="guides" aria-hidden="true"><g id="rays"></g><g id="depths"></g><g id="focus"></g></svg>
+<svg id="guides" aria-hidden="true"><defs><radialGradient id="vpGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#fff8e4" stop-opacity="1"/><stop offset="16%" stop-color="#ffdea0" stop-opacity=".8"/><stop offset="45%" stop-color="#e6ac5c" stop-opacity=".28"/><stop offset="100%" stop-color="#e6ac5c" stop-opacity="0"/></radialGradient><radialGradient id="vpHot" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#fffaf0" stop-opacity=".95"/><stop offset="60%" stop-color="#ffe6b0" stop-opacity=".4"/><stop offset="100%" stop-color="#ffe6b0" stop-opacity="0"/></radialGradient></defs><g id="rays"></g><g id="depths"></g><g id="focus"></g></svg>
 <header class="masthead"><span>RAFFAELLO / A STUDY IN PERSPECTIVE</span><h1>The geometry<br>of thought.</h1></header>
 <div class="chapter"><span id="stateLabel">I — DISORDER</span><span class="rule"></span><span>RENAISSANCE</span></div>
 <div class="toolbar"><button id="compose" type="button">Compose &#8599;</button><button id="scatter" type="button">Scatter &#8634;</button></div>
 <span id="loadStatus" role="status">Loading figures…</span>
 </main>
-<script src="renaissance.js?v=perspective-2"></script>
+<script src="renaissance.js?v=perspective-10"></script>
 </body></html>

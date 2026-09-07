@@ -1568,7 +1568,7 @@ body.view-impressionism .pull-chain {
     z-index: 2147483643;
     color: #fff;
     width: 34px;
-    height: 214px;
+    height: 184px;
     perspective: 120px;
     filter:
         drop-shadow(0 12px 18px rgba(0, 0, 0, 0.58))
@@ -1603,7 +1603,7 @@ body.view-impressionism .chain {
     left: calc(50% + 4px);
     top: 0;
     width: 8px;
-    height: 148px;
+    height: 118px;
     margin: 0;
     color: transparent;
     background:
@@ -1621,7 +1621,7 @@ body.view-impressionism .chain {
 body.view-impressionism .handle {
     position: absolute;
     left: calc(50% + 4px);
-    top: 141px;
+    top: 111px;
     width: 28px;
     height: 28px;
     margin-top: 0;
@@ -1640,11 +1640,11 @@ body.view-impressionism .handle {
 }
 
 body.view-impressionism .pull-chain.pulled .chain {
-    height: 184px;
+    height: 154px;
 }
 
 body.view-impressionism .pull-chain.pulled .handle {
-    top: 177px;
+    top: 147px;
     transform: translateX(-50%) rotateX(12deg);
 }
 

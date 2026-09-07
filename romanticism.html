@@ -1,382 +1,343 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Romanticism Storm</title>
-    <style>
-        html,
-        body {
-            margin: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background: #02050a;
-            color: #e8eef5;
-            font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-        }
-
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-
-        .hud {
-            position: fixed;
-            left: 50%;
-            bottom: clamp(14px, 3vh, 24px);
-            z-index: 3;
-            width: min(700px, calc(100vw - 32px));
-            transform: translateX(-50%);
-            display: grid;
-            grid-template-columns: max-content minmax(80px, 1fr) max-content;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            min-height: 42px;
-            padding: 9px 12px;
-            border: 1px solid rgba(221, 235, 255, 0.2);
-            border-radius: 8px;
-            background: rgba(3, 9, 18, 0.48);
-            color: rgba(238, 246, 255, 0.8);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            box-shadow: 0 18px 52px rgba(0, 0, 0, 0.28);
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            pointer-events: none;
-        }
-
-        .meter {
-            flex: 1;
-            height: 8px;
-            align-self: center;
-            overflow: hidden;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.12);
-        }
-
-        .fill {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, #88d7ff, #f5f1b8, #ff704d);
-            transition: width 120ms ease;
-        }
-
-        @media (max-width: 560px) {
-            .hud {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-
-            .meter {
-                width: 100%;
-            }
-        }
-
-        .flash {
-            position: fixed;
-            inset: 0;
-            z-index: 2;
-            pointer-events: none;
-            background: #dfeeff;
-            opacity: 0;
-            mix-blend-mode: screen;
-        }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Romanticism — The Sublime</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0a1220;color:#eef2fb;font-family:Arial,sans-serif}
+#scene{position:fixed;inset:0;display:block;width:100%;height:100%;cursor:crosshair;outline:none}
+#scene:focus-visible{box-shadow:inset 0 0 0 2px #ffdf9e88}
+header{position:absolute;left:5%;top:7%;z-index:2;pointer-events:none;max-width:min(560px,60%)}
+header span{font:9px/1.7 Arial,sans-serif;letter-spacing:.2em;color:#d9e3ffa8}
+header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;letter-spacing:-.03em;margin:14px 0 0;color:#f5f7ff;text-shadow:0 4px 26px #00000070}
+.caption{position:absolute;left:5%;bottom:6%;z-index:2;max-width:340px;font:11px/1.6 Arial,sans-serif;color:#c9d6f0a8;letter-spacing:.015em;margin:0;pointer-events:none}
+.tag{position:absolute;left:5%;bottom:12.5%;z-index:2;display:flex;align-items:center;gap:10px;pointer-events:none}
+.tag span{font:9px/1.6 Arial,sans-serif;letter-spacing:.18em;color:#c9d6f088}
+.tag strong{font:italic 15px Georgia,serif;font-weight:400;color:#f3e6c8;letter-spacing:.02em}
+.tag i{width:26px;height:1px;background:#c9d6f044;display:block;font-style:normal}
+.mood{position:absolute;left:4.5%;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:12px;z-index:3}
+.mood-icon{width:14px;height:14px;display:block}
+.slider-wrap{width:36px;height:168px;display:flex;align-items:center;justify-content:center}
+#temperament{-webkit-appearance:none;appearance:none;width:168px;height:36px;background:transparent;transform:rotate(90deg);cursor:pointer;margin:0}
+#temperament::-webkit-slider-runnable-track{height:3px;border-radius:3px;background:linear-gradient(90deg,#ffd98a,#98a9c9,#232a3d)}
+#temperament::-moz-range-track{height:3px;border-radius:3px;background:linear-gradient(90deg,#ffd98a,#98a9c9,#232a3d)}
+#temperament::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff6e2;border:1px solid #caa15a;box-shadow:0 0 10px #ffdf9e88,0 2px 6px #00000070;margin-top:-6.5px}
+#temperament::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#fff6e2;border:1px solid #caa15a}
+#temperament:focus-visible{outline:none}
+#temperament:focus-visible::-webkit-slider-thumb{outline:2px solid #ffdf9e;outline-offset:3px}
+.mood small{writing-mode:vertical-rl;font-size:7px;letter-spacing:.24em;color:#c9d6f077}
+.restore{position:absolute;right:5%;bottom:5%;z-index:3;border:1px solid #cfe0ff33;border-radius:30px;background:#0e1830b8;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#eef2fb;padding:9px 17px;font:9px/1 Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
+.restore:hover{background:#16223fd8}
+.restore:focus-visible{outline:2px solid #ffdf9e;outline-offset:4px}
+@media(max-width:640px){
+  header{top:6%;max-width:82%}
+  header h1{font-size:27px}
+  .caption{max-width:78%;bottom:15%}
+  .tag{bottom:22%}
+  .mood{left:3%}
+  .slider-wrap{width:30px;height:124px}
+  #temperament{width:124px;height:30px}
+  .restore{right:3%;bottom:3%;padding:7px 13px}
+}
+@media(prefers-reduced-motion:reduce){#temperament{transition:none}}
+</style>
 </head>
 <body>
-    <div class="flash" id="flash"></div>
-    <div class="hud">
-        <span>WASD boat control</span>
-        <div class="meter"><div class="fill" id="fill"></div></div>
-        <span>Scroll storm / click lightning</span>
-    </div>
+<canvas id="scene" tabindex="0" aria-label="A wanderer above a sea of fog. Move to part the mist. Drag the sky control from dawn to tempest. Click the sky, or press Enter, to release birds."></canvas>
+<header><span>CASPAR DAVID FRIEDRICH / 1818</span><h1>Wanderer<br>above the fog.</h1></header>
+<div class="tag"><span>ROMANTICISM</span><i></i><strong id="moodLabel">Dawn</strong></div>
+<p class="caption">Move to part the mist over the valley. Drag the sky from serene dawn toward the tempest. Click the heavens to loose the birds.</p>
+<div class="mood">
+<svg class="mood-icon" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="#ffd98a"/></svg>
+<div class="slider-wrap"><input id="temperament" type="range" min="0" max="1" step=".001" value=".16" aria-label="Shift the sky from serene dawn to tempest"></div>
+<svg class="mood-icon" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 9.4a2.6 2.6 0 0 1 4.9-1.3A2.1 2.1 0 0 1 9.4 9.4H2Z" fill="#9fb2d8"/><path d="M5.6 10.4 4.4 13l1.7-.3-1 2.3" stroke="#dbe4f7" stroke-width=".9" fill="none" stroke-linecap="round"/></svg>
+<small>SERENITY&nbsp;—&nbsp;TEMPEST</small>
+</div>
+<button class="restore" id="restore" type="button">Calm the sky</button>
+<script>
+(() => {
+  'use strict';
+  const canvas = document.getElementById('scene'), ctx = canvas.getContext('2d');
+  const temperamentInput = document.getElementById('temperament');
+  const restoreBtn = document.getElementById('restore');
+  const moodLabel = document.getElementById('moodLabel');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const lerp = (a, b, f) => a + (b - a) * f;
+  const lerpColor = (a, b, f) => [lerp(a[0], b[0], f), lerp(a[1], b[1], f), lerp(a[2], b[2], f)];
+  const rgb = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
 
-    <script type="module">
-        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
+  let width = 1, height = 1, dpr = 1;
+  let pointer = { x: .5, y: .5, active: false };
+  let temperament = Number(temperamentInput.value);
+  let displayTemperament = temperament;
+  let elapsed = 0, last = 0, raf = 0;
+  let lightning = 0, lightningTimer = 1.4;
+  const birds = [];
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.outputColorSpace = THREE.SRGBColorSpace;
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 0.9;
-        document.body.appendChild(renderer.domElement);
+  function resize() {
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    width = innerWidth; height = innerHeight;
+    canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr);
+  }
+  addEventListener('resize', resize);
 
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x050912);
-        scene.fog = new THREE.FogExp2(0x050912, 0.018);
+  function setPointer(e) { pointer.x = e.clientX / width; pointer.y = e.clientY / height; pointer.active = true; }
+  canvas.addEventListener('pointermove', setPointer, { passive: true });
+  canvas.addEventListener('pointerenter', () => pointer.active = true);
+  canvas.addEventListener('pointerleave', () => pointer.active = false);
 
-        const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 420);
-        camera.position.set(0, 8.5, 17);
-        camera.lookAt(0, 0, -8);
+  temperamentInput.addEventListener('input', () => { temperament = Number(temperamentInput.value); });
+  restoreBtn.addEventListener('click', () => { temperament = .16; temperamentInput.value = '.16'; });
 
-        const fill = document.getElementById('fill');
-        const flashOverlay = document.getElementById('flash');
-        const keys = new Set();
-        const boatState = {
-            position: new THREE.Vector3(0, 0, 0),
-            velocity: new THREE.Vector3(0, 0, -0.02),
-            heading: 0
-        };
-        let storm = 0;
-        let targetStorm = 0;
-        let lightning = 0;
+  function spawnBirds(x, y) {
+    const count = 3 + Math.floor(Math.random() * 3);
+    const dir = x < width / 2 ? 1 : -1;
+    for (let i = 0; i < count; i++) {
+      birds.push({
+        x: x + (Math.random() - .5) * 50, y: y + (Math.random() - .5) * 34,
+        vx: dir * (66 + Math.random() * 44), vy: -6 + Math.random() * 8,
+        phase: Math.random() * 10, age: 0
+      });
+    }
+  }
+  canvas.addEventListener('click', e => {
+    if (e.clientY > height * .64) return;
+    spawnBirds(e.clientX, e.clientY);
+  });
+  canvas.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault(); spawnBirds(width * .5, height * .26);
+  });
 
-        const sun = new THREE.DirectionalLight(0x9db7d6, 1.0);
-        sun.position.set(-3, 8, 6);
-        scene.add(sun);
+  // A wanderer's sky: three temperament stops — dawn, overcast day, tempest — sampled and blended live.
+  const skyStops = [
+    { top: [66, 92, 148], mid: [186, 165, 150], horizon: [255, 213, 158] },
+    { top: [66, 80, 104], mid: [126, 134, 148], horizon: [172, 178, 188] },
+    { top: [7, 9, 16], mid: [16, 20, 32], horizon: [34, 31, 40] }
+  ];
+  function sampleSky(t) {
+    if (t <= .5) { const f = t / .5; return { top: lerpColor(skyStops[0].top, skyStops[1].top, f), mid: lerpColor(skyStops[0].mid, skyStops[1].mid, f), horizon: lerpColor(skyStops[0].horizon, skyStops[1].horizon, f) }; }
+    const f = (t - .5) / .5; return { top: lerpColor(skyStops[1].top, skyStops[2].top, f), mid: lerpColor(skyStops[1].mid, skyStops[2].mid, f), horizon: lerpColor(skyStops[1].horizon, skyStops[2].horizon, f) };
+  }
+  function drawSky(sky) {
+    const g = ctx.createLinearGradient(0, 0, 0, height * .8);
+    g.addColorStop(0, rgb(sky.top)); g.addColorStop(.55, rgb(sky.mid)); g.addColorStop(1, rgb(sky.horizon));
+    ctx.fillStyle = g; ctx.fillRect(0, 0, width, height * .82);
+  }
+  function drawStars(t) {
+    const a = clamp((t - .55) * 2.2, 0, 1);
+    if (a <= 0) return;
+    for (let i = 0; i < 70; i++) {
+      const x = (((Math.sin(i * 127.1 + 3) * 43758.5453) % 1) + 1) % 1 * width;
+      const y = (((Math.sin(i * 311.7 + 8) * 19341.17) % 1) + 1) % 1 * height * .48;
+      const tw = reduced.matches ? .75 : .5 + .5 * Math.sin(elapsed * 1.3 + i);
+      ctx.globalAlpha = a * (.28 + tw * .5);
+      ctx.fillStyle = '#eaf1ff'; ctx.beginPath(); ctx.arc(x, y, i % 7 === 0 ? 1.3 : .7, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+  function drawOrb(t) {
+    const x = width * .74, y = height * (.3 + t * .05);
+    const core = t < .5 ? [255, 240, 205] : [214, 224, 255];
+    const glowA = clamp(1 - t * 1.5, .12, 1);
+    const r = width * .13;
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
+    grad.addColorStop(0, rgb(core, .85 * glowA)); grad.addColorStop(1, rgb(core, 0));
+    ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = rgb(core, .8 * glowA); ctx.beginPath(); ctx.arc(x, y, width * .012, 0, Math.PI * 2); ctx.fill();
+  }
 
-        const lightningLight = new THREE.DirectionalLight(0xdbeaff, 0);
-        lightningLight.position.set(-8, 14, 5);
-        scene.add(lightningLight);
-        scene.add(new THREE.AmbientLight(0x20314a, 0.42));
+  function ridgeY(xf, layer) {
+    const freqs = [1.1, 2.3, 4.7, 8.1], amps = [.05, .026, .013, .007];
+    let y = 0;
+    for (let i = 0; i < 4; i++) y += Math.sin(xf * freqs[i] * Math.PI * 2 + layer * 11.3 + i * 3.7) * amps[i] * (1 + layer * .12);
+    return y;
+  }
+  function drawMountains(t, sky) {
+    const layers = 5;
+    for (let L = 0; L < layers; L++) {
+      const base = height * (.40 + L * .075);
+      ctx.beginPath(); ctx.moveTo(0, height);
+      const steps = 48;
+      for (let i = 0; i <= steps; i++) {
+        const xf = i / steps;
+        ctx.lineTo(xf * width, base + ridgeY(xf, L) * height * 1.4);
+      }
+      ctx.lineTo(width, height); ctx.closePath();
+      const farF = 1 - L / (layers - 1);
+      const rockCool = [42, 50, 66], rockWarm = [92, 70, 54];
+      const rockBase = lerpColor(rockCool, rockWarm, t < .4 ? (1 - t / .4) * .4 : 0);
+      ctx.fillStyle = rgb(lerpColor(rockBase, sky.horizon, .16 + farF * .64 + t * .12));
+      ctx.fill();
+    }
+  }
 
-        const waterUniforms = {
-            u_time: { value: 0 },
-            u_storm: { value: 0 },
-            u_lightning: { value: 0 }
-        };
+  const fogPuffs = [];
+  (function buildFog() {
+    for (let i = 0; i < 64; i++) {
+      const row = i % 6;
+      fogPuffs.push({ xf: (i * 0.6180339887) % 1, row, speed: .01 + row * .0045, size: .13 + Math.random() * .07, wobble: Math.random() * Math.PI * 2 });
+    }
+  })();
+  function drawFog(t, sky) {
+    // A dense, overlapping bank of puffs — each one individually parted by the cursor — reads as a
+    // continuous sea of cloud filling the valley, per the painting, rather than scattered wisps.
+    const rows = 6, fogBaseY = height * .54, fogSpanY = height * .27;
+    const wind = .16 + t * .6;
+    const fogColor = t > .55 ? [148, 157, 174] : [240, 236, 224];
+    for (const p of fogPuffs) {
+      const rowFrac = p.row / rows;
+      let y = fogBaseY + rowFrac * fogSpanY + (reduced.matches ? 0 : Math.sin(elapsed * .6 + p.wobble) * 6);
+      let x = (((p.xf + elapsed * p.speed * wind) % 1.2) - .1) * width;
+      const size = width * p.size * (.75 + rowFrac * .6);
+      let alpha = .26 + t * .16 + rowFrac * .13;
+      if (pointer.active) {
+        const dx = x - pointer.x * width, dy = y - pointer.y * height;
+        const dist = Math.hypot(dx, dy);
+        const clear = clamp(1 - dist / (200 + rowFrac * 50), 0, 1);
+        if (clear > 0) { alpha *= 1 - clear * .92; x += (dx / (dist || 1)) * clear * 60; }
+      }
+      const grad = ctx.createRadialGradient(x, y, 0, x, y, size);
+      grad.addColorStop(0, rgb(fogColor, alpha)); grad.addColorStop(1, rgb(fogColor, 0));
+      ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill();
+    }
+  }
 
-        const water = new THREE.Mesh(
-            new THREE.PlaneGeometry(360, 360, 260, 260),
-            new THREE.ShaderMaterial({
-                uniforms: waterUniforms,
-                vertexShader: `
-                    uniform float u_time;
-                    uniform float u_storm;
-                    varying vec3 v_pos;
-                    varying float v_height;
+  function drawBird(b) {
+    const flap = Math.sin(b.age * 10 + b.phase) * 9;
+    ctx.save(); ctx.translate(b.x, b.y);
+    ctx.strokeStyle = 'rgba(18,16,24,.7)'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-9, 0); ctx.quadraticCurveTo(-4, -6 - flap * .3, 0, 0); ctx.quadraticCurveTo(4, -6 + flap * .3, 9, 0); ctx.stroke();
+    ctx.restore();
+  }
+  function updateBirds(dt) {
+    for (let i = birds.length - 1; i >= 0; i--) {
+      const b = birds[i]; b.age += dt;
+      b.x += b.vx * dt; b.y += b.vy * dt + Math.sin(b.age * 3 + b.phase) * 8 * dt;
+      if (b.age > 10 || b.x < -40 || b.x > width + 40) birds.splice(i, 1);
+    }
+  }
 
-                    vec3 gerstner(vec3 p, vec2 dir, float steepness, float wavelength, float speed, float amp) {
-                        float k = 6.28318530718 / wavelength;
-                        float c = sqrt(9.8 / k) * speed;
-                        vec2 d = normalize(dir);
-                        float f = k * dot(d, p.xz) - c * u_time;
-                        float a = amp;
-                        return vec3(
-                            d.x * steepness * a * cos(f),
-                            a * sin(f),
-                            d.y * steepness * a * cos(f)
-                        );
-                    }
+  function drawForegroundLedge() {
+    ctx.beginPath();
+    ctx.moveTo(0, height); ctx.lineTo(0, height * .92);
+    ctx.quadraticCurveTo(width * .22, height * .80, width * .36, height * .855);
+    ctx.quadraticCurveTo(width * .445, height * .895, width * .5, height * .78);
+    ctx.quadraticCurveTo(width * .555, height * .70, width * .62, height * .835);
+    ctx.quadraticCurveTo(width * .76, height * .92, width, height * .87);
+    ctx.lineTo(width, height); ctx.closePath();
+    ctx.fillStyle = '#050508'; ctx.fill();
+  }
+  function drawWanderer(wind) {
+    const fx = width * .535, ground = height * .735;
+    const sway = (reduced.matches ? .3 : Math.sin(elapsed * 1.6)) * wind * 3;
+    ctx.save(); ctx.translate(fx, ground);
+    ctx.fillStyle = 'rgba(6,5,8,.97)';
+    ctx.fillRect(-7, -2, 6, 24); ctx.fillRect(2, -2, 6, 24);
+    ctx.translate(0, -2);
+    ctx.beginPath();
+    ctx.moveTo(-11, -44);
+    ctx.quadraticCurveTo(-21 - sway, -8, -17 - sway * 1.4, 18);
+    ctx.lineTo(17 + sway * 1.4, 18);
+    ctx.quadraticCurveTo(21 + sway, -8, 11, -44);
+    ctx.quadraticCurveTo(0, -50, -11, -44);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(0, -52, 7, 8, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(6,5,8,.92)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(13, -28); ctx.lineTo(23 + sway * .6, 22); ctx.stroke();
+    ctx.restore();
+  }
 
-                    void main() {
-                        vec3 p = position;
-                        float s = u_storm;
-                        float amp = mix(0.16, 4.4, s * s);
-                        float freq = mix(1.0, 2.9, s);
-                        vec3 displaced = p;
-                        displaced += gerstner(p, vec2(1.0, 0.25), 0.48, 22.0 / freq, 0.9 + s, amp);
-                        displaced += gerstner(p, vec2(-0.45, 1.0), 0.36, 13.0 / freq, 1.2 + s * 1.2, amp * 0.64);
-                        displaced += gerstner(p, vec2(0.2, -1.0), 0.28, 8.0 / freq, 1.8 + s * 1.6, amp * 0.36);
-                        displaced += gerstner(p, vec2(-1.0, -0.15), 0.22, 5.2 / freq, 2.2 + s * 2.2, amp * 0.18);
-                        v_pos = displaced;
-                        v_height = displaced.y;
-                        gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced, 1.0);
-                    }
-                `,
-                fragmentShader: `
-                    precision highp float;
-                    uniform float u_storm;
-                    uniform float u_lightning;
-                    varying vec3 v_pos;
-                    varying float v_height;
+  const rainDrops = [];
+  (function buildRain() { for (let i = 0; i < 130; i++) rainDrops.push({ x: Math.random(), y: Math.random(), len: 9 + Math.random() * 15, speed: 560 + Math.random() * 300 }); })();
+  function drawRain(t, dt) {
+    const a = clamp((t - .55) * 2.2, 0, 1);
+    if (a <= 0) return;
+    ctx.strokeStyle = `rgba(210,224,255,${.32 * a})`; ctx.lineWidth = 1;
+    const windX = (t - .5) * 2 * 36;
+    for (const d of rainDrops) {
+      d.y += (d.speed * dt) / height;
+      if (d.y > 1.05) { d.y = -.05; d.x = Math.random(); }
+      const x = d.x * width, y = d.y * height;
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + windX * .03, y + d.len); ctx.stroke();
+    }
+  }
 
-                    void main() {
-                        float foam = smoothstep(0.8, 3.4, v_height) * (0.25 + u_storm);
-                        float depth = smoothstep(-5.0, 3.0, v_height);
-                        vec3 calm = vec3(0.02, 0.19, 0.28);
-                        vec3 storm = vec3(0.015, 0.035, 0.07);
-                        vec3 color = mix(calm, storm, u_storm);
-                        color = mix(color, vec3(0.55, 0.72, 0.78), foam);
-                        color += vec3(0.36, 0.48, 0.72) * depth * 0.14;
-                        color += vec3(0.7, 0.82, 1.0) * u_lightning * (0.25 + foam);
-                        gl_FragColor = vec4(color, 1.0);
-                    }
-                `,
-                side: THREE.DoubleSide
-            })
-        );
-        water.rotation.x = -Math.PI / 2;
-        scene.add(water);
+  let audioCtx = null;
+  function playThunder() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+      const master = audioCtx.createGain(); master.gain.value = .38; master.connect(audioCtx.destination);
+      const bufferSize = Math.floor(audioCtx.sampleRate * 1.4);
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 1.5);
+      const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
+      const low = audioCtx.createBiquadFilter(); low.type = 'lowpass'; low.frequency.value = 320;
+      const g = audioCtx.createGain(); g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(.85, now + .06); g.gain.exponentialRampToValueAtTime(.001, now + 1.3);
+      noise.connect(low); low.connect(g); g.connect(master); noise.start(now);
+    } catch (e) { /* Web Audio unavailable — the flash still lands without thunder. */ }
+  }
+  function maybeLightning(t, dt) {
+    lightningTimer -= dt;
+    if (t > .62 && lightningTimer <= 0) {
+      lightning = 1; playThunder();
+      lightningTimer = 2 + Math.random() * 5 * (1.6 - t);
+    }
+    lightning *= reduced.matches ? 0 : .88;
+    if (lightning < .01) lightning = 0;
+  }
 
-        function gerstnerHeight(x, z, time, s) {
-            const waves = [
-                [1, 0.25, 22, 0.9 + s, 1.0],
-                [-0.45, 1, 13, 1.2 + s * 1.2, 0.64],
-                [0.2, -1, 8, 1.8 + s * 1.6, 0.36],
-                [-1, -0.15, 5.2, 2.2 + s * 2.2, 0.18]
-            ];
-            const amp = THREE.MathUtils.lerp(0.16, 4.4, s * s);
-            const freq = THREE.MathUtils.lerp(1.0, 2.9, s);
-            let height = 0;
-            let dx = 0;
-            let dz = 0;
-            for (const [dirX, dirZ, wavelengthBase, speed, mult] of waves) {
-                const length = Math.hypot(dirX, dirZ);
-                const ux = dirX / length;
-                const uz = dirZ / length;
-                const wavelength = wavelengthBase / freq;
-                const k = Math.PI * 2 / wavelength;
-                const c = Math.sqrt(9.8 / k) * speed;
-                const phase = k * (ux * x + uz * z) - c * time;
-                const a = amp * mult;
-                height += a * Math.sin(phase);
-                const slope = a * k * Math.cos(phase);
-                dx += ux * slope;
-                dz += uz * slope;
-            }
-            return { height, dx, dz };
-        }
+  function drawVignette() {
+    const g = ctx.createRadialGradient(width / 2, height * .55, height * .2, width / 2, height * .55, height * .88);
+    g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.4)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, width, height);
+  }
+  function drawLightning() {
+    if (lightning <= 0) return;
+    ctx.fillStyle = `rgba(225,232,255,${lightning * .5})`;
+    ctx.fillRect(0, 0, width, height);
+  }
 
-        function createBoat() {
-            const boat = new THREE.Group();
-            const hullMat = new THREE.MeshStandardMaterial({ color: 0x5a321f, roughness: 0.62, metalness: 0.02 });
-            const sailMat = new THREE.MeshStandardMaterial({ color: 0xd8d0bd, roughness: 0.78, metalness: 0.01, side: THREE.DoubleSide });
-            const darkMat = new THREE.MeshStandardMaterial({ color: 0x1a100b, roughness: 0.7 });
+  function updateMoodLabel(t) {
+    const label = t < .32 ? 'Dawn' : t < .5 ? 'Overcast' : t < .78 ? 'Storm Wind' : 'Tempest';
+    if (moodLabel.textContent !== label) moodLabel.textContent = label;
+  }
 
-            const hull = new THREE.Mesh(new THREE.CapsuleGeometry(0.5, 1.8, 16, 28), hullMat);
-            hull.scale.set(1.25, 0.24, 0.58);
-            hull.rotation.z = Math.PI / 2;
-            boat.add(hull);
+  function frame(now) {
+    raf = 0;
+    const dt = last ? Math.min((now - last) / 1000, .05) : 0; last = now;
+    elapsed += dt;
+    displayTemperament += (temperament - displayTemperament) * Math.min(1, dt * (reduced.matches ? 8 : 2.2));
+    const t = displayTemperament, sky = sampleSky(t);
+    updateBirds(dt);
+    if (!reduced.matches) maybeLightning(t, dt); else lightning = 0;
+    updateMoodLabel(t);
 
-            const keel = new THREE.Mesh(new THREE.ConeGeometry(0.42, 1.8, 4), darkMat);
-            keel.position.y = -0.18;
-            keel.rotation.y = Math.PI / 4;
-            keel.scale.set(0.42, 0.22, 0.95);
-            boat.add(keel);
+    ctx.setTransform(canvas.width / width, 0, 0, canvas.height / height, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+    drawSky(sky);
+    drawStars(t);
+    drawOrb(t);
+    birds.forEach(drawBird);
+    drawMountains(t, sky);
+    drawFog(t, sky);
+    drawRain(t, dt);
+    drawForegroundLedge();
+    drawWanderer(clamp(t * 1.3, 0, 1.3));
+    drawVignette();
+    drawLightning();
 
-            const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.05, 1.8, 12), darkMat);
-            mast.position.y = 0.76;
-            boat.add(mast);
-
-            const sailShape = new THREE.Shape();
-            sailShape.moveTo(0, 0);
-            sailShape.lineTo(0.82, 0.24);
-            sailShape.lineTo(0.08, 1.18);
-            sailShape.closePath();
-            const sail = new THREE.Mesh(new THREE.ShapeGeometry(sailShape), sailMat);
-            sail.position.set(0.02, 0.2, 0.04);
-            sail.rotation.y = Math.PI / 2;
-            boat.add(sail);
-
-            boat.scale.setScalar(0.78);
-            return boat;
-        }
-
-        const boat = createBoat();
-        scene.add(boat);
-
-        const sky = new THREE.Mesh(
-            new THREE.SphereGeometry(190, 48, 24),
-            new THREE.ShaderMaterial({
-                uniforms: { u_lightning: { value: 0 }, u_storm: { value: 0 } },
-                vertexShader: 'varying vec3 v_pos; void main(){ v_pos = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-                fragmentShader: `
-                    precision highp float;
-                    uniform float u_lightning;
-                    uniform float u_storm;
-                    varying vec3 v_pos;
-                    void main() {
-                        float horizon = smoothstep(-20.0, 35.0, v_pos.y);
-                        float cloud = sin(v_pos.x * 0.035 + v_pos.z * 0.05) * sin(v_pos.z * 0.025);
-                        vec3 low = mix(vec3(0.05, 0.08, 0.12), vec3(0.015, 0.018, 0.026), u_storm);
-                        vec3 high = mix(vec3(0.16, 0.24, 0.36), vec3(0.045, 0.05, 0.07), u_storm);
-                        vec3 color = mix(low, high, horizon);
-                        color += vec3(0.08, 0.08, 0.1) * cloud * u_storm;
-                        color += vec3(0.75, 0.82, 1.0) * u_lightning;
-                        gl_FragColor = vec4(color, 1.0);
-                    }
-                `,
-                side: THREE.BackSide
-            })
-        );
-        scene.add(sky);
-
-        const stormSilhouette = new THREE.Mesh(
-            new THREE.TorusKnotGeometry(22, 8, 180, 24, 2, 3),
-            new THREE.MeshBasicMaterial({ color: 0x0a0d13, transparent: true, opacity: 0 })
-        );
-        stormSilhouette.position.set(0, 28, -70);
-        stormSilhouette.scale.set(2.2, 0.8, 0.55);
-        scene.add(stormSilhouette);
-
-        window.addEventListener('keydown', event => keys.add(event.key.toLowerCase()));
-        window.addEventListener('keyup', event => keys.delete(event.key.toLowerCase()));
-        window.addEventListener('wheel', event => {
-            targetStorm = THREE.MathUtils.clamp(targetStorm + Math.max(event.deltaY, -60) * 0.0009, 0, 1);
-            fill.style.width = `${Math.round(targetStorm * 100)}%`;
-        }, { passive: true });
-        window.addEventListener('click', () => {
-            lightning = 1;
-        });
-
-        window.addEventListener('resize', () => {
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-        });
-
-        function animate(ms) {
-            requestAnimationFrame(animate);
-            const time = ms * 0.001;
-            storm = THREE.MathUtils.lerp(storm, targetStorm, 0.04);
-            lightning *= 0.86;
-            if (lightning < 0.002) lightning = 0;
-
-            waterUniforms.u_time.value = time;
-            waterUniforms.u_storm.value = storm;
-            waterUniforms.u_lightning.value = lightning;
-            sky.material.uniforms.u_storm.value = storm;
-            sky.material.uniforms.u_lightning.value = lightning;
-            lightningLight.intensity = lightning * 9.5;
-            renderer.toneMappingExposure = 0.75 + lightning * 2.8 + storm * 0.18;
-            flashOverlay.style.opacity = String(lightning * 0.36);
-            stormSilhouette.material.opacity = lightning * (0.08 + storm * 0.32);
-
-            const forward = new THREE.Vector3(Math.sin(boatState.heading), 0, -Math.cos(boatState.heading));
-            const side = new THREE.Vector3(Math.cos(boatState.heading), 0, Math.sin(boatState.heading));
-            const controlAuthority = Math.max(0.03, 1 - Math.pow(storm, 1.55) * 1.18);
-            const currentForce = new THREE.Vector3(
-                Math.sin(time * 0.8 + boatState.position.z * 0.09),
-                0,
-                Math.cos(time * 0.7 + boatState.position.x * 0.08)
-            ).multiplyScalar(storm * storm * 0.105);
-
-            if (keys.has('a')) boatState.heading += 0.026 * controlAuthority;
-            if (keys.has('d')) boatState.heading -= 0.026 * controlAuthority;
-            if (keys.has('w')) boatState.velocity.add(forward.multiplyScalar(0.012 * controlAuthority));
-            if (keys.has('s')) boatState.velocity.add(forward.multiplyScalar(-0.007 * controlAuthority));
-            if (keys.has('q')) boatState.velocity.add(side.multiplyScalar(-0.006 * controlAuthority));
-            if (keys.has('e')) boatState.velocity.add(side.multiplyScalar(0.006 * controlAuthority));
-
-            boatState.velocity.add(currentForce);
-            boatState.velocity.multiplyScalar(0.982 - storm * 0.01);
-            boatState.position.add(boatState.velocity);
-            boatState.position.x = THREE.MathUtils.clamp(boatState.position.x, -38, 38);
-            boatState.position.z = THREE.MathUtils.clamp(boatState.position.z, -58, 28);
-
-            const sample = gerstnerHeight(boatState.position.x, boatState.position.z, time, storm);
-            boat.position.set(boatState.position.x, sample.height + 0.32, boatState.position.z);
-            boat.rotation.y = boatState.heading;
-            boat.rotation.x = THREE.MathUtils.clamp(sample.dz * 0.16, -0.75, 0.75);
-            boat.rotation.z = THREE.MathUtils.clamp(-sample.dx * 0.16, -0.85, 0.85);
-            boat.scale.setScalar(0.78 * (1 + storm * 0.04));
-
-            const camOffset = new THREE.Vector3(0, 8 + storm * 5, 16 + storm * 7);
-            camera.position.lerp(boat.position.clone().add(camOffset), 0.045);
-            camera.lookAt(boat.position.x, boat.position.y + 0.7, boat.position.z - 8 - storm * 8);
-            scene.fog.density = 0.018 + storm * 0.02;
-            renderer.render(scene, camera);
-        }
-
-        requestAnimationFrame(animate);
-    </script>
+    raf = requestAnimationFrame(frame);
+  }
+  function start() { if (!raf) { last = 0; raf = requestAnimationFrame(frame); } }
+  document.addEventListener('visibilitychange', () => { if (document.hidden) { cancelAnimationFrame(raf); raf = 0; } else start(); });
+  resize(); start();
+})();
+</script>
 </body>
 </html>

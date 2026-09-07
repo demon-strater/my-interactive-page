@@ -14,6 +14,9 @@
     {x:2.65,z:1.8,h:1.8}, {x:.95,z:2.7,h:1.35},
     {x:-.9,z:.7,h:1.52}, {x:3.1,z:4.2,h:2.7}
   ];
+  // Anchors the depth exaggeration below: figures at the group's average distance keep their plain 1/(z+4)
+  // size, while nearer/farther ones are pushed further apart from that anchor for a stronger sense of depth.
+  const avgZ=world.reduce((sum,p)=>sum+p.z,0)/world.length,refScale=1/(avgZ+4);
   let width=1,height=1,ordered=false,raf=0,transitionStart=0,duration=0;
   let vanishing={x:.5,y:.37},fromVP={...vanishing},targetVP={...vanishing};
   let lineAmount=0,fromLines=0,targetLines=0,items=[],ready=false;
@@ -21,7 +24,10 @@
   const lerp=(a,b,t)=>a+(b-a)*t;
   const ease=t=>t*t*t*(t*(t*6-15)+10);
   function projection(i) {
-    const p=world[i], scale=1/(p.z+4);
+    const p=world[i], plain=1/(p.z+4);
+    // Exaggerated past the plain pinhole falloff so the near/far philosophers read as clearly closer/further,
+    // not just slightly different in size — the group's average depth is held fixed as the pivot.
+    const scale=refScale*Math.pow(plain/refScale,1.45);
     // The camera's framing adapts to the chosen point while retaining shared depth.
     const side=p.x<0?vanishing.x:1-vanishing.x;
     const fx=width*Math.min(.82,Math.max(.1,side)*1.7);
@@ -55,6 +61,10 @@
     line.setAttribute('class',minor?'guide-line guide-minor':'guide-line');
     parent.append(line);
   }
+  // Shared with the architecture: the floor grid and the room's columns read off the same depth curve AND the
+  // same hall-width curve, so a column stands exactly on a floor row and no row reaches sideways into a column.
+  function roomDepth(i) { return 1/(1+i*.62); }
+  function hallHalf(s) { return width*.49*s; }
   function drawGuides() {
     rays.replaceChildren();depths.replaceChildren();focus.replaceChildren();
     if(lineAmount<.001)return;
@@ -67,42 +77,100 @@
     }
     for(const [x,y] of [[0,0],[width,0],[0,height*.38],[width,height*.38]])makeLine(rays,vx,vy,lerp(vx,x,reveal),lerp(vy,y,reveal),true);
     makeLine(depths,0,vy,width,vy,true);
-    for(let i=1;i<=9;i++) {
-      const depth=1/(1+i*.62),y=vy+(height-vy)*depth;
-      const expansion=clamp((lineAmount-.2-i*.035)*2.5,0,1);
-      makeLine(depths,vx*(1-expansion),y,vx+(width-vx)*expansion,y,true);
+    // Each floor row spans only the hall's own width at that depth, so it stops at the walls instead of
+    // slicing across a nearer column's shaft.
+    for(let i=0;i<=9;i++) {
+      const s=roomDepth(i),y=vy+(height-vy)*s,half=hallHalf(s);
+      const expansion=clamp((lineAmount-.2-i*.035)*2.5,0,1)*half;
+      makeLine(depths,vx-expansion,y,vx+expansion,y,true);
     }
-    for(const radius of [4,14,25]) {
-      const circle=document.createElementNS(svg.namespaceURI,'circle');
-      circle.setAttribute('cx',vx);circle.setAttribute('cy',vy);circle.setAttribute('r',radius*(.7+.3*lineAmount));
-      circle.setAttribute('class','guide-focus');circle.style.opacity=radius===25?'.25':'.8';focus.append(circle);
+    // A soft, layered glow rather than a faceted star — closer to natural bloom than a graphic icon.
+    const haloR=95*(.7+.3*lineAmount),hotR=30*(.7+.3*lineAmount);
+    const halo=document.createElementNS(svg.namespaceURI,'circle');
+    halo.setAttribute('cx',String(vx));halo.setAttribute('cy',String(vy));
+    halo.setAttribute('r',String(haloR));halo.setAttribute('fill','url(#vpGlow)');
+    focus.append(halo);
+    const hot=document.createElementNS(svg.namespaceURI,'circle');
+    hot.setAttribute('cx',String(vx));hot.setAttribute('cy',String(vy));
+    hot.setAttribute('r',String(hotR));hot.setAttribute('fill','url(#vpHot)');
+    focus.append(hot);
+    const core=document.createElementNS(svg.namespaceURI,'circle');
+    core.setAttribute('cx',String(vx));core.setAttribute('cy',String(vy));
+    core.setAttribute('r',String(2.2*(.7+.3*lineAmount)));
+    core.setAttribute('class','guide-core');focus.append(core);
+  }
+  function drawFloor(vx,vy) {
+    // Rows taper with hallHalf(), the same curve the columns stand on, so the marble floor fills the hall
+    // exactly to its walls at every depth and never reaches sideways into a column.
+    const rows=[{y:vy,half:0}];
+    for(let i=9;i>=0;i--) {
+      const s=roomDepth(i);
+      rows.push({y:vy+(height-vy)*s,half:hallHalf(s)});
     }
-    makeLine(focus,vx-34,vy,vx-19,vy);makeLine(focus,vx+19,vy,vx+34,vy);
-    makeLine(focus,vx,vy-34,vx,vy-19);makeLine(focus,vx,vy+19,vx,vy+34);
+    const grout=`rgba(212,178,112,${.05+lineAmount*.14})`;
+    const cols=8;
+    for(let r=0;r<rows.length-1;r++) {
+      const a=rows[r],b=rows[r+1];
+      const f0=Math.max(0,(a.y-vy)/(height-vy||1));
+      const tileAlpha=(.02+lineAmount*.1)*clamp(f0*1.4,0,1);
+      const groutAlpha=clamp(f0*1.6,0,1);
+      if(groutAlpha<=.004)continue;
+      for(let c=0;c<cols;c++) {
+        const t0=-1+2*c/cols,t1=-1+2*(c+1)/cols;
+        const x0a=vx+t0*a.half,x1a=vx+t1*a.half,x0b=vx+t0*b.half,x1b=vx+t1*b.half;
+        ctx.beginPath();ctx.moveTo(x0a,a.y);ctx.lineTo(x1a,a.y);ctx.lineTo(x1b,b.y);ctx.lineTo(x0b,b.y);ctx.closePath();
+        if((r+c)%2!==0&&tileAlpha>.004){ctx.fillStyle=`rgba(94,64,30,${tileAlpha})`;ctx.fill();}
+        ctx.strokeStyle=grout;ctx.lineWidth=Math.max(.4,.9*groutAlpha);ctx.globalAlpha=groutAlpha;ctx.stroke();ctx.globalAlpha=1;
+      }
+    }
   }
   function drawRoom() {
     ctx.setTransform(canvas.width/width,0,0,canvas.height/height,0,0);
     ctx.clearRect(0,0,width,height);
     const vx=vanishing.x*width,vy=vanishing.y*height;
     const glow=ctx.createRadialGradient(vx,vy,0,vx,vy,Math.max(width,height)*.7);
-    glow.addColorStop(0,'#c2bd8d30');glow.addColorStop(.55,'#535d4330');glow.addColorStop(1,'#080e0c99');
+    glow.addColorStop(0,'#caa0521f');glow.addColorStop(.5,'#3a2b1226');glow.addColorStop(1,'#020100a8');
     ctx.fillStyle=glow;ctx.fillRect(0,0,width,height);
-    // A vaulted architectural study emerges in the same perspective as the figures.
-    ctx.globalAlpha=.14+lineAmount*.6;
-    for(let i=5;i>=0;i--) {
-      const s=1/(1+i*.55),half=width*.49*s;
-      const base=vy+(height-vy)*s,top=vy-height*.52*s;
-      ctx.beginPath();ctx.moveTo(vx-half,base);ctx.lineTo(vx-half,vy-height*.13*s);
-      ctx.bezierCurveTo(vx-half,top,vx+half,top,vx+half,vy-height*.13*s);ctx.lineTo(vx+half,base);
-      ctx.strokeStyle=i%2?'#c4b58a':'#807e61';ctx.lineWidth=Math.max(1,13*s);ctx.stroke();
-      ctx.strokeStyle='#e2d5ac55';ctx.lineWidth=1;ctx.stroke();
+    // A distant apse frames the vanishing point, giving the hall a terminus to converge on.
+    const nH=height*.24*(.4+lineAmount*.6),nW=nH*.5;
+    ctx.beginPath();
+    ctx.moveTo(vx-nW/2,vy+nH*.55);ctx.lineTo(vx-nW/2,vy-nH*.1);
+    ctx.quadraticCurveTo(vx-nW/2,vy-nH*.58,vx,vy-nH*.58);
+    ctx.quadraticCurveTo(vx+nW/2,vy-nH*.58,vx+nW/2,vy-nH*.1);
+    ctx.lineTo(vx+nW/2,vy+nH*.55);
+    ctx.fillStyle=`rgba(10,7,3,${.35+lineAmount*.25})`;ctx.fill();
+    ctx.strokeStyle=`rgba(226,190,120,${.18+lineAmount*.3})`;ctx.lineWidth=1;ctx.stroke();
+    // A calm colonnade rises from the same floor the perspective grid defines — every column's foot sits
+    // exactly on a roomDepth() row and its width matches hallHalf() there, so nothing drifts past the floor
+    // or gets crossed by it. Kept plain and dim so it stages the figures rather than competing with them.
+    ctx.globalAlpha=.1+lineAmount*.34;
+    const levels=[7,5,3,2,1,0];
+    for(const i of levels) {
+      const s=roomDepth(i),half=hallHalf(s);
+      // Raised well past the apse's crown so even the farthest arch clears the door it frames.
+      const base=vy+(height-vy)*s,top=vy-height*1.5*s,archTop=vy-height*.42*s;
+      ctx.beginPath();ctx.moveTo(vx-half,base);ctx.lineTo(vx-half,archTop);
+      ctx.bezierCurveTo(vx-half,top,vx+half,top,vx+half,archTop);ctx.lineTo(vx+half,base);
+      ctx.strokeStyle=i%2?'#7c6539':'#392a13';ctx.lineWidth=Math.max(1,12*s);ctx.stroke();
+      // a single soft gilt rim
+      ctx.strokeStyle=`rgba(240,205,140,${.5*(.3+lineAmount*.7)})`;ctx.lineWidth=Math.max(.5,1*s);ctx.stroke();
+      // one entablature line at the springing, reading as a plain cornice across the hall
+      ctx.strokeStyle=`rgba(232,199,128,${.42*(.3+lineAmount*.7)})`;ctx.lineWidth=Math.max(.5,.8*s);
+      ctx.beginPath();ctx.moveTo(vx-half,archTop);ctx.lineTo(vx+half,archTop);ctx.stroke();
+      // plain pilasters with a simple capital and base
       for(const sign of [-1,1]) {
-        const x=vx+sign*half;
-        ctx.fillStyle='#b3a78228';ctx.fillRect(x-7*s,vy-height*.1*s,14*s,base-vy+height*.1*s);
+        const x=vx+sign*half,pw=7*s;
+        ctx.fillStyle='#3a2a1338';ctx.fillRect(x-pw,archTop,pw*2,base-archTop);
+        ctx.strokeStyle=`rgba(230,197,132,${.32*(.3+lineAmount*.7)})`;ctx.lineWidth=Math.max(.4,.6*s);
+        ctx.strokeRect(x-pw,archTop,pw*2,base-archTop);
+        ctx.fillStyle=`rgba(226,193,126,${.5*(.3+lineAmount*.7)})`;
+        ctx.fillRect(x-pw*1.4,archTop-3*s,pw*2.8,3.4*s);
+        ctx.fillRect(x-pw*1.4,base-3.4*s,pw*2.8,3.4*s);
       }
     }
     ctx.globalAlpha=1;
-    const floor=ctx.createLinearGradient(0,vy,0,height);floor.addColorStop(0,'#a3945c00');floor.addColorStop(1,'#b7a87820');
+    drawFloor(vx,vy);
+    const floor=ctx.createLinearGradient(0,vy,0,height);floor.addColorStop(0,'#c9a35c00');floor.addColorStop(1,'#8a6a3a19');
     ctx.fillStyle=floor;ctx.fillRect(0,vy,width,height-vy);
   }
   function frame(now) {

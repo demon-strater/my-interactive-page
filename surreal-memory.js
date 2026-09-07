@@ -145,8 +145,11 @@
         continue;
       }
       if (holding) {
-        c.vx += gravityDirection.x * gravity * dt;
-        c.vy += gravityDirection.y * gravity * dt;
+        // Snap heading to the cursor direction immediately — like rain caught in a gust, not a slow turn —
+        // while still letting the fall accelerate, so newly spawned clocks never dip down before following.
+        const speed = Math.hypot(c.vx, c.vy) + gravity * dt;
+        c.vx = gravityDirection.x * speed;
+        c.vy = gravityDirection.y * speed;
         c.settled = 0;
       } else {
         c.vx *= Math.exp(-.5 * dt);
