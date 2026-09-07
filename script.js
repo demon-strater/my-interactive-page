@@ -1421,12 +1421,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 240);
     });
 
+    // Two quick clicks unlock the cord for repositioning. The second click is
+    // intentionally cancelled so it does not also switch the room's scene.
+    pullChain.addEventListener('dblclick', event => {
+        if (!body.classList.contains('view-impressionism')) return;
+        event.preventDefault();
+        clearTimeout(pullChainClickTimer);
+        pullChainSuppressClick = true;
+        if (!pullChainMovable) togglePullChainMovement();
+    });
+
     function togglePullChainMovement() {
         clearTimeout(pullChainClickTimer);
         pullChainMovable = !pullChainMovable;
         pullChain.classList.toggle('is-movable', pullChainMovable);
         pullChain.setAttribute('aria-label', pullChainMovable
-            ? 'Lamp chain unlocked. Drag to reposition; long-press four times to lock.'
+            ? 'Lamp chain unlocked. Drag to reposition; press Enter to lock.'
             : 'Switch day and night');
 
         if (!pullChainMovable) {
@@ -1467,6 +1477,12 @@ document.addEventListener('DOMContentLoaded', () => {
     pullChain.addEventListener('pointercancel', () => {
         pullChainPressStartedAt = 0;
         pullChainLongPressCount = 0;
+    });
+
+    pullChain.addEventListener('keydown', event => {
+        if (event.key !== 'Enter' || !pullChainMovable || !body.classList.contains('view-impressionism')) return;
+        event.preventDefault();
+        togglePullChainMovement();
     });
 
     pullChain.addEventListener('pointerdown', event => {
