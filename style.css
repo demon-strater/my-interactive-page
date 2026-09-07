@@ -3823,8 +3823,8 @@ body.view-interaction.night-background .handle {
 }
 .timeline-card.renaissance-card {
     background-image: url('아테네 학당.jpg') !important;
-    background-size: contain !important;
-    background-position: center center !important;
+    background-size: auto 76% !important;
+    background-position: 8% center !important;
     background-repeat: no-repeat !important;
 }
 
