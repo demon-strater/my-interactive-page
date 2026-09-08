@@ -5,10 +5,17 @@
   const room = host.querySelector('.surreal-room');
   const scene = document.createElement('section');
   scene.className = 'memory-scene';
-  scene.setAttribute('aria-label', '밤에 떨어지는 시간');
-  scene.innerHTML = `<canvas tabindex="0" role="button" aria-label="하늘에서 시계가 무작위로 나타납니다. 누르는 동안 화면 중심에서 커서 방향이 아래가 되어 시계가 계속 떨어집니다. 놓으면 화면 아래로 떨어집니다. 키보드는 Enter 또는 스페이스를 길게 누르세요."></canvas>
-    <div class="memory-title"><span>SURREALISM / STUDY 02</span><h2>Falling<br>Hours</h2></div>
-    <nav class="memory-nav" aria-label="밤의 시계 제어"><button type="button" data-back>← Back</button><span>02 / FALLING HOURS</span><button type="button" data-pause>Pause Ⅱ</button></nav>`;
+  scene.setAttribute('aria-label', '세 부분으로 나뉜 몸을 조합해 낯선 존재를 만드는 초현실주의 카드 놀이');
+  scene.innerHTML = `<canvas aria-hidden="true"></canvas>
+    <div class="corpse-hit" id="corpseHit">
+      <button class="corpse-band" data-band="0" type="button"></button>
+      <button class="corpse-band" data-band="1" type="button"></button>
+      <button class="corpse-band" data-band="2" type="button"></button>
+    </div>
+    <div class="memory-title"><span>THE SURREALISTS / CADAVRE EXQUIS, 1925</span><h2>Exquisite<br>Corpse.</h2></div>
+    <p class="corpse-caption" id="corpseCaption" aria-live="polite"></p>
+    <button class="chance-meeting" id="chanceMeeting" type="button">Chance Meeting</button>
+    <nav class="memory-nav" aria-label="조합 카드 조작"><button type="button" data-back>&larr; Back</button><span>02 / EXQUISITE CORPSE</span><button type="button" data-reset>Refold</button></nav>`;
   const enter = document.createElement('button');
   enter.type = 'button'; enter.className = 'memory-enter';
   enter.textContent = 'Next Dream';
@@ -28,76 +35,61 @@
   }
   new MutationObserver(syncMusicToggle).observe(playerButton, { attributes: true, attributeFilter: ['aria-label'] });
   syncMusicToggle();
+
   const canvas = scene.querySelector('canvas'), ctx = canvas.getContext('2d');
-  const pauseButton = scene.querySelector('[data-pause]');
+  const hitWrap = scene.querySelector('#corpseHit');
+  const bandButtons = [...scene.querySelectorAll('.corpse-band')];
+  const captionEl = scene.querySelector('#corpseCaption');
+  const chanceBtn = scene.querySelector('#chanceMeeting');
+  const resetBtn = scene.querySelector('[data-reset]');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  let page = 0, drag = null, paused = reduced.matches;
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  let page = 0, drag = null;
   let elapsed = 0, last = 0, raf = 0, width = 1, height = 1;
-  let pointer = { x: .5, y: .65 };
-  const clocks = [];
-  let holding = false, nextMeteor = .25;
-  let gravityDirection = { x: 0, y: 1 };
-  function releaseClocks() {
-    holding = false;
-    for (const c of clocks) { c.vy = Math.max(0, c.vy); }
-  }
   const visible = () => document.body.classList.contains('view-impressionism');
+
   function setPage(next) {
-    if (!next) releaseClocks();
     page = next; host.style.setProperty('--memory-slide', `${-page * 100}%`);
     host.classList.remove('memory-dragging');
     document.body.classList.toggle('memory-open', !!page);
     room.inert = !!page; scene.inert = !page; enter.tabIndex = page ? -1 : 0;
     if (page) { resize(); start(); }
   }
-  enter.addEventListener('click', () => { setPage(1); scene.querySelector('[data-back]').focus({ preventScroll: true }); });
+  enter.addEventListener('click', () => { setPage(1); bandButtons[0].focus({ preventScroll: true }); });
   scene.querySelector('[data-back]').addEventListener('click', () => { setPage(0); enter.focus({ preventScroll: true }); });
-  function updatePause() { pauseButton.textContent = paused ? 'Resume ▷' : 'Pause Ⅱ'; pauseButton.setAttribute('aria-pressed', String(paused)); }
-  pauseButton.addEventListener('click', () => { paused = !paused; updatePause(); });
-  updatePause();
+
+  // The room-switch swipe lives on the whole host; band buttons opt out via the closest('button') guard below.
   host.addEventListener('pointerdown', e => {
     if (!visible() || e.button !== 0 || !e.isPrimary || drag || e.target.closest('button')) return;
     drag = { id: e.pointerId, x: e.clientX, y: e.clientY, dx: 0 };
-    if (page) {
-      holding = true;
-      if (paused) { paused = false; updatePause(); }
-    }
-    updatePointer(e); host.setPointerCapture(e.pointerId);
+    host.setPointerCapture(e.pointerId);
   });
-  function updatePointer(e) {
-    const rect = host.getBoundingClientRect();
-    pointer = { x: Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)), y: Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height)) };
-  }
   host.addEventListener('pointermove', e => {
-    const rect = host.getBoundingClientRect();
-    updatePointer(e);
     if (!drag || drag.id !== e.pointerId) return;
-    if (page) return;
+    const rect = host.getBoundingClientRect();
     drag.dx = e.clientX - drag.x;
     if (Math.abs(drag.dx) > 12 && Math.abs(drag.dx) > Math.abs(e.clientY - drag.y)) {
       host.classList.add('memory-dragging');
-      const fraction = Math.max(0, Math.min(1, page - drag.dx / rect.width));
+      const fraction = clamp(page - drag.dx / rect.width, 0, 1);
       host.style.setProperty('--memory-slide', `${-fraction * 100}%`);
-      if (!page) { resize(); draw(); }
     }
   });
   function release(e) {
     if (!drag || drag.id !== e.pointerId) return;
     const threshold = Math.min(230, host.getBoundingClientRect().width * .24);
     const next = e.type === 'pointercancel' ? page : drag.dx < -threshold ? 1 : drag.dx > threshold ? 0 : page;
-    releaseClocks();
     drag = null;
     if (host.hasPointerCapture(e.pointerId)) host.releasePointerCapture(e.pointerId);
     setPage(next);
   }
   host.addEventListener('pointerup', release); host.addEventListener('pointercancel', release);
-  host.addEventListener('lostpointercapture', () => { releaseClocks(); if (drag) { drag = null; setPage(page); } });
-  // This room owns horizontal navigation; suppress the older album swipe handler.
+  host.addEventListener('lostpointercapture', () => { if (drag) { drag = null; setPage(page); } });
   for (const event of ['touchstart', 'touchend']) host.addEventListener(event, e => { if (visible()) e.stopPropagation(); }, { capture: true, passive: true });
   host.addEventListener('keydown', e => {
-    if (e.key === 'ArrowLeft' && page === 0) { e.preventDefault(); setPage(1); pauseButton.focus(); }
-    if (e.key === 'ArrowRight' && page === 1) { e.preventDefault(); setPage(0); enter.focus(); }
+    if (e.key === 'ArrowLeft' && page === 0) { e.preventDefault(); setPage(1); bandButtons[0].focus(); }
+    if (e.key === 'ArrowRight' && page === 1 && document.activeElement === bandButtons[0]) { e.preventDefault(); setPage(0); enter.focus(); }
   });
+
   function resize() {
     const r = host.getBoundingClientRect();
     width = r.width || innerWidth; height = r.height || innerHeight;
@@ -105,203 +97,435 @@
     if (canvas.width !== Math.round(width * dpr) || canvas.height !== Math.round(height * dpr)) {
       canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr);
     }
+    layout();
   }
-  function spawnClock() {
-    // Meteors arrive independently of input, from different parts of the sky.
-    const size = Math.max(22, Math.min(width, height) * (.038 + Math.random() * .015));
-    const x = width * (.08 + Math.random() * .84), y = -size * 1.8;
-    const direction = x < width * .5 ? 1 : -1;
-    clocks.push({ x, y, vx: direction * (90 + Math.random() * 170), vy: 95 + Math.random() * 130,
-      size, angle: (Math.random() - .5) * .6, spin: (Math.random() - .5) * .6,
-      age: 0, settled: 0, melt: 0, melting: false, trail: [], tint: Math.random() });
-    if (clocks.length > 56) clocks.shift();
+  function geometry() {
+    let cardW = clamp(width * .23, 200, 320);
+    let cardH = cardW * 1.72;
+    const maxH = height * .62;
+    if (cardH > maxH) { cardH = maxH; cardW = cardH / 1.72; }
+    const cardX = width * .565 - cardW / 2, top = height * .52 - cardH / 2;
+    return { cardX, top, cardW, cardH, bandH: cardH / 3 };
   }
-  canvas.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault(); holding = true;
-      if (paused) { paused = false; updatePause(); }
+  function layout() {
+    const g = geometry();
+    hitWrap.style.setProperty('--card-x', `${g.cardX + g.cardW / 2}px`);
+    hitWrap.style.setProperty('--card-y', `${g.top + g.cardH / 2}px`);
+    hitWrap.style.setProperty('--card-w', `${g.cardW}px`);
+    hitWrap.style.setProperty('--card-h', `${g.cardH}px`);
+  }
+
+  // --- The three folds: each a bank of six unrelated parts, chosen blind of one another. ---
+  const NAMES = [
+    ['Melting Clock', 'Open Birdcage', 'Butterfly Eye', 'Apple for a Face', 'Candle Flame', 'Crescent Moon'],
+    ['Chest of Drawers', "Grandfather's Clock", 'Caged Ribs', 'Upright Piano', 'Thundercloud', 'Hollow Tree'],
+    ['Flamingo Legs', 'Pendulum Legs', "Barber's Pole", 'Tangled Roots', 'Riding a Cloud', 'Umbrella Ribs']
+  ];
+  const INK = '#2a1f14', PAPER_FILL = '#f4ead0', GOLD = '#a97c3f';
+  const px = (b, f) => b.x + f * b.w, py = (b, f) => b.y + f * b.h;
+  function ink(lw) { ctx.strokeStyle = INK; ctx.fillStyle = PAPER_FILL; ctx.lineWidth = lw; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; }
+  function neckStub(b, cy0, halfFrac = .05) {
+    const half = b.w * halfFrac;
+    ctx.beginPath();
+    ctx.moveTo(px(b, .5) - half, cy0); ctx.lineTo(px(b, .5) - half, py(b, 1));
+    ctx.moveTo(px(b, .5) + half, cy0); ctx.lineTo(px(b, .5) + half, py(b, 1));
+    ctx.stroke();
+  }
+
+  const HEAD = [
+    // Melting clock — a Dalí nod: the clock face droops past its own band.
+    (b, t) => {
+      const lw = Math.max(1.4, b.w * .009); ink(lw);
+      const cx = px(b, .5), cy = py(b, .48), r = b.w * .25, sag = 9 + Math.sin(t * .7) * 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, Math.PI * 1.02, Math.PI * 1.98);
+      ctx.bezierCurveTo(cx + r * .92, cy + r * .74, cx + r * .26, cy + r * 1.95 + sag, cx, cy + r * 2.05 + sag);
+      ctx.bezierCurveTo(cx - r * .26, cy + r * 1.95 + sag, cx - r * .92, cy + r * .74, cx - r, cy);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.lineWidth = lw * .6;
+      for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6; ctx.beginPath(); ctx.moveTo(cx + Math.sin(a) * r * .86, cy - Math.cos(a) * r * .86); ctx.lineTo(cx + Math.sin(a) * r * .73, cy - Math.cos(a) * r * .73); ctx.stroke(); }
+      const ha = t * .5, ma = t * 3;
+      ctx.lineWidth = lw * 1.15; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.sin(ha) * r * .4, cy - Math.cos(ha) * r * .4); ctx.stroke();
+      ctx.lineWidth = lw * .7; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.sin(ma) * r * .62, cy - Math.cos(ma) * r * .62); ctx.stroke();
+      neckStub(b, cy + r * 2.05 + sag);
+    },
+    // A birdcage for a head, door open, one small tenant.
+    (b, t) => {
+      const lw = Math.max(1.2, b.w * .007); ink(lw);
+      const cx = px(b, .5), top = py(b, .2), bot = py(b, .78), r = b.w * .21;
+      ctx.beginPath(); ctx.ellipse(cx, top, r, r * .38, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(cx, bot, r * .78, r * .3, 0, 0, Math.PI * 2); ctx.stroke();
+      for (let i = 0; i <= 7; i++) { const a = -Math.PI * .92 + Math.PI * 1.84 * i / 7; ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * r, top); ctx.lineTo(cx + Math.cos(a) * r * .8, bot); ctx.stroke(); }
+      ctx.beginPath(); ctx.moveTo(cx, py(b, .04)); ctx.lineTo(cx, top - r * .08); ctx.stroke();
+      const bx = cx + Math.sin(t * 1.3) * r * .22, by = (top + bot) / 2 + Math.sin(t * 2.1) * 3;
+      ctx.fillStyle = '#3a2c1c';
+      ctx.beginPath(); ctx.ellipse(bx, by, r * .2, r * .15, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(bx + r * .18, by); ctx.lineTo(bx + r * .3, by - 2); ctx.lineTo(bx + r * .18, by + 3); ctx.closePath(); ctx.fill();
+      neckStub(b, bot + r * .06);
+    },
+    // A single lashed eye, wide open, wings for lashes.
+    (b, t) => {
+      const lw = Math.max(1.3, b.w * .008); ink(lw);
+      const cx = px(b, .5), cy = py(b, .48), r = b.w * .24;
+      const blink = reduced.matches ? 1 : clamp(1 - Math.pow(Math.sin(t * .55), 16), .06, 1);
+      ctx.beginPath(); ctx.moveTo(cx - r, cy); ctx.quadraticCurveTo(cx, cy - r * blink, cx + r, cy); ctx.quadraticCurveTo(cx, cy + r * blink, cx - r, cy); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx, cy, r * .38 * blink, 0, Math.PI * 2); ctx.fillStyle = INK; ctx.fill();
+      ctx.fillStyle = GOLD;
+      for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(cx + s * r * .9, cy - r * .1); ctx.quadraticCurveTo(cx + s * r * 1.5, cy - r * .8, cx + s * r * 1.9, cy - r * .3); ctx.quadraticCurveTo(cx + s * r * 1.3, cy - r * .05, cx + s * r * .9, cy + r * .1); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+      neckStub(b, cy + r * .9);
+    },
+    // Magritte's green apple, hovering where a face should be.
+    (b, t) => {
+      const lw = Math.max(1.3, b.w * .008); ink(lw);
+      const cx = px(b, .5), cy = py(b, .5) + Math.sin(t * .8) * 4, r = b.w * .22;
+      ctx.strokeStyle = INK; ctx.fillStyle = '#eef0dd66';
+      ctx.beginPath(); ctx.ellipse(cx, cy, r * .82, r, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = '#8ba15b';
+      ctx.beginPath(); ctx.moveTo(cx, cy - r); ctx.bezierCurveTo(cx + r * .95, cy - r * .9, cx + r * .95, cy + r * .85, cx, cy + r); ctx.bezierCurveTo(cx - r * .95, cy + r * .85, cx - r * .95, cy - r * .9, cx, cy - r); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#4a3a1c'; ctx.lineWidth = lw * 1.1; ctx.beginPath(); ctx.moveTo(cx, cy - r); ctx.quadraticCurveTo(cx + r * .1, cy - r * 1.3, cx + r * .05, cy - r * 1.5); ctx.stroke();
+      neckStub(b, cy + r);
+    },
+    // A candle standing where a head belongs, wax like hair.
+    (b, t) => {
+      const lw = Math.max(1.3, b.w * .008); ink(lw);
+      const cx = px(b, .5), top = py(b, .16), bot = py(b, .82), r = b.w * .13;
+      ctx.beginPath(); ctx.moveTo(cx - r, top); ctx.lineTo(cx - r * 1.15, bot); ctx.lineTo(cx + r * 1.15, bot); ctx.lineTo(cx + r, top); ctx.closePath(); ctx.fill(); ctx.stroke();
+      for (const s of [-1, -.3, .5]) { ctx.beginPath(); ctx.moveTo(cx + s * r, top); ctx.quadraticCurveTo(cx + s * r * 1.4, top + (bot - top) * .3, cx + s * r * .8, top + (bot - top) * .55); ctx.stroke(); }
+      const flick = reduced.matches ? 0 : Math.sin(t * 7) * 2;
+      ctx.fillStyle = '#c96a2e';
+      ctx.beginPath(); ctx.moveTo(cx, top - r * 1.6 + flick); ctx.quadraticCurveTo(cx + r * .55, top - r * .5, cx, top + r * .1); ctx.quadraticCurveTo(cx - r * .55, top - r * .5, cx, top - r * 1.6 + flick); ctx.fill();
+      neckStub(b, bot);
+    },
+    // A crescent moon in profile, a keyhole for its watching eye.
+    (b, t) => {
+      const lw = Math.max(1.3, b.w * .008); ink(lw);
+      const cx = px(b, .5), cy = py(b, .48), r = b.w * .27;
+      ctx.beginPath(); ctx.arc(cx, cy, r, Math.PI * .5, Math.PI * 1.85); ctx.arc(cx + r * .55, cy, r * .82, Math.PI * 1.85, Math.PI * .5, true); ctx.closePath(); ctx.fill(); ctx.stroke();
+      const gx = cx - r * .18, gy = cy - r * .02;
+      ctx.fillStyle = INK;
+      ctx.beginPath(); ctx.arc(gx, gy, r * .12, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(gx - r * .05, gy); ctx.lineTo(gx + r * .05, gy); ctx.lineTo(gx + r * .09, gy + r * .32); ctx.lineTo(gx - r * .09, gy + r * .32); ctx.closePath(); ctx.fill();
+      neckStub(b, cy + r * .85);
     }
+  ];
+
+  const TORSO = [
+    // Dalí's chest of drawers, one pulled open with an eye inside.
+    (b, t) => {
+      const lw = Math.max(1.3, b.w * .008); ink(lw);
+      const x = px(b, .22), w = b.w * .56, top = py(b, .08), bot = py(b, .92), rows = 4;
+      ctx.beginPath(); ctx.rect(x, top, w, bot - top); ctx.fill(); ctx.stroke();
+      for (let i = 1; i < rows; i++) { const y = top + (bot - top) * i / rows; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + w, y); ctx.stroke(); }
+      const openRow = 2, oy = top + (bot - top) * openRow / rows, oh = (bot - top) / rows;
+      const openF = reduced.matches ? .5 : .4 + Math.sin(t * .9) * .12;
+      ctx.fillStyle = '#3a2c1c'; ctx.fillRect(x - w * openF * .28, oy + oh * .15, w * (1 + openF * .28), oh * .7); ctx.strokeRect(x - w * openF * .28, oy + oh * .15, w * (1 + openF * .28), oh * .7);
+      ctx.beginPath(); ctx.arc(x + w * .22, oy + oh * .5, oh * .22, 0, Math.PI * 2); ctx.fillStyle = '#efe3c8'; ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x + w * .22, oy + oh * .5, oh * .09, 0, Math.PI * 2); ctx.fillStyle = INK; ctx.fill();
+      for (let i = 0; i < rows; i++) if (i !== openRow) { const y = top + (bot - top) * (i + .5) / rows; ctx.fillStyle = GOLD; ctx.beginPath(); ctx.arc(x + w * .5, y, oh * .06, 0, Math.PI * 2); ctx.fill(); }
+    },
+    // A grandfather clock case, pendulum swinging behind its little door.
+    (b, t) => {
+      const lw = Math.max(1.3, b.w * .008); ink(lw);
+      const x = px(b, .28), w = b.w * .44, top = py(b, .06), bot = py(b, .94);
+      ctx.beginPath(); ctx.moveTo(x, bot); ctx.lineTo(x, top + (bot - top) * .12); ctx.quadraticCurveTo(x, top, x + w * .5, top); ctx.quadraticCurveTo(x + w, top, x + w, top + (bot - top) * .12); ctx.lineTo(x + w, bot); ctx.closePath(); ctx.fill(); ctx.stroke();
+      const fcy = top + (bot - top) * .22, fr = w * .3;
+      ctx.beginPath(); ctx.arc(x + w * .5, fcy, fr, 0, Math.PI * 2); ctx.stroke();
+      const wy = top + (bot - top) * .4, wh = (bot - top) * .5, wcx = x + w * .5;
+      ctx.strokeRect(wcx - w * .32, wy, w * .64, wh);
+      const swing = Math.sin(t * 1.8) * .38;
+      ctx.save(); ctx.translate(wcx, wy); ctx.rotate(swing);
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, wh * .82); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, wh * .82, w * .1, 0, Math.PI * 2); ctx.fillStyle = GOLD; ctx.fill(); ctx.stroke();
+      ctx.restore();
+    },
+    // Ribs bent into cage bars, a small bird nested where the heart would be.
+    (b, t) => {
+      const lw = Math.max(1.3, b.w * .008); ink(lw);
+      const cx = px(b, .5), top = py(b, .1), bot = py(b, .9), rw = b.w * .34;
+      ctx.beginPath(); ctx.moveTo(cx, top); ctx.lineTo(cx, bot); ctx.stroke();
+      for (let i = 0; i < 5; i++) { const y = top + (bot - top) * (i + .5) / 5, sway = Math.sin(t * 1.2 + i) * 2;
+        for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(cx, y - 8); ctx.quadraticCurveTo(cx + s * rw + sway, y, cx, y + 8); ctx.stroke(); } }
+      const bx = cx, by = (top + bot) / 2 + Math.sin(t * 2.4) * 3;
+      ctx.fillStyle = '#3a2c1c'; ctx.beginPath(); ctx.ellipse(bx, by, rw * .32, rw * .22, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(bx + rw * .28, by); ctx.lineTo(bx + rw * .42, by - 2); ctx.lineTo(bx + rw * .28, by + 3); ctx.closePath(); ctx.fill();
+    },
+    // An upright piano worn as a torso, keys bared like teeth.
+    (b, t) => {
+      const lw = Math.max(1.3, b.w * .008); ink(lw);
+      const x = px(b, .18), w = b.w * .64, top = py(b, .12), bot = py(b, .82);
+      ctx.beginPath(); ctx.rect(x, top, w, bot - top); ctx.fill(); ctx.stroke();
+      const ky = top + (bot - top) * .62, kh = (bot - top) * .22;
+      ctx.fillStyle = '#f4ead0'; ctx.fillRect(x + w * .06, ky, w * .88, kh); ctx.strokeRect(x + w * .06, ky, w * .88, kh);
+      const keys = 9;
+      for (let i = 1; i < keys; i++) { const kx = x + w * .06 + (w * .88) * i / keys; ctx.beginPath(); ctx.moveTo(kx, ky); ctx.lineTo(kx, ky + kh); ctx.stroke(); }
+      ctx.fillStyle = INK;
+      for (let i = 0; i < keys; i++) if (i % 7 !== 2 && i % 7 !== 6) ctx.fillRect(x + w * .06 + (w * .88) * (i + .68) / keys, ky, (w * .88) / keys * .58, kh * .58);
+      const glow = .3 + .2 * Math.sin(t * .8);
+      ctx.fillStyle = `rgba(201,106,46,${glow})`; ctx.beginPath(); ctx.arc(x + w * .5, top + (bot - top) * .28, w * .1, 0, Math.PI * 2); ctx.fill();
+    },
+    // A body of stormcloud, one small bolt inside it.
+    (b, t) => {
+      const lw = Math.max(1.3, b.w * .008); ink(lw);
+      const cx = px(b, .5), cy = py(b, .5), rx = b.w * .38, ry = b.h * .3;
+      ctx.beginPath();
+      for (let i = 0; i <= 24; i++) { const a = Math.PI * 2 * i / 24; const wob = 1 + Math.sin(a * 3 + t * .6) * .08; const x = cx + Math.cos(a) * rx * wob, y = cy + Math.sin(a) * ry * wob; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      const flash = reduced.matches ? .5 : .35 + .35 * Math.max(0, Math.sin(t * 3));
+      ctx.strokeStyle = `rgba(201,106,46,${flash})`; ctx.lineWidth = lw * 1.3;
+      ctx.beginPath(); ctx.moveTo(cx - 6, cy - ry * .3); ctx.lineTo(cx + 8, cy); ctx.lineTo(cx - 4, cy); ctx.lineTo(cx + 6, cy + ry * .4); ctx.stroke();
+    },
+    // A hollowed tree trunk, a small lit window cut into the bark.
+    (b, t) => {
+      const lw = Math.max(1.3, b.w * .008); ink(lw);
+      const cx = px(b, .5), top = py(b, .08), bot = py(b, .92), rw = b.w * .32;
+      ctx.beginPath();
+      ctx.moveTo(cx - rw, bot); ctx.bezierCurveTo(cx - rw * 1.15, top + (bot - top) * .5, cx - rw * .6, top, cx, top);
+      ctx.bezierCurveTo(cx + rw * .6, top, cx + rw * 1.15, top + (bot - top) * .5, cx + rw, bot);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      for (const f of [.3, .5, .7]) { ctx.beginPath(); ctx.moveTo(cx - rw * f, top + (bot - top) * .15); ctx.quadraticCurveTo(cx - rw * f * .6, (top + bot) / 2, cx - rw * f, bot - (bot - top) * .1); ctx.lineWidth = lw * .7; ctx.stroke(); }
+      const wy = (top + bot) / 2, glow = .55 + .25 * Math.sin(t * 1.1);
+      ctx.fillStyle = `rgba(230,180,90,${glow})`; ctx.fillRect(cx - rw * .22, wy - rw * .2, rw * .44, rw * .38); ctx.lineWidth = lw; ctx.strokeRect(cx - rw * .22, wy - rw * .2, rw * .44, rw * .38);
+    }
+  ];
+
+  const LEGS = [
+    // Improbably thin flamingo legs, one bent to rest.
+    (b, t) => {
+      const lw = Math.max(1.4, b.w * .009); ink(lw);
+      const top = py(b, .04), bot = py(b, .92), cx = px(b, .5), bend = Math.sin(t * .6) * 3;
+      for (const s of [-1, 1]) {
+        ctx.beginPath(); ctx.moveTo(cx + s * b.w * .06, top);
+        if (s < 0) ctx.lineTo(cx + s * b.w * .06, bot); else { ctx.lineTo(cx + s * b.w * .1, top + (bot - top) * .55 + bend); ctx.lineTo(cx + s * b.w * .04, bot); }
+        ctx.stroke();
+      }
+      ctx.lineWidth = lw * 1.3;
+      for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(cx + s * b.w * .04, bot); ctx.lineTo(cx + s * b.w * .11, bot); ctx.stroke(); }
+    },
+    // Two pendulums for legs, ticking out of step with each other.
+    (b, t) => {
+      const lw = Math.max(1.3, b.w * .008); ink(lw);
+      const top = py(b, .06), cx = px(b, .5), len = b.h * .78;
+      for (const s of [-1, 1]) {
+        const ang = Math.sin(t * 1.6 + (s > 0 ? 1.4 : 0)) * .22;
+        const x0 = cx + s * b.w * .08;
+        ctx.save(); ctx.translate(x0, top); ctx.rotate(ang * s);
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, len); ctx.stroke();
+        ctx.beginPath(); ctx.arc(0, len, b.w * .05, 0, Math.PI * 2); ctx.fillStyle = GOLD; ctx.fill(); ctx.stroke();
+        ctx.restore();
+      }
+    },
+    // Barber-pole legs, stripes spiralling down.
+    (b, t) => {
+      const lw = Math.max(1.3, b.w * .008); ink(lw);
+      const top = py(b, .05), bot = py(b, .92), cx = px(b, .5);
+      for (const s of [-1, 1]) {
+        const x = cx + s * b.w * .1;
+        ctx.beginPath(); ctx.moveTo(x - b.w * .07, top); ctx.lineTo(x - b.w * .07, bot); ctx.lineTo(x + b.w * .07, bot); ctx.lineTo(x + b.w * .07, top); ctx.stroke();
+        ctx.save(); ctx.beginPath(); ctx.rect(x - b.w * .07, top, b.w * .14, bot - top); ctx.clip();
+        ctx.strokeStyle = GOLD; ctx.lineWidth = b.w * .05;
+        const shift = (reduced.matches ? 0 : t * 14) % 24;
+        for (let y = top - 24 + shift; y < bot + 24; y += 24) { ctx.beginPath(); ctx.moveTo(x - b.w * .12, y); ctx.lineTo(x + b.w * .12, y - 24); ctx.stroke(); }
+        ctx.restore(); ctx.strokeStyle = INK;
+      }
+    },
+    // Roots instead of legs, gripping the ground.
+    (b, t) => {
+      const lw = Math.max(1.3, b.w * .008); ink(lw);
+      const top = py(b, .05), bot = py(b, .8), cx = px(b, .5);
+      ctx.beginPath(); ctx.moveTo(cx - b.w * .1, top); ctx.lineTo(cx - b.w * .1, top + (bot - top) * .5); ctx.moveTo(cx + b.w * .1, top); ctx.lineTo(cx + b.w * .1, top + (bot - top) * .5); ctx.stroke();
+      const sway = reduced.matches ? 0 : Math.sin(t * .5) * 2;
+      for (const s of [-1.3, -.6, .6, 1.3]) {
+        ctx.beginPath(); ctx.moveTo(cx + s * b.w * .04, top + (bot - top) * .5);
+        ctx.bezierCurveTo(cx + s * b.w * .3 + sway, top + (bot - top) * .65, cx + s * b.w * .5, bot - (bot - top) * .1, cx + s * b.w * .55, bot);
+        ctx.lineWidth = lw * (1 - Math.abs(s) * .2); ctx.stroke();
+      }
+    },
+    // No legs at all — the figure simply rides a small cloud.
+    (b, t) => {
+      const lw = Math.max(1.3, b.w * .008); ink(lw);
+      const cx = px(b, .5), top = py(b, .05), hem = py(b, .42);
+      ctx.beginPath(); ctx.moveTo(cx - b.w * .16, top); ctx.lineTo(cx - b.w * .22, hem); ctx.quadraticCurveTo(cx, hem + b.h * .06, cx + b.w * .22, hem); ctx.lineTo(cx + b.w * .16, top); ctx.stroke();
+      const bob = reduced.matches ? 0 : Math.sin(t * 1.1) * 4;
+      const cy = hem + b.h * .2 + bob, cr = b.w * .3;
+      for (const [dx, dy, r] of [[-cr * .5, 0, cr * .62], [cr * .35, -cr * .12, cr * .55], [0, cr * .12, cr * .7], [cr * .8, cr * .08, cr * .42]]) {
+        ctx.beginPath(); ctx.arc(cx + dx, cy + dy, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+    },
+    // Umbrella ribs for legs — Lautréamont's chance meeting, taken literally.
+    (b, t) => {
+      const lw = Math.max(1.3, b.w * .008); ink(lw);
+      const cx = px(b, .5), top = py(b, .08), spread = py(b, .38), bot = py(b, .92);
+      ctx.beginPath(); ctx.moveTo(cx, top); ctx.lineTo(cx, bot); ctx.stroke();
+      for (const s of [-1.4, -.7, .7, 1.4]) {
+        ctx.beginPath(); ctx.moveTo(cx, top); ctx.quadraticCurveTo(cx + s * b.w * .18, spread - b.h * .02, cx + s * b.w * .14, spread);
+        ctx.lineWidth = lw * .8; ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + s * b.w * .14, spread); ctx.lineTo(cx + s * b.w * .09, bot);
+        ctx.stroke();
+      }
+      ctx.beginPath(); ctx.moveTo(cx - b.w * .18, spread); for (const s of [-1, -.5, 0, .5, 1]) ctx.lineTo(cx + s * b.w * .18, spread + (s % 1 ? 6 : 0)); ctx.lineWidth = lw * .7; ctx.stroke();
+    }
+  ];
+  const PARTS = [HEAD, TORSO, LEGS];
+  const bandIndex = [0, 1, 2];
+  const flipping = [false, false, false], flipT = [0, 0, 0], flipTo = [0, 0, 0], flipDone = [false, false, false], spins = [0, 0, 0];
+
+  let audioCtx = null;
+  function playFlip() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+      const size = Math.floor(audioCtx.sampleRate * .16);
+      const buffer = audioCtx.createBuffer(1, size, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < size; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / size);
+      const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
+      const band = audioCtx.createBiquadFilter(); band.type = 'bandpass'; band.Q.value = .9;
+      band.frequency.setValueAtTime(2000, now); band.frequency.exponentialRampToValueAtTime(420, now + .15);
+      const g = audioCtx.createGain(); g.gain.setValueAtTime(.3, now); g.gain.exponentialRampToValueAtTime(.001, now + .17);
+      noise.connect(band); band.connect(g); g.connect(audioCtx.destination); noise.start(now);
+    } catch (e) { /* silent card flip if Web Audio is unavailable */ }
+  }
+
+  function triggerFlip(i, target) {
+    if (flipping[i]) return;
+    flipping[i] = true; flipT[i] = 0; flipTo[i] = target; flipDone[i] = false;
+    playFlip();
+  }
+  function updateFlips(dt) {
+    for (let i = 0; i < 3; i++) {
+      if (!flipping[i]) continue;
+      flipT[i] += dt / .34;
+      if (flipT[i] >= .5 && !flipDone[i]) { bandIndex[i] = flipTo[i]; flipDone[i] = true; updateBandLabels(); }
+      if (flipT[i] >= 1) {
+        flipping[i] = false; flipT[i] = 0; flipDone[i] = false;
+        regenerateCaption();
+        if (spins[i] > 0) { spins[i]--; triggerFlip(i, Math.floor(Math.random() * 6)); }
+      }
+    }
+  }
+  function updateBandLabels() {
+    const zh = ['Head', 'Torso', 'Legs'];
+    bandButtons.forEach((btn, i) => btn.setAttribute('aria-label', `Change the ${zh[i].toLowerCase()} — now ${NAMES[i][bandIndex[i]]}`));
+  }
+  bandButtons.forEach(btn => btn.addEventListener('click', () => {
+    const i = Number(btn.dataset.band);
+    triggerFlip(i, (bandIndex[i] + 1) % 6);
+  }));
+  chanceBtn.addEventListener('click', () => {
+    for (let i = 0; i < 3; i++) { spins[i] = 2 + i; setTimeout(() => triggerFlip(i, Math.floor(Math.random() * 6)), i * 140); }
   });
-  canvas.addEventListener('keyup', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); releaseClocks(); } });
-  canvas.addEventListener('blur', () => { if (!drag) releaseClocks(); });
-  function advance(dt) {
-    nextMeteor -= dt;
-    if (nextMeteor <= 0) { spawnClock(); nextMeteor = .28 + Math.random() * .72; }
-    const gravity = Math.max(220, height * .6);
-    if (holding) {
-      // The cursor tilts the entire world's down axis; it is not an attractor.
-      const dx = (pointer.x - .5) * width;
-      const dy = (pointer.y - .5) * height;
-      const distance = Math.hypot(dx, dy);
-      if (distance > 12) gravityDirection = { x: dx / distance, y: dy / distance };
+  resetBtn.addEventListener('click', () => { for (let i = 0; i < 3; i++) setTimeout(() => triggerFlip(i, i), i * 90); });
+
+  // The exquisite corpse's own namesake trick: three unrelated fragments, none seeing the others.
+  const ADJ = ['velvet', 'glass', 'forgotten', 'insomniac', 'porcelain', 'weightless', 'thunderous', 'tender', 'unfinished', 'borrowed', 'astonished', 'salt-white'];
+  const NOUN = ['hour', 'key', 'moth', 'mirror', 'garden', 'telephone', 'ocean', 'ash', 'staircase', 'violin', 'appetite', 'silence'];
+  const VERB = ['wears', 'devours', 'dreams of', 'forgets', 'waters', 'folds into', 'swallows', 'becomes', 'collects', 'misplaces', 'interrupts', 'rehearses'];
+  const OBJ = ['a cloud of keys', 'the last umbrella', 'a burning violin', 'its own shadow', 'a drawer of eyes', "tomorrow's weather", 'a second moon', 'the sound of drawers', 'a folded ocean', "someone else's name", 'a very small storm', 'the wrong century'];
+  function regenerateCaption() {
+    const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+    captionEl.textContent = `The ${pick(ADJ)} ${pick(NOUN)} ${pick(VERB)} ${pick(OBJ)}.`;
+  }
+
+  const clouds = [];
+  (function buildClouds() { for (let i = 0; i < 7; i++) clouds.push({ xf: Math.random(), y: .1 + Math.random() * .55, r: .1 + Math.random() * .16, a: .1 + Math.random() * .1, speed: .006 + Math.random() * .01 }); })();
+  function drawBackdrop(t) {
+    const g = ctx.createLinearGradient(0, 0, 0, height);
+    g.addColorStop(0, '#160c22'); g.addColorStop(.55, '#20122c'); g.addColorStop(1, '#2b1932');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, width, height);
+    for (let i = 0; i < 60; i++) {
+      const x = (((Math.sin(i * 127.1 + 3) * 43758.5453) % 1) + 1) % 1 * width;
+      const y = (((Math.sin(i * 311.7 + 8) * 19341.17) % 1) + 1) % 1 * height;
+      const tw = reduced.matches ? .7 : .5 + .5 * Math.sin(t * 1.2 + i);
+      ctx.globalAlpha = .45 * tw; ctx.fillStyle = '#f3e6ff';
+      ctx.beginPath(); ctx.arc(x, y, i % 7 === 0 ? 1.3 : .7, 0, Math.PI * 2); ctx.fill();
     }
-    for (let i = clocks.length - 1; i >= 0; i--) {
-      const c = clocks[i];
-      c.age += dt;
-      if (c.melting) {
-        c.melt = Math.min(1, c.melt + dt / 2.15);
-        c.angle += c.spin * dt * (1 + c.melt * 2);
-        if (c.melt >= 1) clocks.splice(i, 1);
-        continue;
-      }
-      if (holding) {
-        // Snap heading to the cursor direction immediately — like rain caught in a gust, not a slow turn —
-        // while still letting the fall accelerate, so newly spawned clocks never dip down before following.
-        const speed = Math.hypot(c.vx, c.vy) + gravity * dt;
-        c.vx = gravityDirection.x * speed;
-        c.vy = gravityDirection.y * speed;
-        c.settled = 0;
-      } else {
-        c.vx *= Math.exp(-.5 * dt);
-        c.vy += gravity * dt;
-      }
-      c.x += c.vx * dt; c.y += c.vy * dt; c.angle += c.spin * dt;
-      const floor = height * .94 - c.size * 1.22;
-      if (!holding && c.y >= floor) {
-        c.y = floor;
-        c.vy = 0;
-        c.vx = 0;
-        c.melting = true;
-        c.melt = 0;
-      }
-      if (!holding && (c.x < c.size || c.x > width - c.size)) {
-        c.x = Math.max(c.size, Math.min(width - c.size, c.x));
-        c.vx *= -.35;
-      }
-      c.trail.push({x:c.x, y:c.y});
-      if (c.trail.length > 32) c.trail.shift();
-      const margin = c.size * 5;
-      const departed = c.x < -margin || c.x > width + margin || c.y < -margin || c.y > height + margin;
-      if (departed) clocks.splice(i, 1);
+    ctx.globalAlpha = 1;
+    for (const c of clouds) {
+      const x = (((c.xf + (reduced.matches ? 0 : t * c.speed)) % 1.3) - .15) * width;
+      const grad = ctx.createRadialGradient(x, c.y * height, 0, x, c.y * height, c.r * width);
+      grad.addColorStop(0, `rgba(120,84,150,${c.a})`); grad.addColorStop(1, 'rgba(120,84,150,0)');
+      ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(x, c.y * height, c.r * width, 0, Math.PI * 2); ctx.fill();
     }
   }
-  function drawClock(c) {
-    const alpha = Math.min(1, c.age * 3, c.melting ? 1 - c.melt : 1);
-    ctx.save(); ctx.globalAlpha = Math.max(0, alpha);
-    if (c.trail.length > 1) {
-      ctx.lineCap = 'round';
-      for (let i = 1; i < c.trail.length; i++) {
-        const strength = i / c.trail.length;
-        ctx.beginPath();ctx.moveTo(c.trail[i-1].x,c.trail[i-1].y);ctx.lineTo(c.trail[i].x,c.trail[i].y);
-        ctx.strokeStyle = `rgba(220,177,105,${strength * .34})`;
-        ctx.lineWidth = c.size * .16 * strength;ctx.stroke();
-      }
-    }
-    ctx.translate(c.x,c.y + c.size * c.melt * .32); ctx.rotate(c.angle);
-    ctx.scale(1 + c.melt * .18, 1 - c.melt * .7);
-    const r = c.size;
-    const ring = (radius, fill, stroke, line = 1) => {
-      ctx.beginPath();ctx.arc(0,0,radius,0,Math.PI*2);
-      if(fill){ctx.fillStyle=fill;ctx.fill();}
-      if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=line;ctx.stroke();}
-    };
-    const metal=ctx.createLinearGradient(-r,-r,r,r);
-    for(const [stop,color] of [[0,'#fff4ce'],[.16,'#a96f39'],[.3,'#f3d18a'],[.46,'#65401f'],[.57,'#d69a4e'],[.8,'#704720'],[1,'#ffe7a7']])metal.addColorStop(stop,color);
-    // Cast shadow, turned winding crown, and a polished suspension bow.
-    ctx.shadowColor='#000b';ctx.shadowBlur=r*.38;ctx.shadowOffsetY=r*.16;
-    ctx.strokeStyle=metal;ctx.lineWidth=r*.065;
-    ctx.beginPath();ctx.ellipse(0,-r*1.2,r*.16,r*.19,0,0,Math.PI*2);ctx.stroke();
-    ctx.fillStyle=metal;ctx.fillRect(-r*.105,-r*1.16,r*.21,r*.22);
-    ctx.shadowBlur=0;ctx.shadowOffsetY=0;
-    for(let i=-3;i<=3;i++){ctx.strokeStyle='#51381b';ctx.lineWidth=.55;ctx.beginPath();ctx.moveTo(i*r*.025,-r*1.14);ctx.lineTo(i*r*.025,-r*.96);ctx.stroke();}
-    ring(r,metal,'#604620',r*.025);
-    ring(r*.955,null,'#fff0be',r*.018);
-    ring(r*.90,'#3c2e1c','#72552a',r*.04);
-    const face=ctx.createRadialGradient(-r*.28,-r*.3,r*.05,0,0,r*.9);
-    face.addColorStop(0,'#fff8df');face.addColorStop(.65,'#e4cf9f');face.addColorStop(1,'#94704c');
-    ring(r*.85,face,'#f8dfa1',r*.018);
-    ring(r*.78,null,'#93877366',.5);
-    ctx.strokeStyle='#302c28';
-    for(let i=0;i<60;i++){
-      const a=i*Math.PI/30;
-      const inner=i%5===0?.735:.77;
-      ctx.lineWidth=i%5===0?r*.017:r*.008;
-      ctx.beginPath();ctx.moveTo(Math.sin(a)*r*inner,Math.cos(a)*r*inner);ctx.lineTo(Math.sin(a)*r*.805,Math.cos(a)*r*.805);ctx.stroke();
-    }
-    ctx.fillStyle='#302b25';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`${r*.17}px Georgia`;
-    const numerals=['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
-    for(let i=1;i<=12;i++){const a=i*Math.PI/6-Math.PI/2;ctx.fillText(numerals[i-1],Math.cos(a)*r*.63,Math.sin(a)*r*.63);}
-    ctx.font=`${r*.095}px Georgia`;ctx.fillStyle='#76664e';ctx.fillText('MÉMOIRE',0,-r*.3);
-    ctx.font=`${r*.06}px Georgia`;ctx.fillText('AUTOMATIQUE',0,-r*.18);
-    // Recessed small-seconds dial with circular machining marks.
-    ctx.save();ctx.translate(0,r*.35);
-    ring(r*.18,'#d4ccb5','#a69979',.65);
-    for(let i=1;i<5;i++)ring(r*(.07+i*.022),null,'#aa9f8330',.4);
-    for(let i=0;i<12;i++){const a=i*Math.PI/6;ctx.beginPath();ctx.moveTo(Math.sin(a)*r*.145,Math.cos(a)*r*.145);ctx.lineTo(Math.sin(a)*r*.17,Math.cos(a)*r*.17);ctx.strokeStyle='#736951';ctx.lineWidth=.5;ctx.stroke();}
-    ctx.rotate(c.age*1.2);ctx.beginPath();ctx.moveTo(0,r*.035);ctx.lineTo(0,-r*.145);ctx.strokeStyle='#334957';ctx.lineWidth=.8;ctx.stroke();ctx.restore();
-    // Bevelled blued-steel hands sit above the enamel and cast small shadows.
-    for(const [angle,length,thickness] of [[c.age*.025-1.05,r*.48,r*.045],[c.age*.15+1.05,r*.70,r*.027]]){
-      ctx.save();ctx.rotate(angle);ctx.shadowColor='#30291d66';ctx.shadowBlur=1.8;ctx.shadowOffsetX=1;ctx.shadowOffsetY=1.5;
-      ctx.beginPath();ctx.moveTo(-thickness,r*.12);ctx.lineTo(-thickness*.65,-length*.65);ctx.lineTo(0,-length);ctx.lineTo(thickness*.65,-length*.65);ctx.lineTo(thickness,r*.12);ctx.closePath();ctx.fillStyle='#173146';ctx.fill();
-      ctx.shadowBlur=0;ctx.shadowOffsetX=0;ctx.shadowOffsetY=0;ctx.beginPath();ctx.moveTo(0,r*.09);ctx.lineTo(0,-length*.88);ctx.strokeStyle='#9bb4c3';ctx.lineWidth=.6;ctx.stroke();ctx.restore();
-    }
-    ring(r*.06,metal,'#6b512f',.6);ring(r*.024,'#23394b');
-    // A restrained curved reflection across the sapphire glass.
-    ctx.save();ctx.beginPath();ctx.arc(0,0,r*.84,0,Math.PI*2);ctx.clip();
-    const glass=ctx.createLinearGradient(-r,-r,r*.5,r);
-    glass.addColorStop(0,'#ffffff52');glass.addColorStop(.42,'#ffffff0a');glass.addColorStop(.5,'#ffffff25');glass.addColorStop(.53,'#ffffff00');glass.addColorStop(1,'#6d95bc12');
-    ctx.fillStyle=glass;ctx.fillRect(-r,-r,r*2,r*2);ctx.restore();
-    ctx.beginPath();ctx.arc(0,0,r*.925,Math.PI*1.08,Math.PI*1.78);ctx.strokeStyle='#fff6d7bd';ctx.lineWidth=r*.022;ctx.stroke();
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath(); ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  function drawCard(g, t) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 34; ctx.shadowOffsetY = 16;
+    const grad = ctx.createLinearGradient(0, g.top, 0, g.top + g.cardH);
+    grad.addColorStop(0, '#f0e5cc'); grad.addColorStop(1, '#e2d1a8');
+    ctx.fillStyle = grad; roundRect(g.cardX, g.top, g.cardW, g.cardH, 10); ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.strokeStyle = 'rgba(90,65,35,.5)'; ctx.lineWidth = 1.5; ctx.stroke();
     ctx.restore();
-    if (c.melting) {
-      const melt = c.melt;
+    // paper grain
+    ctx.save(); roundRect(g.cardX, g.top, g.cardW, g.cardH, 10); ctx.clip();
+    for (let i = 0; i < 120; i++) {
+      const x = g.cardX + (((Math.sin(i * 91.3 + 1) * 24634.6) % 1 + 1) % 1) * g.cardW;
+      const y = g.top + (((Math.sin(i * 57.9 + 5) * 15234.9) % 1 + 1) % 1) * g.cardH;
+      ctx.globalAlpha = .05; ctx.fillStyle = '#3a2c14'; ctx.fillRect(x, y, 1, 1);
+    }
+    ctx.globalAlpha = 1; ctx.restore();
+  }
+  function drawBands(g, t) {
+    for (let i = 0; i < 3; i++) {
+      const b = { x: g.cardX, y: g.top + i * g.bandH, w: g.cardW, h: g.bandH };
+      const s = flipping[i] ? Math.max(.02, Math.abs(Math.cos(flipT[i] * Math.PI))) : 1;
       ctx.save();
-      ctx.globalAlpha = Math.max(0, (1 - melt) * .72);
-      ctx.translate(c.x, c.y + r * (.48 + melt * .4));
-      ctx.scale(1 + melt * 1.8, .28 + melt * .16);
-      ctx.beginPath();ctx.ellipse(0,0,r*.72,r*.2,0,0,Math.PI*2);
-      ctx.fillStyle='#9b6938';ctx.shadowColor='#20150d88';ctx.shadowBlur=r*.2;ctx.fill();
-      ctx.restore();
-      ctx.save();ctx.globalAlpha=Math.max(0,(1-melt)*.8);ctx.translate(c.x,c.y+r*.35);
-      for(let i=0;i<4;i++){
-        const drip=(i*.37+c.tint)%1;
-        ctx.beginPath();ctx.moveTo((drip-.5)*r*1.45,-r*.1);ctx.quadraticCurveTo((drip-.5)*r*1.35,r*(.35+melt*.4),(drip-.5)*r*1.28,r*(.72+melt*.45));
-        ctx.strokeStyle=i%2?'#d5a057':'#f1d18c';ctx.lineWidth=r*(.045-i*.006);ctx.lineCap='round';ctx.stroke();
-      }
+      roundRect(g.cardX, g.top, g.cardW, g.cardH, 10); ctx.clip();
+      ctx.beginPath(); ctx.rect(b.x, b.y, b.w, b.h); ctx.clip();
+      ctx.translate(px(b, .5), 0); ctx.scale(s, 1); ctx.translate(-px(b, .5), 0);
+      PARTS[i][bandIndex[i]](b, t);
       ctx.restore();
     }
   }
+  function drawCreases(g) {
+    ctx.save();
+    roundRect(g.cardX, g.top, g.cardW, g.cardH, 10); ctx.clip();
+    for (const f of [1 / 3, 2 / 3]) {
+      const y = g.top + g.cardH * f;
+      ctx.strokeStyle = 'rgba(80,58,30,.4)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(g.cardX, y); ctx.lineTo(g.cardX + g.cardW, y); ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,250,235,.3)';
+      ctx.beginPath(); ctx.moveTo(g.cardX, y + 1.4); ctx.lineTo(g.cardX + g.cardW, y + 1.4); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
   function draw() {
-    ctx.setTransform(canvas.width/width,0,0,canvas.height/height,0,0);
-    const sky = ctx.createLinearGradient(0,0,width*.35,height);
-    sky.addColorStop(0,'#030611');sky.addColorStop(.6,'#0b1429');sky.addColorStop(1,'#171c35');
-    ctx.fillStyle=sky;ctx.fillRect(0,0,width,height);
-    const haze=ctx.createRadialGradient(width*.72,height*.65,0,width*.72,height*.65,width*.65);
-    haze.addColorStop(0,'#34457424');haze.addColorStop(1,'#233c6a00');ctx.fillStyle=haze;ctx.fillRect(0,0,width,height);
-    for(let i=0;i<100;i++){
-      const x=((Math.sin(i*127.1+3)*43758.5453)%1+1)%1*width;
-      const y=((Math.sin(i*311.7+8)*19341.17)%1+1)%1*height;
-      ctx.globalAlpha=.18+(.5+.5*Math.sin(elapsed*.35+i))*.38;
-      ctx.fillStyle='#d9e5ff';ctx.beginPath();ctx.arc(x,y,i%9===0?1.2:.6,0,Math.PI*2);ctx.fill();
-    }
-    ctx.globalAlpha=1;
-    const ground = ctx.createLinearGradient(0,height*.92,0,height);
-    ground.addColorStop(0,'#a5c6ff00');ground.addColorStop(1,'#a5c6ff12');
-    ctx.fillStyle=ground;ctx.fillRect(0,height*.92,width,height*.08);
-    clocks.forEach(drawClock);
-    if(holding){
-      const x=pointer.x*width,y=pointer.y*height;
-      ctx.strokeStyle='#d1defd35';ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,9,0,Math.PI*2);ctx.stroke();
-      ctx.fillStyle='#e0eaff99';ctx.beginPath();ctx.arc(x,y,1.5,0,Math.PI*2);ctx.fill();
-    }
+    ctx.setTransform(canvas.width / width, 0, 0, canvas.height / height, 0, 0);
+    drawBackdrop(elapsed);
+    const g = geometry();
+    drawCard(g, elapsed);
+    drawBands(g, elapsed);
+    drawCreases(g);
   }
   function frame(now) {
-    raf=0;
-    if(!page || !visible() || document.hidden){last=0;return;}
-    const dt=last?Math.min((now-last)/1000,.05):0;last=now;
-    if(!paused){elapsed+=dt;advance(dt);}
-    draw();raf=requestAnimationFrame(frame);
+    raf = 0;
+    if (!page || !visible() || document.hidden) { last = 0; return; }
+    const dt = last ? Math.min((now - last) / 1000, .05) : 0; last = now;
+    elapsed += dt;
+    updateFlips(dt);
+    draw();
+    raf = requestAnimationFrame(frame);
   }
-  function start(){if(!raf && page && visible() && !document.hidden){last=0;raf=requestAnimationFrame(frame);}}
-  new ResizeObserver(() => {resize();if(page)draw();}).observe(host);
+  function start() { if (!raf && page && visible() && !document.hidden) { last = 0; raf = requestAnimationFrame(frame); } }
+  new ResizeObserver(() => { resize(); if (page) draw(); }).observe(host);
   let wasVisible = visible();
   new MutationObserver(() => {
     const isVisible = visible();
     if (isVisible === wasVisible) return;
     wasVisible = isVisible;
-    if(!isVisible){drag=null;setPage(0);}else start();
-  }).observe(document.body,{attributes:true,attributeFilter:['class']});
-  document.addEventListener('visibilitychange',()=>{if(document.hidden){releaseClocks();drag=null;}start();});
-  window.addEventListener('blur',()=>{releaseClocks();if(drag){drag=null;setPage(page);}});
+    if (!isVisible) { drag = null; setPage(0); } else start();
+  }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) drag = null; start(); });
+  window.addEventListener('blur', () => { if (drag) { drag = null; setPage(page); } });
+
+  updateBandLabels();
+  regenerateCaption();
   setPage(0);
 })();

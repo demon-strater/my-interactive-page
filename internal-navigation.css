@@ -1,0 +1,10 @@
+/* Reserve the host Home button's upper-right corner in embedded scenes. */
+header,
+.masthead {
+    max-width: max(0px, calc(95% - 124px));
+    overflow-wrap: anywhere;
+}
+
+#loadStatus {
+    top: max(76px, 8%);
+}
