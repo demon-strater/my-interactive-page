@@ -47,7 +47,7 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
 </style>
 </head>
 <body>
-<canvas id="scene" tabindex="0" aria-label="A wanderer above a sea of fog, in a long dark greatcoat with a walking cane. Move the cursor to part the mist; he turns his head to watch it. Scroll to move the sky from dawn to tempest. Press and hold anywhere (or hold Enter) to drive a storm toward the pointer — wind, rain and thunder that build while held and fall calm when released. Click the wanderer for a note on Romanticism."></canvas>
+<canvas id="scene" tabindex="0" aria-label="A wanderer above a sea of fog. Move the cursor to part the mist; he turns his head to watch it. Scroll to move the sky from dawn to tempest. Press and hold anywhere (or hold Enter) to drive wind and rain toward the pointer — the storm builds while held and falls calm when released. Click the wanderer for a note on Romanticism."></canvas>
 <header><span>CASPAR DAVID FRIEDRICH / 1818</span><h1>Wanderer<br>above the fog.</h1></header>
 <div class="tag"><span>ROMANTICISM</span><i></i><strong id="moodLabel">Dawn</strong></div>
 <div class="mood">
@@ -82,7 +82,7 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
 
   const TAU = Math.PI * 2;
   const finePointer = matchMedia('(pointer: fine)').matches;
-  let headLook = 0, pitchLook = 0, parallaxX = 0, parallaxY = 0;
+  let headLook = 0, parallaxX = 0, parallaxY = 0;
   // storm: sustained while a pointer is held down, dying away when released
   const gust = { held: false, dir: 1, power: 0, turb: 0, v: 0, sv: 0 };
 
@@ -171,31 +171,6 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
   canvas.addEventListener('keyup', e => { if (e.key === 'Enter' || e.key === ' ') endHold(); });
   canvas.addEventListener('blur', endHold);
 
-  // A translucent gust front that sits downwind and undulates while the storm blows.
-  function drawGustFront(gp) {
-    if (gp <= .03) return;
-    const c = displayTemperament > .5 ? '192,200,216' : '228,225,214';
-    const cx = width * (.5 + gust.dir * (.1 + gp * .32));
-    const band = width * (.28 + gp * .26);
-    const g = ctx.createLinearGradient(cx - gust.dir * band, 0, cx + gust.dir * band * .35, 0);
-    g.addColorStop(0, `rgba(${c},0)`);
-    g.addColorStop(.6, `rgba(${c},${.12 * gp})`);
-    g.addColorStop(1, `rgba(${c},0)`);
-    ctx.fillStyle = g; ctx.fillRect(0, height * .16, width, height * .6);
-    if (reduced.matches) return;
-    ctx.strokeStyle = `rgba(${c},${.16 * gp})`; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
-    for (let i = 0; i < 12; i++) {
-      const p = i / 12;
-      const wy = height * (.2 + p * .5) + Math.sin(elapsed * 3 + i * 1.3) * 6;
-      const drift = p * 1.7 + elapsed * (.12 + gp * .5) * gust.dir;
-      const wx = (((drift % 1.4) + 1.4) % 1.4 - .2) * width;
-      ctx.beginPath();
-      ctx.moveTo(wx - gust.dir * 40, wy);
-      ctx.quadraticCurveTo(wx, wy - 7, wx + gust.dir * 40, wy);
-      ctx.stroke();
-    }
-  }
-
   // A wanderer's sky: three temperament stops — dawn, overcast day, tempest — sampled and blended live.
   const skyStops = [
     { top: [66, 92, 148], mid: [186, 165, 150], horizon: [255, 213, 158] },
@@ -262,27 +237,31 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
   }
 
   const fogPuffs = [];
+  let fogScroll = 0;
   (function buildFog() {
     for (let i = 0; i < 64; i++) {
       const row = i % 6;
       fogPuffs.push({ xf: (i * 0.6180339887) % 1, row, speed: .01 + row * .0045, size: .13 + Math.random() * .07, wobble: Math.random() * Math.PI * 2 });
     }
   })();
-  function drawFog(t, sky, push) {
+  function drawFog(t, sky, push, dt) {
     // A dense, overlapping bank of puffs — each one individually parted by the cursor — reads as a
     // continuous sea of cloud filling the valley, per the painting, rather than scattered wisps.
     const rows = 6, fogBaseY = height * .54, fogSpanY = height * .27;
     const ap = Math.abs(push || 0);
-    const wind = (.16 + t * .6) * (1 + ap * 2.6);
+    // Integrate the drift so a rising wind speeds the fog up smoothly (never a jump),
+    // and let a gust push the whole bank toward the cursor's side.
+    const windSpeed = (.16 + t * .6) + (push || 0) * 5;
+    fogScroll += (dt || 0) * windSpeed;
     const fogColor = t > .55 ? [148, 157, 174] : [240, 236, 224];
     for (const p of fogPuffs) {
       const rowFrac = p.row / rows;
       let y = fogBaseY + rowFrac * fogSpanY + (reduced.matches ? 0 : Math.sin(elapsed * .6 + p.wobble) * 6);
-      let x = (((p.xf + elapsed * p.speed * wind) % 1.2) - .1) * width;
-      x += -parallaxX * 24 * (.4 + rowFrac) + (push || 0) * width * .34 * (.45 + rowFrac);
-      y += -parallaxY * 9 * (.3 + rowFrac) - ap * 14 * (.3 + rowFrac);
-      const size = width * p.size * (.75 + rowFrac * .6) * (1 + ap * .4);
-      let alpha = (.26 + t * .16 + rowFrac * .13) * (1 + ap * .22);
+      let x = (((p.xf + fogScroll * p.speed) % 1.2) - .1) * width;
+      x += -parallaxX * 24 * (.4 + rowFrac) + (push || 0) * width * .05 * (.4 + rowFrac);
+      y += -parallaxY * 9 * (.3 + rowFrac) - ap * 8 * (.3 + rowFrac);
+      const size = width * p.size * (.75 + rowFrac * .6) * (1 + ap * .28);
+      let alpha = (.26 + t * .16 + rowFrac * .13) * (1 + ap * .28);
       if (pointer.active) {
         const dx = x - pointer.x * width, dy = y - pointer.y * height;
         const dist = Math.hypot(dx, dy);
@@ -323,127 +302,92 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
     ctx.fillStyle = '#050508'; ctx.fill();
     ctx.restore();
   }
-  // The Rückenfigur of Friedrich's painting: a man seen from behind on a crag,
-  // in a long dark greatcoat that falls past the knee, a cane in his right hand,
-  // windswept hair. A back view, so a turn of the head shows only a slight
-  // profile — a brow / nose nub breaking the skull's edge toward the cursor.
+  // The original Rückenfigur silhouette: a simple back view — coat, two legs,
+  // an oval head, a walking cane. The head turns gently to follow the cursor.
   function drawWanderer(wind) {
-    const fx = width * .535 - parallaxX * 8, ground = height * .75 - parallaxY * 3;
-    const S = clamp(Math.min(width, height) / 500, 1.3, 2.15);
-    const g = clamp(gust.sv, -1.2, 1.2);                          // -1..1 downwind push
-    const breeze = reduced.matches ? .18 : (Math.sin(elapsed * 1.5) * .5 + Math.sin(elapsed * .73) * .5);
-    const flap = wind * (.45 + breeze * .45) + g * 5.4;          // hem flutter
-    const hairBlow = wind * 1.2 + breeze * 1.5 + g * 8.5;
-    const liftR = g > .04 ? g * 13 : 0, liftL = g < -.04 ? -g * 13 : 0;
-    const hemY = -15;                                            // mid-calf — clearly a LONG coat
-    const ink = 'rgba(8,7,11,.98)';
-
-    ctx.save();
-    ctx.translate(fx, ground);
-    ctx.scale(S, S);
-    ctx.fillStyle = ink;
-
-    // the crag underfoot — low, blending into the outcrop below
+    const fx = width * .535 - parallaxX * 10, ground = height * .735 - parallaxY * 4;
+    const lean = clamp(gust.sv, -1, 1) * 3.6;                       // a nudge in the wind's direction
+    const sway = (reduced.matches ? .3 : Math.sin(elapsed * 1.6)) * wind * 3 + lean;
+    ctx.save(); ctx.translate(fx, ground);
+    ctx.fillStyle = 'rgba(6,5,8,.97)';
+    ctx.fillRect(-7, -2, 6, 24); ctx.fillRect(2, -2, 6, 24);
+    ctx.translate(0, -2);
     ctx.beginPath();
-    ctx.moveTo(-28, 9);
-    ctx.quadraticCurveTo(-22, -3, -3, -5);
-    ctx.quadraticCurveTo(15, -7, 25, 3);
-    ctx.quadraticCurveTo(31, 10, 30, 19);
-    ctx.lineTo(-30, 19); ctx.closePath(); ctx.fill();
-
-    // lower legs + boots — only the calves show below the long coat
-    ctx.beginPath();
-    ctx.moveTo(-8, hemY + 2); ctx.lineTo(-3.4, hemY + 2);
-    ctx.lineTo(-4.4, -3.5); ctx.lineTo(-9.4, -1.5); ctx.closePath(); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(-8.4, -1, 5, 3.2, -.14, 0, TAU); ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(3.6, hemY + 2); ctx.lineTo(8.2, hemY);
-    ctx.quadraticCurveTo(11.4, -6, 10.6, -4);
-    ctx.lineTo(5.4, -5); ctx.quadraticCurveTo(3.4, -9, 2.4, hemY + 2); ctx.closePath(); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(10.6, -3.5, 5.2, 3.3, .18, 0, TAU); ctx.fill();
-
-    // the long greatcoat — a dark column falling to mid-calf, with a back vent
-    ctx.beginPath();
-    ctx.moveTo(-11.5, -52);                                       // left shoulder
-    ctx.bezierCurveTo(-13.5, -46, -11.5, -42, -10.5, -38);        // shoulder → upper back
-    ctx.bezierCurveTo(-11, -30, -12, -22, -12.5 - flap, hemY + liftL);   // long straight side, slight flare
-    ctx.quadraticCurveTo(-6.5, hemY + 3.5 + liftL * .3, -1.5, hemY + 1.5 - Math.abs(g) * 1.6); // hem in to vent
-    ctx.lineTo(-1.5, -19); ctx.lineTo(1.5, -19);                  // centre-back vent slit
-    ctx.lineTo(1.5, hemY + 1.5 - Math.abs(g) * 1.6);
-    ctx.quadraticCurveTo(6.5, hemY + 3.5 + liftR * .3, 12.5 + flap, hemY + liftR);   // right hem
-    ctx.bezierCurveTo(12, -22, 11, -30, 10.5, -38);              // long right side up
-    ctx.bezierCurveTo(11.5, -42, 13.5, -46, 11.5, -52);         // right shoulder
-    ctx.quadraticCurveTo(0, -55, -11.5, -52);                    // shoulder yoke
+    ctx.moveTo(-11, -44);
+    ctx.quadraticCurveTo(-21 - sway, -8, -17 - sway * 1.4, 18);
+    ctx.lineTo(17 + sway * 1.4, 18);
+    ctx.quadraticCurveTo(21 + sway, -8, 11, -44);
+    ctx.quadraticCurveTo(0, -50, -11, -44);
     ctx.closePath(); ctx.fill();
-
-    // a torn corner of the hem whipped up on the downwind side during a gust
-    if (Math.abs(g) > .06) {
-      const s = Math.sign(g);
-      ctx.beginPath();
-      ctx.moveTo(s * (10 + flap * .4), hemY - 1 + (s > 0 ? liftR : liftL));
-      ctx.quadraticCurveTo(s * (17 + flap * 3), hemY - 6, s * (21 + flap * 5.5), hemY - 13 - flap * 2.4);
-      ctx.quadraticCurveTo(s * (14 + flap * 2), hemY - 3, s * (8 + flap * .3), hemY - 2);
-      ctx.closePath(); ctx.fill();
-    }
-
-    // standing collar of the greatcoat
-    ctx.beginPath();
-    ctx.moveTo(-5.5, -52); ctx.quadraticCurveTo(0, -54, 5.5, -52);
-    ctx.lineTo(4.6, -57.5); ctx.quadraticCurveTo(0, -59.5, -4.6, -57.5); ctx.closePath(); ctx.fill();
-
-    // head, turning to follow the cursor
-    const turn = clamp(headLook, -1, 1), pitch = clamp(pitchLook, -1, 1);
-    const hx = turn * 6.6, hy = -62 - Math.abs(turn) * 1.5 - pitch * 3.6;
-    ctx.save();
-    ctx.translate(hx, hy);
-    ctx.rotate(turn * .36);
-    ctx.beginPath(); ctx.ellipse(0, 0, 7.2, 8.5, 0, 0, TAU); ctx.fill();
-    if (Math.abs(turn) > .1) {                      // brow / nose breaking the silhouette
-      const nd = Math.sign(turn);
-      ctx.beginPath();
-      ctx.moveTo(nd * 6, -2.2);
-      ctx.quadraticCurveTo(nd * (8.6 + Math.abs(turn) * 3.4), 1.4, nd * 5.8, 4.2);
-      ctx.quadraticCurveTo(nd * 3.4, 2.2, nd * 4.6, -1.3);
-      ctx.closePath(); ctx.fill();
-    }
-    // windswept hair
-    ctx.strokeStyle = ink; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
-    const hs = Math.sign(hairBlow || 1);
-    for (let i = -2; i <= 2; i++) {
-      const a0 = -Math.PI / 2 + i * .3;
-      const x0 = Math.cos(a0) * 6, y0 = Math.sin(a0) * 7.4;
-      const len = 4 + (2 - Math.abs(i)) * 2.6;
-      ctx.beginPath();
-      ctx.moveTo(x0, y0);
-      ctx.quadraticCurveTo(x0 + hairBlow * .45, y0 - 3.5, x0 + hairBlow + hs * len, y0 - 1 + Math.abs(i) * .8);
-      ctx.stroke();
-    }
-    ctx.restore();
-
-    // walking cane in the right hand, planted on the rock
-    ctx.strokeStyle = ink; ctx.lineWidth = 2.1; ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(10.5, -36);
-    ctx.quadraticCurveTo(17, -14, 22, 12);
-    ctx.stroke();
-
+    const hx = headLook * 3.4, hy = -52 - Math.abs(headLook) * .7;
+    ctx.beginPath(); ctx.ellipse(hx, hy, 7, 8, headLook * .12, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(6,5,8,.92)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(13, -28); ctx.lineTo(23 + sway * .6, 22); ctx.stroke();
     ctx.restore();
   }
 
   const rainDrops = [];
-  (function buildRain() { for (let i = 0; i < 130; i++) rainDrops.push({ x: Math.random(), y: Math.random(), len: 9 + Math.random() * 15, speed: 560 + Math.random() * 300 }); })();
-  function drawRain(t, dt, gustWind) {
-    const a = clamp((t - .5) * 2.4, 0, 1);
-    if (a <= 0) return;
-    const gw = gustWind || 0;
-    ctx.strokeStyle = `rgba(210,224,255,${.32 * a})`; ctx.lineWidth = 1;
-    const windX = (t - .5) * 2 * 36 + gw;
-    const fall = 1 + Math.abs(gw) / 240;
-    for (const d of rainDrops) {
-      d.y += (d.speed * fall * dt) / height;
-      if (d.y > 1.05) { d.y = -.05; d.x = Math.random(); }
-      const x = d.x * width, y = d.y * height;
-      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + windX * .045, y + d.len); ctx.stroke();
+  (function buildRain() {
+    for (let i = 0; i < 240; i++) rainDrops.push({
+      x: Math.random(), y: Math.random(),
+      z: .45 + Math.random() * .55,          // depth: near drops fall faster / longer / brighter
+      speed: 0.9 + Math.random() * 0.5
+    });
+  })();
+  // A field of parallel drops all driven along one wind vector, wrapping on every
+  // edge — so a gust looks like rain sweeping across toward the cursor, not popping.
+  function drawRain(power, dt, windX) {
+    if (power <= 0.001) return;
+    const shown = Math.floor(rainDrops.length * clamp(power * 1.1, .06, 1));
+    for (let pass = 0; pass < 2; pass++) {
+      // pass 0: far, faint, thin.  pass 1: near, brighter.
+      ctx.strokeStyle = `rgba(206,218,240,${(pass ? .34 : .16) * clamp(power * 1.3, 0, 1)})`;
+      ctx.lineWidth = pass ? 1.3 : 1;
+      ctx.beginPath();
+      for (let i = pass; i < shown; i += 2) {
+        const d = rainDrops[i];
+        const vx = windX * d.z;                       // px/s sideways
+        const vy = (520 + d.z * 520) * d.speed;       // px/s down
+        if (dt) {
+          d.x += (vx * dt) / width;
+          d.y += (vy * dt) / height;
+        }
+        if (d.y > 1.04) { d.y -= 1.08; d.x = Math.random(); }
+        else if (d.y < -.04) d.y += 1.08;
+        if (d.x > 1.05) d.x -= 1.1; else if (d.x < -.05) d.x += 1.1;
+        const px = d.x * width, py = d.y * height;
+        const m = Math.hypot(vx, vy) || 1;
+        const len = (9 + d.z * 15) + Math.min(1, Math.abs(windX) / 260) * (8 + d.z * 26);
+        ctx.moveTo(px, py);
+        ctx.lineTo(px - (vx / m) * len, py - (vy / m) * len);
+      }
+      ctx.stroke();
+    }
+  }
+  // Broad translucent sheets of rain drifting across in the wind's direction — the
+  // large-scale "몰아치는" gesture behind the individual drops.
+  function drawRainSheets(power, windX) {
+    if (power < .1) return;
+    const dir = windX >= 0 ? 1 : -1;
+    const slant = clamp(windX / 520, -1.1, 1.1) * height * .5;
+    const n = 3;
+    for (let i = 0; i < n; i++) {
+      const cyc = ((elapsed * (.045 + power * .11) + i / n) % 1 + 1) % 1;
+      const cx = (dir > 0 ? cyc * 1.6 - .3 : 1.3 - cyc * 1.6) * width;
+      const w = width * (.42 + power * .34);
+      const a = Math.sin(cyc * Math.PI) * .05 * power;
+      if (a <= .001) continue;
+      const g = ctx.createLinearGradient(cx - w / 2, 0, cx + w / 2, 0);
+      g.addColorStop(0, 'rgba(202,214,236,0)');
+      g.addColorStop(.5, `rgba(202,214,236,${a})`);
+      g.addColorStop(1, 'rgba(202,214,236,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.moveTo(cx - w / 2 + slant, -20);
+      ctx.lineTo(cx + w / 2 + slant, -20);
+      ctx.lineTo(cx + w / 2 - slant, height + 20);
+      ctx.lineTo(cx - w / 2 - slant, height + 20);
+      ctx.closePath(); ctx.fill();
     }
   }
 
@@ -545,12 +489,13 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
   }
   function maybeLightning(t, dt) {
     lightningTimer -= dt;
-    if (t > .6 && lightningTimer <= 0) {
-      lightning = Math.max(lightning, .7 + Math.random() * .3);
-      playThunder(.03 + Math.random() * .18, .5 + (t - .6) * .7);
-      lightningTimer = 2.4 + Math.random() * 5.5 * (1.6 - t);
+    if (t > .66 && lightningTimer <= 0) {
+      const far = clamp((t - .66) / .34, .18, 1);          // faint & distant until a real tempest
+      lightning = Math.max(lightning, .28 + far * .55);
+      playThunder(.12 + Math.random() * .4, .32 + far * .5);
+      lightningTimer = 3 + Math.random() * 6 * (1.6 - t);
     }
-    lightning *= reduced.matches ? 0 : .88;
+    lightning *= reduced.matches ? 0 : .87;
     if (lightning < .01) lightning = 0;
   }
 
@@ -580,22 +525,24 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
     // storm: build toward a target while held, ebb away when released
     if (gust.held) {
       const dirTarget = pointer.x < .535 ? -1 : 1;
-      gust.dir += (dirTarget - gust.dir) * Math.min(1, dt * 2.6);      // direction eases, never snaps
-      const want = clamp(1.15 - pointer.y, .5, 1);                     // hold higher for a fiercer storm
-      gust.power += (want - gust.power) * Math.min(1, dt * .85);       // ~1s natural build
+      gust.dir += (dirTarget - gust.dir) * Math.min(1, dt * 2.2);      // direction eases, never snaps
+      const want = clamp(1.1 - pointer.y, .45, 1);                     // hold higher for a fiercer storm
+      gust.power += (want - gust.power) * Math.min(1, dt * .8);        // ~1.2s natural build
     } else {
       gust.power += (0 - gust.power) * Math.min(1, dt * .5);          // ~2s die-down
       if (gust.power < .003) gust.power = 0;
     }
     // gustiness: layered slow fluctuation so the wind never sits still
-    const flutter = reduced.matches ? .85
-      : .74 + .26 * (Math.sin(elapsed * 1.7) * .5 + Math.sin(elapsed * 3.4 + 1) * .3 + Math.sin(elapsed * .63) * .2);
+    const flutter = reduced.matches ? .88
+      : .8 + .2 * (Math.sin(elapsed * 1.5) * .5 + Math.sin(elapsed * 3.1 + 1) * .3 + Math.sin(elapsed * .6) * .2);
     gust.turb = gust.power * flutter;
     gust.v = gust.turb;
     gust.sv = gust.turb * gust.dir;
     if (gust.power > .01) updateStormAudio(gust.power, gust.dir);
 
-    const renderT = clamp(displayTemperament + gust.turb * .5, 0, 1);
+    const renderT = clamp(displayTemperament + gust.turb * .34, 0, 1);
+    const windPx = (renderT - .42) * 70 + gust.sv * 560;              // horizontal wind for rain / sheets
+    const rainPower = Math.max(clamp((renderT - .5) * 2.2, 0, 1), gust.v * .9);
     const sky = sampleSky(renderT);
     updateBirds(dt);
     if (!reduced.matches) maybeLightning(renderT, dt); else lightning = 0;
@@ -603,19 +550,20 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
 
     // cursor-driven life: the wanderer's gaze, and layered parallax across the vista
     const pact = finePointer && pointer.active && !reduced.matches;
-    const lookT = pact ? clamp((pointer.x - .535) * 2.6, -1, 1) : 0;
-    const pitchT = pact ? clamp((.46 - pointer.y) * 2.2, -1, 1) : 0;
+    const lookT = pact ? clamp((pointer.x - .535) * 2.4, -1, 1) : 0;
     const pxT = pact ? clamp(pointer.x - .5, -.5, .5) : 0;
     const pyT = pact ? clamp(pointer.y - .5, -.5, .5) : 0;
     const es = Math.min(1, dt * 3);
     headLook += (lookT - headLook) * es;
-    pitchLook += (pitchT - pitchLook) * es;
     parallaxX += (pxT - parallaxX) * es;
     parallaxY += (pyT - parallaxY) * es;
 
     const sc = canvas.width / width, scy = canvas.height / height;
-    const shake = reduced.matches ? 0 : gust.turb * gust.turb * 4.5;   // quadratic — subtle until it rages
-    const shx = shake ? (Math.random() - .5) * shake : 0, shy = shake ? (Math.random() - .5) * shake : 0;
+    // a gentle low-frequency buffet while the storm blows — the wind leaning on you,
+    // not a jitter.
+    const buf = reduced.matches ? 0 : gust.v;
+    const shx = buf ? (Math.sin(elapsed * 5.7) * 1.4 + Math.sin(elapsed * 9.3 + 1) * .6) * buf : 0;
+    const shy = buf ? Math.sin(elapsed * 4.6 + 2) * 1 * buf : 0;
     ctx.setTransform(sc, 0, 0, scy, shx * sc, shy * scy);
     ctx.clearRect(-8, -8, width + 16, height + 16);
     drawSky(sky);
@@ -623,11 +571,11 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
     drawOrb(renderT);
     birds.forEach(drawBird);
     drawMountains(renderT, sky);
-    drawFog(renderT, sky, gust.sv);
-    drawGustFront(gust.v);
-    drawRain(renderT, dt, gust.sv * 260);
+    drawFog(renderT, sky, gust.sv, dt);
+    drawRainSheets(rainPower, windPx);
+    drawRain(rainPower, dt, windPx);
     drawForegroundLedge();
-    drawWanderer(clamp(renderT * 1.3, 0, 1.4));
+    drawWanderer(clamp(renderT * 1.3, 0, 1.3));
     drawVignette();
     drawLightning();
 
