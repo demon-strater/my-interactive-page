@@ -14,7 +14,11 @@
     </div>
     <div class="memory-title"><span>THE SURREALISTS / CADAVRE EXQUIS, 1925</span><h2>Exquisite<br>Corpse.</h2></div>
     <p class="corpse-caption" id="corpseCaption" aria-live="polite"></p>
-    <button class="chance-meeting" id="chanceMeeting" type="button">Chance Meeting</button>
+    <button class="chance-meeting" id="chanceMeeting" type="button" aria-label="손잡이를 아래로 당기거나 눌러 무작위 조합">
+      <span class="lever-track" aria-hidden="true"></span><span class="lever-base" aria-hidden="true"></span>
+      <span class="lever-stem" aria-hidden="true"></span><span class="lever-knob" aria-hidden="true"></span>
+      <span class="lever-label" aria-hidden="true">PULL <span>↓</span></span>
+    </button>
     <nav class="memory-nav" aria-label="조합 카드 조작"><button type="button" data-back>&larr; Back</button><span>02 / EXQUISITE CORPSE</span><button type="button" data-reset>Refold</button></nav>`;
   const enter = document.createElement('button');
   enter.type = 'button'; enter.className = 'memory-enter';
@@ -47,6 +51,16 @@
   let page = 0, drag = null;
   let elapsed = 0, last = 0, raf = 0, width = 1, height = 1;
   const visible = () => document.body.classList.contains('view-impressionism');
+  const lampChain = document.getElementById('pullChain');
+  const chainHome = document.createComment('Lamp chain position outside the surreal room');
+  lampChain.before(chainHome);
+  function syncLampChain() {
+    // Share the room's translation and clipping, including interactive swipes.
+    // Restore the original location when another artwork is opened.
+    if (visible()) room.append(lampChain);
+    else chainHome.after(lampChain);
+  }
+  syncLampChain();
 
   function setPage(next) {
     page = next; host.style.setProperty('--memory-slide', `${-page * 100}%`);
@@ -100,11 +114,12 @@
     layout();
   }
   function geometry() {
-    let cardW = clamp(width * .23, 200, 320);
+    const compact = width <= 600;
+    let cardW = Math.min(compact ? width - 118 : width * .36, 480);
     let cardH = cardW * 1.72;
-    const maxH = height * .62;
+    const maxH = height * (compact ? .64 : .78);
     if (cardH > maxH) { cardH = maxH; cardW = cardH / 1.72; }
-    const cardX = width * .565 - cardW / 2, top = height * .52 - cardH / 2;
+    const cardX = width * .5 - cardW / 2, top = height * .49 - cardH / 2;
     return { cardX, top, cardW, cardH, bandH: cardH / 3 };
   }
   function layout() {
@@ -113,6 +128,8 @@
     hitWrap.style.setProperty('--card-y', `${g.top + g.cardH / 2}px`);
     hitWrap.style.setProperty('--card-w', `${g.cardW}px`);
     hitWrap.style.setProperty('--card-h', `${g.cardH}px`);
+    scene.style.setProperty('--lever-x', `${g.cardX + g.cardW + (width <= 600 ? 27 : 65)}px`);
+    scene.style.setProperty('--lever-y', `${g.top + g.cardH * .52}px`);
   }
 
   // --- The three folds: each a bank of six unrelated parts, chosen blind of one another. ---
@@ -447,19 +464,67 @@
         if (spins[i] > 0) { spins[i]--; triggerFlip(i, Math.floor(Math.random() * 6)); }
       }
     }
+    if (rolling && !flipping.some(Boolean)) {
+      rolling = false;
+      chanceBtn.removeAttribute('aria-disabled');
+      resetBtn.disabled = false;
+      scene.classList.remove('is-rolling');
+    }
   }
   function updateBandLabels() {
     const zh = ['Head', 'Torso', 'Legs'];
     bandButtons.forEach((btn, i) => btn.setAttribute('aria-label', `Change the ${zh[i].toLowerCase()} — now ${NAMES[i][bandIndex[i]]}`));
   }
   bandButtons.forEach(btn => btn.addEventListener('click', () => {
+    if (rolling) return;
     const i = Number(btn.dataset.band);
     triggerFlip(i, (bandIndex[i] + 1) % 6);
   }));
-  chanceBtn.addEventListener('click', () => {
-    for (let i = 0; i < 3; i++) { spins[i] = 2 + i; setTimeout(() => triggerFlip(i, Math.floor(Math.random() * 6)), i * 140); }
+  let leverDrag = null, rolling = false, suppressLeverClick = false;
+  const setLeverPull = value => chanceBtn.style.setProperty('--lever-pull', value);
+  function roll() {
+    if (rolling || flipping.some(Boolean)) return;
+    rolling = true;
+    chanceBtn.setAttribute('aria-disabled', 'true');
+    resetBtn.disabled = true;
+    scene.classList.add('is-rolling');
+    setLeverPull(1);
+    setTimeout(() => setLeverPull(0), 180);
+    for (let i = 0; i < 3; i++) {
+      spins[i] = reduced.matches ? 0 : 2 + i;
+      triggerFlip(i, (bandIndex[i] + 1 + Math.floor(Math.random() * 5)) % 6);
+    }
+  }
+  function releaseLever(e) {
+    if (!leverDrag || e.pointerId !== leverDrag.id) return;
+    const gesture = leverDrag; leverDrag = null;
+    chanceBtn.classList.remove('is-pulling');
+    setLeverPull(0);
+    suppressLeverClick = gesture.distance > 6;
+    if (chanceBtn.hasPointerCapture(e.pointerId)) chanceBtn.releasePointerCapture(e.pointerId);
+    if (e.type === 'pointerup' && gesture.distance >= 30) roll();
+  }
+  chanceBtn.addEventListener('pointerdown', e => {
+    if (e.button !== 0 || !e.isPrimary || rolling) return;
+    suppressLeverClick = false;
+    leverDrag = { id: e.pointerId, y: e.clientY, distance: 0 };
+    chanceBtn.classList.add('is-pulling');
+    chanceBtn.setPointerCapture(e.pointerId);
   });
-  resetBtn.addEventListener('click', () => { for (let i = 0; i < 3; i++) setTimeout(() => triggerFlip(i, i), i * 90); });
+  chanceBtn.addEventListener('pointermove', e => {
+    if (!leverDrag || e.pointerId !== leverDrag.id) return;
+    leverDrag.distance = Math.max(0, e.clientY - leverDrag.y);
+    setLeverPull(clamp(leverDrag.distance / (width <= 600 ? 56 : 80), 0, 1));
+  });
+  for (const event of ['pointerup', 'pointercancel', 'lostpointercapture']) chanceBtn.addEventListener(event, releaseLever);
+  chanceBtn.addEventListener('click', e => {
+    if (suppressLeverClick && e.detail !== 0) { suppressLeverClick = false; return; }
+    roll();
+  });
+  resetBtn.addEventListener('click', () => {
+    if (rolling) return;
+    for (let i = 0; i < 3; i++) triggerFlip(i, i);
+  });
 
   // The exquisite corpse's own namesake trick: three unrelated fragments, none seeing the others.
   const ADJ = ['velvet', 'glass', 'forgotten', 'insomniac', 'porcelain', 'weightless', 'thunderous', 'tender', 'unfinished', 'borrowed', 'astonished', 'salt-white'];
@@ -564,6 +629,7 @@
     const isVisible = visible();
     if (isVisible === wasVisible) return;
     wasVisible = isVisible;
+    syncLampChain();
     if (!isVisible) { drag = null; setPage(0); } else start();
   }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
   document.addEventListener('visibilitychange', () => { if (document.hidden) drag = null; start(); });
