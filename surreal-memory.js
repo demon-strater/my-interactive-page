@@ -542,130 +542,47 @@
     (((Math.sin(i * 127.1 + 3) * 43758.5453) % 1) + 1) % 1,
     (((Math.sin(i * 311.7 + 8) * 19341.17) % 1) + 1) % 1
   ];
-  // A few faint constellations traced between neighbouring stars — a surrealist sky-map.
-  const LINKS = [[3, 11], [11, 19], [19, 27], [7, 23], [23, 41], [14, 33], [33, 48], [48, 55], [5, 17], [17, 29]];
+  // A faint, quiet night sky — a soft gradient, a scatter of dim stars, a low
+  // crescent, and barely-there haze. Nothing that draws attention from the card.
   function drawBackdrop(t) {
     const g = ctx.createLinearGradient(0, 0, 0, height);
-    g.addColorStop(0, '#140a20'); g.addColorStop(.5, '#20122e'); g.addColorStop(1, '#32213c');
+    g.addColorStop(0, '#0e0819'); g.addColorStop(.55, '#170f24'); g.addColorStop(1, '#20182c');
     ctx.fillStyle = g; ctx.fillRect(0, 0, width, height);
-    // a warm pool of light gathered where the card will stand
-    const spot = ctx.createRadialGradient(width * .5, height * .46, 0, width * .5, height * .46, Math.max(width, height) * .62);
-    spot.addColorStop(0, 'rgba(86,58,104,.5)'); spot.addColorStop(.55, 'rgba(58,38,74,.22)'); spot.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = spot; ctx.fillRect(0, 0, width, height);
-    // stars
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 66; i++) {
       const [sx, sy] = starAt(i);
       const x = sx * width, y = sy * height;
-      const tw = reduced.matches ? .7 : .5 + .5 * Math.sin(t * 1.2 + i);
-      ctx.globalAlpha = .45 * tw; ctx.fillStyle = '#f3e6ff';
-      ctx.beginPath(); ctx.arc(x, y, i % 7 === 0 ? 1.3 : .7, 0, Math.PI * 2); ctx.fill();
-    }
-    ctx.globalAlpha = .16; ctx.strokeStyle = '#d9c7ff'; ctx.lineWidth = 1;
-    for (const [a, b] of LINKS) {
-      const p = starAt(a), q = starAt(b);
-      ctx.beginPath(); ctx.moveTo(p[0] * width, p[1] * height); ctx.lineTo(q[0] * width, q[1] * height); ctx.stroke();
+      const tw = reduced.matches ? .7 : .5 + .5 * Math.sin(t * 1.1 + i);
+      ctx.globalAlpha = (i % 9 === 0 ? .42 : .24) * tw; ctx.fillStyle = '#efe7ff';
+      ctx.beginPath(); ctx.arc(x, y, i % 9 === 0 ? 1.2 : .7, 0, Math.PI * 2); ctx.fill();
     }
     ctx.globalAlpha = 1;
     // a low crescent moon (bitten by an offset disc painted back in sky tone)
-    const mx = width * .84, my = height * .17, mr = Math.min(width, height) * .05;
+    const mx = width * .84, my = height * .16, mr = Math.min(width, height) * .042;
     ctx.save();
-    ctx.fillStyle = 'rgba(247,235,214,.45)';
+    ctx.fillStyle = 'rgba(240,231,214,.26)';
     ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#1a0e26';
+    ctx.fillStyle = '#150e21';
     ctx.beginPath(); ctx.arc(mx + mr * .55, my - mr * .3, mr * .96, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
-    // drifting haze
     for (const c of clouds) {
       const x = (((c.xf + (reduced.matches ? 0 : t * c.speed)) % 1.3) - .15) * width;
       const grad = ctx.createRadialGradient(x, c.y * height, 0, x, c.y * height, c.r * width);
-      grad.addColorStop(0, `rgba(120,84,150,${c.a})`); grad.addColorStop(1, 'rgba(120,84,150,0)');
+      grad.addColorStop(0, `rgba(118,92,148,${c.a * .6})`); grad.addColorStop(1, 'rgba(118,92,148,0)');
       ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(x, c.y * height, c.r * width, 0, Math.PI * 2); ctx.fill();
     }
   }
-  // --- Small line glyphs that drift in the margins, framing the card in surrealist motifs. ---
-  const MOTIFS = [
-    { type: 'eye', xf: .085, yf: .30, s: 20, ph: 0.4, amp: 10 },
-    { type: 'moon', xf: .915, yf: .24, s: 16, ph: 1.7, amp: 12 },
-    { type: 'key', xf: .925, yf: .70, s: 17, ph: 3.1, amp: 9 },
-    { type: 'star', xf: .075, yf: .74, s: 13, ph: 2.2, amp: 11 },
-    { type: 'spiral', xf: .12, yf: .52, s: 12, ph: 4.5, amp: 8 }
-  ];
-  function glyph(type, x, y, s, rot, alpha) {
-    ctx.save();
-    ctx.translate(x, y); ctx.rotate(rot);
-    ctx.globalAlpha = alpha; ctx.strokeStyle = GOLD; ctx.fillStyle = GOLD;
-    ctx.lineWidth = 1.2; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-    ctx.beginPath();
-    if (type === 'eye') {
-      ctx.moveTo(-s, 0); ctx.quadraticCurveTo(0, -s * .8, s, 0); ctx.quadraticCurveTo(0, s * .8, -s, 0); ctx.stroke();
-      ctx.beginPath(); ctx.arc(0, 0, s * .32, 0, Math.PI * 2); ctx.stroke();
-      ctx.beginPath(); ctx.arc(0, 0, s * .1, 0, Math.PI * 2); ctx.fill();
-    } else if (type === 'moon') {
-      ctx.arc(0, 0, s, Math.PI * .35, Math.PI * 1.65); ctx.stroke();
-      ctx.beginPath(); ctx.arc(s * .5, 0, s * .92, Math.PI * .6, Math.PI * 1.4, true); ctx.stroke();
-    } else if (type === 'key') {
-      ctx.arc(0, -s * .5, s * .42, 0, Math.PI * 2); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(0, -s * .08); ctx.lineTo(0, s); ctx.moveTo(0, s * .55); ctx.lineTo(s * .4, s * .55);
-      ctx.moveTo(0, s * .8); ctx.lineTo(s * .3, s * .8); ctx.stroke();
-    } else if (type === 'star') {
-      for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2; ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * s, Math.sin(a) * s); }
-      ctx.stroke();
-      ctx.beginPath();
-      for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + Math.PI / 4; ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * s * .45, Math.sin(a) * s * .45); }
-      ctx.stroke();
-    } else if (type === 'spiral') {
-      ctx.moveTo(0, 0);
-      for (let a = 0; a < Math.PI * 4; a += .3) { const r = a * s * .09; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); }
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
-  function drawStage(g, t) {
+  function drawStage(g) {
+    // a soft contact shadow so the card sits down rather than floating
     const cx = g.cardX + g.cardW / 2, cbot = g.top + g.cardH;
-    // contact shadow so the card sits on the ground rather than floating
     ctx.save();
-    ctx.filter = 'blur(9px)';
-    ctx.fillStyle = 'rgba(0,0,0,.4)';
-    ctx.beginPath(); ctx.ellipse(cx, cbot + 10, g.cardW * .46, 15, 0, 0, Math.PI * 2); ctx.fill();
+    if ('filter' in ctx) ctx.filter = 'blur(10px)';
+    ctx.fillStyle = 'rgba(0,0,0,.34)';
+    ctx.beginPath(); ctx.ellipse(cx, cbot + 12, g.cardW * .44, 15, 0, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
-    // an arched frame standing behind the card, like a de Chirico portal
-    const pad = Math.max(16, g.cardW * .085);
-    for (let pass = 0; pass < 2; pass++) {
-      const q = pass * 6;
-      const x = g.cardX - pad + q, y = g.top - pad + q;
-      const w = g.cardW + pad * 2 - q * 2, h = g.cardH + pad * 2 - q * 2;
-      const r = Math.min(w * .5, h * .4);
-      ctx.save();
-      ctx.globalAlpha = pass ? .06 : .12; ctx.strokeStyle = GOLD; ctx.lineWidth = 1.3;
-      ctx.beginPath();
-      ctx.moveTo(x, y + h);
-      ctx.lineTo(x, y + r);
-      ctx.quadraticCurveTo(x, y, x + r, y);
-      ctx.lineTo(x + w - r, y);
-      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-      ctx.lineTo(x + w, y + h);
-      ctx.stroke();
-      ctx.restore();
-    }
-    // keystone diamond at the crown of the arch
-    ctx.save();
-    ctx.globalAlpha = .16; ctx.fillStyle = GOLD;
-    const ky = g.top - pad, ks = pad * .32;
-    ctx.beginPath(); ctx.moveTo(cx, ky - ks); ctx.lineTo(cx + ks, ky); ctx.lineTo(cx, ky + ks); ctx.lineTo(cx - ks, ky); ctx.closePath(); ctx.fill();
-    ctx.restore();
-    // margin motifs (only where there is room beside the card)
-    if (width > 720 && !reduced.matches) {
-      for (const m of MOTIFS) {
-        const drift = Math.sin(t * .25 + m.ph);
-        const mx = m.xf * width + Math.cos(t * .18 + m.ph) * m.amp;
-        const my = m.yf * height + drift * m.amp;
-        glyph(m.type, mx, my, m.s, drift * .12, .07 + .04 * (drift * .5 + .5));
-      }
-    }
   }
   function drawVignette() {
-    const g = ctx.createRadialGradient(width * .5, height * .5, Math.min(width, height) * .32, width * .5, height * .5, Math.max(width, height) * .72);
-    g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(6,3,14,.55)');
+    const g = ctx.createRadialGradient(width * .5, height * .5, Math.min(width, height) * .34, width * .5, height * .5, Math.max(width, height) * .74);
+    g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(8,4,16,.42)');
     ctx.fillStyle = g; ctx.fillRect(0, 0, width, height);
   }
   function roundRect(x, y, w, h, r) {
@@ -727,16 +644,6 @@
       }
     }
     ctx.restore();
-    // two strips of translucent tape pinning the top corners
-    ctx.save();
-    ctx.fillStyle = 'rgba(226,208,158,.32)'; ctx.strokeStyle = 'rgba(255,255,255,.12)';
-    const tw = Math.max(26, g.cardW * .16), th = tw * .42;
-    for (const [tx, ang] of [[g.cardX + tw * .1, -0.32], [g.cardX + g.cardW - tw * .1, 0.32]]) {
-      ctx.save(); ctx.translate(tx, g.top - th * .1); ctx.rotate(ang);
-      ctx.fillRect(-tw / 2, -th / 2, tw, th); ctx.strokeRect(-tw / 2, -th / 2, tw, th);
-      ctx.restore();
-    }
-    ctx.restore();
   }
   function drawBands(g, t) {
     for (let i = 0; i < 3; i++) {
@@ -767,7 +674,7 @@
     ctx.setTransform(canvas.width / width, 0, 0, canvas.height / height, 0, 0);
     drawBackdrop(elapsed);
     const g = geometry();
-    drawStage(g, elapsed);
+    drawStage(g);
     drawCard(g, elapsed);
     drawBands(g, elapsed);
     drawCreases(g);

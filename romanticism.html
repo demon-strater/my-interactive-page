@@ -323,9 +323,9 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
 
     // raised left arm, pointing toward the cursor / the sky
     const ax = armX, ay = armY;
-    const bx = -6, by = -40;                             // shoulder pivot
+    const bx = -7, by = -42;                             // shoulder pivot
     const perpX = -ay, perpY = ax;                       // bow the elbow outward (to his left)
-    const elX = bx + ax * 12 - perpX * 3, elY = by + ay * 12 - perpY * 3;
+    const elX = bx + ax * 12 - perpX * 2.5, elY = by + ay * 12 - perpY * 2.5;
     const wrX = elX + ax * 11,           wrY = elY + ay * 11;
     const tpX = wrX + ax * 6.5,          tpY = wrY + ay * 6.5;
     ctx.strokeStyle = 'rgba(6,5,8,.97)'; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
@@ -576,16 +576,21 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
     parallaxX += (pxT - parallaxX) * es;
     parallaxY += (pyT - parallaxY) * es;
 
-    // the raised arm points where the cursor is, but never below the horizon —
-    // he is always gesturing at the sky.
+    // the raised arm points where the cursor is, but stays well above the horizon
+    // and never swings so far it crosses the head — he is gesturing at the sky.
     let adx = 0, ady = -1;
     if (pact) {
-      let vx = pointer.x - .545, vy = Math.min(pointer.y - .58, -.12);
+      let vx = pointer.x - .545, vy = pointer.y - .62;
       const m = Math.hypot(vx, vy) || 1;
-      adx = vx / m; ady = vy / m;
+      adx = clamp(vx / m, -.5, .5);          // cap the sideways swing (~40° off vertical)
+      ady = Math.min(vy / m, -.6);           // keep it steeply skyward
+      const n = Math.hypot(adx, ady) || 1;
+      adx /= n; ady /= n;
     }
     armX += (adx - armX) * es;
     armY += (ady - armY) * es;
+    const an = Math.hypot(armX, armY) || 1;  // renormalise so the arm keeps its length mid-swing
+    armX /= an; armY /= an;
 
     const sc = canvas.width / width, scy = canvas.height / height;
     // a gentle low-frequency buffet while the storm blows — the wind leaning on you,
