@@ -385,22 +385,27 @@
   // Local assets travel with the GitHub Pages deployment, including project subpaths.
   const ART = NAMES.map((bank, band) => bank.map((name, index) => {
     const image = new Image();
-    const asset = { image, bounds: null, src: `s${band * 6 + index + 1}.png` };
+    const asset = { image, bounds: null, ready: false, src: `s${band * 6 + index + 1}.png` };
     image.decoding = 'async';
     image.onload = () => {
-      // Measure once, preserving the original PNG and its alpha channel.
-      const probe = document.createElement('canvas');
-      probe.width = image.naturalWidth; probe.height = image.naturalHeight;
-      const probeCtx = probe.getContext('2d', { willReadFrequently: true });
-      probeCtx.drawImage(image, 0, 0);
-      const pixels = probeCtx.getImageData(0, 0, probe.width, probe.height).data;
-      let left = probe.width, right = -1, top = probe.height, bottom = -1;
-      for (let y = 0; y < probe.height; y++) for (let x = 0; x < probe.width; x++) {
-        if (pixels[(y * probe.width + x) * 4 + 3] < 32) continue;
-        left = Math.min(left, x); right = Math.max(right, x);
-        top = Math.min(top, y); bottom = Math.max(bottom, y);
+      asset.ready = true;
+      try {
+        // Measure once, preserving the original PNG and its alpha channel.
+        const probe = document.createElement('canvas');
+        probe.width = image.naturalWidth; probe.height = image.naturalHeight;
+        const probeCtx = probe.getContext('2d', { willReadFrequently: true });
+        probeCtx.drawImage(image, 0, 0);
+        const pixels = probeCtx.getImageData(0, 0, probe.width, probe.height).data;
+        let left = probe.width, right = -1, top = probe.height, bottom = -1;
+        for (let y = 0; y < probe.height; y++) for (let x = 0; x < probe.width; x++) {
+          if (pixels[(y * probe.width + x) * 4 + 3] < 32) continue;
+          left = Math.min(left, x); right = Math.max(right, x);
+          top = Math.min(top, y); bottom = Math.max(bottom, y);
+        }
+        if (right >= left) asset.bounds = { x: left, y: top, w: right - left + 1, h: bottom - top + 1 };
+      } catch (e) {
+        asset.bounds = null;
       }
-      if (right >= left) asset.bounds = { x: left, y: top, w: right - left + 1, h: bottom - top + 1 };
       if (page) draw();
     };
     return asset;
@@ -411,8 +416,12 @@
     }
   }
   function drawArtwork(b, band, index, t) {
-    const asset = ART[band][index], crop = asset.bounds;
-    if (!crop) { PARTS[band][index](b, t); return; }
+    const asset = ART[band][index];
+    if (!asset.ready || !asset.image.naturalWidth || !asset.image.naturalHeight) {
+      PARTS[band][index](b, t);
+      return;
+    }
+    const crop = asset.bounds || { x: 0, y: 0, w: asset.image.naturalWidth, h: asset.image.naturalHeight };
     const anchor = asset.image.naturalWidth / 2 - crop.x;
     const span = 2 * Math.max(anchor, crop.w - anchor);
     // Smaller than the band so the artwork clears the card's border rules and

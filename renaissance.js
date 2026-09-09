@@ -6,13 +6,23 @@
   const rays = document.getElementById('rays'), depths = document.getElementById('depths'), focus = document.getElementById('focus');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const names = ['Plato','Aristotle','Socrates','Pythagoras','Euclid','Diogenes','Heraclitus','Ptolemy'];
+  const figureFiles = [
+    'ChatGPT Image 2026년 9월 7일 오후 02_07_49 (1).png',
+    'ChatGPT Image 2026년 9월 7일 오후 02_07_49 (2).png',
+    'ChatGPT Image 2026년 9월 7일 오후 02_07_49 (3).png',
+    'ChatGPT Image 2026년 9월 7일 오후 02_07_49 (4).png',
+    'ChatGPT Image 2026년 9월 7일 오후 02_07_49 (5).png',
+    'ChatGPT Image 2026년 9월 7일 오후 02_07_49 (6).png',
+    'ChatGPT Image 2026년 9월 7일 오후 02_07_49 (7).png',
+    'ChatGPT Image 2026년 9월 7일 오후 02_07_49 (8).png'
+  ];
   // World positions preserve the central pair, side conversations and seated foreground.
   // All positions and figure heights use the same pinhole projection (f / depth).
   const world = [
-    {x:-.48,z:5.8,h:2.7}, {x:.48,z:5.8,h:2.7},
-    {x:-2.65,z:5.4,h:2.6}, {x:-2.65,z:1.8,h:1.62},
-    {x:2.65,z:1.8,h:1.8}, {x:.95,z:2.7,h:1.35},
-    {x:-.9,z:.7,h:1.52}, {x:3.1,z:4.2,h:2.7}
+    {x:-.46,z:6.7,h:2.7}, {x:.46,z:6.7,h:2.7},
+    {x:-2.28,z:6.2,h:2.6}, {x:-2.15,z:2.35,h:1.62},
+    {x:2.15,z:2.35,h:1.8}, {x:.86,z:3.2,h:1.35},
+    {x:-.78,z:1.2,h:1.52}, {x:2.52,z:5.15,h:2.7}
   ];
   // Anchors the depth exaggeration below: figures at the group's average distance keep their plain 1/(z+4)
   // size, while nearer/farther ones are pushed further apart from that anchor for a stronger sense of depth.
@@ -27,19 +37,19 @@
     const p=world[i], plain=1/(p.z+4);
     // Exaggerated past the plain pinhole falloff so the near/far philosophers read as clearly closer/further,
     // not just slightly different in size — the group's average depth is held fixed as the pivot.
-    const scale=refScale*Math.pow(plain/refScale,1.45);
+    const scale=refScale*Math.pow(plain/refScale,1.62);
     // The camera's framing adapts to the chosen point while retaining shared depth.
     const side=p.x<0?vanishing.x:1-vanishing.x;
-    const fx=width*Math.min(.82,Math.max(.1,side)*1.7);
+    const fx=width*Math.min(.74,Math.max(.1,side)*1.55);
     const figureHeight=Math.min(height*1.14,width*.88)*p.h*scale;
     return {x:vanishing.x*width+p.x*fx*scale,
       y:vanishing.y*height+(height*.9-vanishing.y*height)*4*scale,
       h:figureHeight,angle:0,depth:scale};
   }
   function disorder(i) {
-    const spots=[[.18,.50],[.72,.48],[.41,.82],[.84,.86],[.50,.46],[.16,.91],[.66,.94],[.89,.46]];
+    const spots=[[.18,.56],[.55,.54],[.36,.76],[.78,.79],[.48,.48],[.15,.86],[.62,.88],[.86,.52]];
     return {x:width*(spots[i][0]+(Math.random()-.5)*.055),y:height*spots[i][1],
-      h:Math.min(height,width*.8)*(.26+Math.random()*.18),angle:(Math.random()-.5)*64,depth:Math.random()};
+      h:Math.min(height,width*.8)*(.15+Math.random()*.08),angle:(Math.random()-.5)*42,depth:Math.random()};
   }
   function renderFigures(t) {
     for(const [i,item] of items.entries()) {
@@ -219,15 +229,32 @@
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ready){if(raf)cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);}});
   async function init() {
     resize();
-    // A generated manifest keeps every uploaded ChatGPT Image asset in this scene.
-    const response=await fetch('renaissance-figures.json');if(!response.ok)throw Error('Image list unavailable');
-    const files=await response.json();
-    items=await Promise.all(files.map(async(file,i)=>{
-      const img=new Image();img.src=file;img.alt=names[i]||`Philosopher ${i+1}`;img.draggable=false;
-      await img.decode();
-      const el=document.createElement('div');el.className='philosopher';el.append(img);figures.append(el);
-      const current=disorder(i);return {el,ratio:img.naturalWidth/img.naturalHeight,from:{...current},to:{...current},current};
+    let files=figureFiles;
+    try {
+      // A generated manifest keeps every uploaded ChatGPT Image asset in this scene.
+      const response=await fetch('renaissance-figures.json');
+      if(response.ok)files=await response.json();
+    } catch (e) {
+      files=figureFiles;
+    }
+    const loaded=await Promise.allSettled(files.map(async(file,i)=>{
+      const img=new Image();img.src=encodeURI(file);img.alt=names[i]||`Philosopher ${i+1}`;img.draggable=false;
+      await img.decode().catch(()=>new Promise((resolve,reject)=>{
+        if(img.complete&&img.naturalWidth)resolve();
+        else { img.onload=resolve; img.onerror=reject; }
+      }));
+      const el=document.createElement('div');el.className='philosopher';el.append(img);
+      const current=disorder(i);
+      const item={el,ratio:img.naturalWidth/img.naturalHeight,from:{...current},to:{...current},current};
+      const w=current.h*item.ratio;
+      el.style.width=`${w}px`;el.style.height=`${current.h}px`;
+      el.style.transform=`translate(${current.x-w/2}px,${current.y-current.h}px) rotate(${current.angle}deg)`;
+      el.style.zIndex=String(Math.round(current.depth*1000));
+      return item;
     }));
+    items=loaded.filter(result=>result.status==='fulfilled').map(result=>result.value);
+    if(!items.length)throw Error('Images unavailable');
+    figures.replaceChildren(...items.map(item=>item.el));
     ready=true;document.getElementById('loadStatus').textContent='';duration=0;frame(performance.now());
   }
   init().catch(error=>{document.getElementById('loadStatus').textContent='Images unavailable — reload to retry';console.error(error);});
