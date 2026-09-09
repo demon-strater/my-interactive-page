@@ -38,6 +38,10 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
 .wanderer-speech::after{content:"";position:absolute;left:50%;bottom:-12px;transform:translateX(-50%);border:12px solid transparent;border-bottom:0;border-top-color:#ece0c4}
 .wanderer-speech .ws-kicker{display:block;font:italic 11px/1.5 Georgia,serif;letter-spacing:.18em;color:#8a6a2f;margin:0 0 8px}
 .wanderer-speech p{margin:0}
+.verse{position:absolute;left:50%;bottom:19%;transform:translateX(-50%) translateY(10px);z-index:2;max-width:min(540px,80vw);text-align:center;pointer-events:none;color:#eef2ffd0;text-shadow:0 2px 22px #000000b0;opacity:0;transition:opacity 1.9s ease,transform 1.9s ease}
+.verse.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.verse span{font:italic 16px/1.7 Georgia,"Nanum Myeongjo",serif;letter-spacing:.015em}
+.verse small{display:block;margin-top:9px;font:9px/1 Arial,sans-serif;letter-spacing:.24em;color:#c9d6f077}
 @media(max-width:640px){
   header{top:6%;max-width:82%}
   header h1{font-size:27px}
@@ -48,15 +52,17 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
   #temperament{width:124px;height:30px}
   .restore{right:3%;bottom:3%;padding:7px 13px}
   .wanderer-speech{bottom:44%;width:82vw;font-size:13px;line-height:1.78;padding:13px 16px 15px}
+  .verse{bottom:27%;max-width:82vw}
+  .verse span{font-size:13.5px}
 }
-@media(prefers-reduced-motion:reduce){#temperament{transition:none}}
+@media(prefers-reduced-motion:reduce){#temperament{transition:none}.verse{transition-duration:.25s}}
 </style>
 </head>
 <body>
-<canvas id="scene" tabindex="0" aria-label="A wanderer above a sea of fog. Move to part the mist. Scroll to shift the sky from dawn to tempest. Click the wanderer for a note on Romanticism; click the sky, or press Enter, to release birds."></canvas>
+<canvas id="scene" tabindex="0" aria-label="A wanderer above a sea of fog. Move to part the mist; the wanderer's gaze follows you and the vista shifts with depth. Scroll to move the sky from dawn to tempest. Click the mist to open a rift onto a hidden shore, click the wanderer for a note on Romanticism, or click the sky (or press Enter) to release birds. Rest the cursor to summon a line of verse."></canvas>
 <header><span>CASPAR DAVID FRIEDRICH / 1818</span><h1>Wanderer<br>above the fog.</h1></header>
 <div class="tag"><span>ROMANTICISM</span><i></i><strong id="moodLabel">Dawn</strong></div>
-<p class="caption">Move to part the mist over the valley. Scroll to turn the sky from serene dawn toward the tempest. Click the wanderer to hear him; click the heavens to loose the birds.</p>
+<p class="caption">Move to part the mist — the wanderer watches where you look. Scroll to turn the sky from dawn toward tempest. Click the mist to tear a rift onto the hidden shore; click the wanderer to hear him. Be still, and the fog will speak.</p>
 <div class="mood">
 <svg class="mood-icon" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="#ffd98a"/></svg>
 <div class="slider-wrap"><input id="temperament" type="range" min="0" max="1" step=".001" value=".16" aria-label="Shift the sky from serene dawn to tempest"></div>
@@ -68,6 +74,7 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
 <span class="ws-kicker">낭만주의 · ROMANTICISM</span>
 <p>18세기 말, 낭만주의는 이성과 규칙에 맞서 태어났다. 개인의 감정과 상상력, 그리고 거대한 자연 앞에서 느끼는 숭고함을 예술의 중심에 두었다. 안개 너머를 응시하는 방랑자처럼, 낭만주의는 알 수 없는 세계와 홀로 마주 선 인간을 그린다.</p>
 </div>
+<div class="verse" id="verse" aria-hidden="true"></div>
 <script>
 (() => {
   'use strict';
@@ -89,6 +96,13 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
   let lightning = 0, lightningTimer = 1.4;
   const birds = [];
 
+  const TAU = Math.PI * 2;
+  const easeOutCubic = x => 1 - Math.pow(1 - x, 3);
+  const finePointer = matchMedia('(pointer: fine)').matches;
+  let headLook = 0, parallaxX = 0, parallaxY = 0, idle = 0;
+  const reveal = { x: 0, y: 0, age: 0, active: false };
+  const ripples = [];
+
   function resize() {
     dpr = Math.min(devicePixelRatio || 1, 2);
     width = innerWidth; height = innerHeight;
@@ -96,7 +110,7 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
   }
   addEventListener('resize', resize);
 
-  function setPointer(e) { pointer.x = e.clientX / width; pointer.y = e.clientY / height; pointer.active = true; }
+  function setPointer(e) { pointer.x = e.clientX / width; pointer.y = e.clientY / height; pointer.active = true; idle = 0; hideVerse(); }
   canvas.addEventListener('pointermove', setPointer, { passive: true });
   canvas.addEventListener('pointerenter', () => pointer.active = true);
   canvas.addEventListener('pointerleave', () => pointer.active = false);
@@ -110,6 +124,7 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
   // Turn the wheel to move the sky along the same 0..1 temperament the slider drives.
   canvas.addEventListener('wheel', e => {
     e.preventDefault();
+    idle = 0; hideVerse();
     const scale = e.deltaMode === 1 ? .04 : e.deltaMode === 2 ? .32 : .0012;
     temperament = clamp(temperament + e.deltaY * scale, 0, 1);
     temperamentInput.value = temperament.toFixed(3);
@@ -147,14 +162,124 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
     return px > fx - 46 && px < fx + 46 && py > ground - 72 && py < ground + 30;
   }
   canvas.addEventListener('click', e => {
+    idle = 0; hideVerse();
     if (hitWanderer(e.clientX, e.clientY)) { toggleSpeech(); return; }
-    if (e.clientY > height * .64) return;
-    spawnBirds(e.clientX, e.clientY);
+    const yf = e.clientY / height;
+    if (yf > .58 && yf < .87) { startReveal(e.clientX, e.clientY); return; }
+    if (yf <= .58) spawnBirds(e.clientX, e.clientY);
   });
   canvas.addEventListener('keydown', e => {
     if (e.key !== 'Enter' && e.key !== ' ') return;
-    e.preventDefault(); spawnBirds(width * .5, height * .26);
+    e.preventDefault(); idle = 0; spawnBirds(width * .5, height * .26);
   });
+
+  // ── A rift in the sea of fog ──────────────────────────────────────────────
+  // Click the mist and it tears open in a spreading ripple, baring a Gothic ruin
+  // on a hidden shore — Friedrich's Eldena — before the cloud rolls back over it.
+  function startReveal(x, y) {
+    reveal.x = x; reveal.y = clamp(y, height * .56, height * .82);
+    reveal.age = 0; reveal.active = true;
+    ripples.length = 0;
+    for (let i = 0; i < 3; i++) ripples.push({ age: -i * .22 });
+  }
+  function drawRuin(cx, baseY, s, a) {
+    ctx.fillStyle = `rgba(9,9,15,${a})`;
+    const w = 12 * s, h = 40 * s, th = 3.4 * s;
+    ctx.beginPath();
+    ctx.moveTo(cx - w, baseY);
+    ctx.lineTo(cx - w, baseY - h * .58);
+    ctx.quadraticCurveTo(cx - w, baseY - h, cx, baseY - h);
+    ctx.quadraticCurveTo(cx + w, baseY - h, cx + w, baseY - h * .58);
+    ctx.lineTo(cx + w, baseY);
+    ctx.closePath();
+    const iw = w - th, ih = h - th * 2.4;
+    ctx.moveTo(cx - iw, baseY);
+    ctx.lineTo(cx - iw, baseY - ih * .55);
+    ctx.quadraticCurveTo(cx - iw, baseY - ih, cx, baseY - ih);
+    ctx.quadraticCurveTo(cx + iw, baseY - ih, cx + iw, baseY - ih * .55);
+    ctx.lineTo(cx + iw, baseY);
+    ctx.closePath();
+    ctx.fill('evenodd');
+    ctx.fillRect(cx - w - th, baseY - h * .34, th, h * .34);
+    ctx.strokeStyle = `rgba(9,9,15,${a})`; ctx.lineWidth = 1.3 * s; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(cx + w + 5 * s, baseY);
+    ctx.lineTo(cx + w + 2.5 * s, baseY - 19 * s);
+    ctx.moveTo(cx + w + 3.4 * s, baseY - 12 * s); ctx.lineTo(cx + w + 9 * s, baseY - 17 * s);
+    ctx.moveTo(cx + w + 3 * s, baseY - 15 * s); ctx.lineTo(cx + w - 1 * s, baseY - 23 * s);
+    ctx.stroke();
+  }
+  function drawReveal(dt) {
+    if (!reveal.active) return;
+    reveal.age += dt;
+    const A = reveal.age;
+    const open = easeOutCubic(clamp(A / .5, 0, 1));
+    const close = 1 - easeOutCubic(clamp((A - 3.1) / 1.3, 0, 1));
+    const k = Math.min(open, close);
+    if (A > 4.6 || k <= .001) { reveal.active = false; ripples.length = 0; return; }
+    const x = reveal.x, y = reveal.y;
+    const maxR = Math.min(width, height) * .17;
+    const R = maxR * (.35 + .65 * k);
+    const fogC = displayTemperament > .55 ? [148, 157, 174] : [240, 236, 224];
+
+    ctx.save();
+    ctx.beginPath(); ctx.arc(x, y, R, 0, TAU); ctx.clip();
+    const g = ctx.createLinearGradient(0, y - R, 0, y + R);
+    g.addColorStop(0, `rgba(52,61,80,${.95 * k})`);
+    g.addColorStop(.5, `rgba(30,36,51,${.97 * k})`);
+    g.addColorStop(1, `rgba(16,19,29,${k})`);
+    ctx.fillStyle = g; ctx.fillRect(x - R, y - R, R * 2, R * 2);
+    const waterY = y + R * .3, s = R / 27;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(x - R, waterY, R * 2, R); ctx.clip();
+    ctx.translate(0, waterY * 2); ctx.scale(1, -1);
+    drawRuin(x, waterY, s * .96, .13 * k);
+    ctx.restore();
+    drawRuin(x, waterY, s, .96 * k);
+    ctx.fillStyle = `rgba(200,214,235,${.16 * k})`;
+    ctx.fillRect(x - R, waterY - .6, R * 2, 1.2);
+    ctx.restore();
+
+    const rim = ctx.createRadialGradient(x, y, R * .5, x, y, R * 1.14);
+    rim.addColorStop(0, rgb(fogC, 0));
+    rim.addColorStop(1, rgb(fogC, .55 * k));
+    ctx.fillStyle = rim; ctx.beginPath(); ctx.arc(x, y, R * 1.14, 0, TAU); ctx.fill();
+    ctx.strokeStyle = `rgba(255,250,236,${.13 * k})`; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.arc(x, y, R, 0, TAU); ctx.stroke();
+
+    if (!reduced.matches) {
+      for (let i = ripples.length - 1; i >= 0; i--) {
+        const rp = ripples[i]; rp.age += dt;
+        if (rp.age < 0) continue;
+        if (rp.age > 1.9) { ripples.splice(i, 1); continue; }
+        const rr = maxR * .45 + rp.age * 155;
+        const ra = clamp(1 - rp.age / 1.7, 0, 1) * .38;
+        ctx.strokeStyle = rgb(fogC, ra); ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.ellipse(x, y, rr, rr * .33, 0, 0, TAU); ctx.stroke();
+      }
+    }
+  }
+
+  // ── Stillness: a line of verse for those who stop to look ─────────────────
+  const verseEl = document.getElementById('verse');
+  const VERSES = [
+    ['Of something far more deeply interfused.', 'WORDSWORTH'],
+    ['I love not Man the less, but Nature more.', 'BYRON'],
+    ['The artist should paint what he sees within him.', 'C. D. FRIEDRICH']
+  ];
+  let verseShown = false, lastVerse = -1;
+  function showVerse() {
+    if (verseShown || speechVisible) return;
+    let i; do { i = Math.floor(Math.random() * VERSES.length); } while (i === lastVerse);
+    lastVerse = i;
+    verseEl.innerHTML = `<span>${VERSES[i][0]}</span><small>&mdash; ${VERSES[i][1]}</small>`;
+    verseShown = true;
+    requestAnimationFrame(() => verseEl.classList.add('show'));
+  }
+  function hideVerse() {
+    if (!verseShown) return;
+    verseShown = false; verseEl.classList.remove('show');
+  }
 
   // A wanderer's sky: three temperament stops — dawn, overcast day, tempest — sampled and blended live.
   const skyStops = [
@@ -184,7 +309,7 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
     ctx.globalAlpha = 1;
   }
   function drawOrb(t) {
-    const x = width * .74, y = height * (.3 + t * .05);
+    const x = width * .74 - parallaxX * 5, y = height * (.3 + t * .05) - parallaxY * 3;
     const core = t < .5 ? [255, 240, 205] : [214, 224, 255];
     const glowA = clamp(1 - t * 1.5, .12, 1);
     const r = width * .13;
@@ -203,14 +328,16 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
   function drawMountains(t, sky) {
     const layers = 5;
     for (let L = 0; L < layers; L++) {
+      const near = L / (layers - 1);                 // 0 = far ridge … 1 = near ridge
       const base = height * (.40 + L * .075);
-      ctx.beginPath(); ctx.moveTo(0, height);
+      const sx = -parallaxX * (5 + near * 26), sy = -parallaxY * (2 + near * 12);
+      ctx.beginPath(); ctx.moveTo(-14, height);
       const steps = 48;
-      for (let i = 0; i <= steps; i++) {
+      for (let i = -2; i <= steps + 2; i++) {
         const xf = i / steps;
-        ctx.lineTo(xf * width, base + ridgeY(xf, L) * height * 1.4);
+        ctx.lineTo(xf * width + sx, base + sy + ridgeY(xf, L) * height * 1.4);
       }
-      ctx.lineTo(width, height); ctx.closePath();
+      ctx.lineTo(width + 14, height); ctx.closePath();
       const farF = 1 - L / (layers - 1);
       const rockCool = [42, 50, 66], rockWarm = [92, 70, 54];
       const rockBase = lerpColor(rockCool, rockWarm, t < .4 ? (1 - t / .4) * .4 : 0);
@@ -236,6 +363,8 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
       const rowFrac = p.row / rows;
       let y = fogBaseY + rowFrac * fogSpanY + (reduced.matches ? 0 : Math.sin(elapsed * .6 + p.wobble) * 6);
       let x = (((p.xf + elapsed * p.speed * wind) % 1.2) - .1) * width;
+      x += -parallaxX * 24 * (.4 + rowFrac);
+      y += -parallaxY * 9 * (.3 + rowFrac);
       const size = width * p.size * (.75 + rowFrac * .6);
       let alpha = .26 + t * .16 + rowFrac * .13;
       if (pointer.active) {
@@ -266,17 +395,20 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
   }
 
   function drawForegroundLedge() {
+    ctx.save();
+    ctx.translate(-parallaxX * 14, -parallaxY * 5);
     ctx.beginPath();
-    ctx.moveTo(0, height); ctx.lineTo(0, height * .92);
+    ctx.moveTo(-24, height + 26); ctx.lineTo(-24, height * .92);
     ctx.quadraticCurveTo(width * .22, height * .80, width * .36, height * .855);
     ctx.quadraticCurveTo(width * .445, height * .895, width * .5, height * .78);
     ctx.quadraticCurveTo(width * .555, height * .70, width * .62, height * .835);
     ctx.quadraticCurveTo(width * .76, height * .92, width, height * .87);
-    ctx.lineTo(width, height); ctx.closePath();
+    ctx.lineTo(width + 24, height + 26); ctx.closePath();
     ctx.fillStyle = '#050508'; ctx.fill();
+    ctx.restore();
   }
   function drawWanderer(wind) {
-    const fx = width * .535, ground = height * .735;
+    const fx = width * .535 - parallaxX * 7, ground = height * .735 - parallaxY * 3;
     const sway = (reduced.matches ? .3 : Math.sin(elapsed * 1.6)) * wind * 3;
     ctx.save(); ctx.translate(fx, ground);
     ctx.fillStyle = 'rgba(6,5,8,.97)';
@@ -289,7 +421,8 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
     ctx.quadraticCurveTo(21 + sway, -8, 11, -44);
     ctx.quadraticCurveTo(0, -50, -11, -44);
     ctx.closePath(); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(0, -52, 7, 8, 0, 0, Math.PI * 2); ctx.fill();
+    const hx = headLook * 3.6, hy = -52 - Math.abs(headLook) * .8;
+    ctx.beginPath(); ctx.ellipse(hx, hy, 7, 8, headLook * .13, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = 'rgba(6,5,8,.92)'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(13, -28); ctx.lineTo(23 + sway * .6, 22); ctx.stroke();
     ctx.restore();
@@ -363,6 +496,19 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
     if (!reduced.matches) maybeLightning(t, dt); else lightning = 0;
     updateMoodLabel(t);
 
+    // cursor-driven life: the wanderer's gaze, and layered parallax across the vista
+    const pact = finePointer && pointer.active && !reduced.matches;
+    const lookT = pact ? clamp((pointer.x - .535) * 2.4, -1, 1) : 0;
+    const pxT = pact ? clamp(pointer.x - .5, -.5, .5) : 0;
+    const pyT = pact ? clamp(pointer.y - .5, -.5, .5) : 0;
+    const es = Math.min(1, dt * 3);
+    headLook += (lookT - headLook) * es;
+    parallaxX += (pxT - parallaxX) * es;
+    parallaxY += (pyT - parallaxY) * es;
+
+    idle += dt;
+    if (idle > 6) showVerse();
+
     ctx.setTransform(canvas.width / width, 0, 0, canvas.height / height, 0, 0);
     ctx.clearRect(0, 0, width, height);
     drawSky(sky);
@@ -371,6 +517,7 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
     birds.forEach(drawBird);
     drawMountains(t, sky);
     drawFog(t, sky);
+    drawReveal(dt);
     drawRain(t, dt);
     drawForegroundLedge();
     drawWanderer(clamp(t * 1.3, 0, 1.3));
