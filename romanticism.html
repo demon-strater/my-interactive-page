@@ -83,6 +83,7 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
   const TAU = Math.PI * 2;
   const finePointer = matchMedia('(pointer: fine)').matches;
   let headLook = 0, parallaxX = 0, parallaxY = 0;
+  let armX = 0, armY = -1;   // smoothed unit vector of the raised, pointing arm
   // storm: sustained while a pointer is held down, dying away when released
   const gust = { held: false, dir: 1, power: 0, turb: 0, v: 0, sv: 0 };
 
@@ -319,6 +320,23 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
     ctx.quadraticCurveTo(21 + sway, -8, 11, -44);
     ctx.quadraticCurveTo(0, -50, -11, -44);
     ctx.closePath(); ctx.fill();
+
+    // raised left arm, pointing toward the cursor / the sky
+    const ax = armX, ay = armY;
+    const bx = -6, by = -40;                             // shoulder pivot
+    const perpX = -ay, perpY = ax;                       // bow the elbow outward (to his left)
+    const elX = bx + ax * 12 - perpX * 3, elY = by + ay * 12 - perpY * 3;
+    const wrX = elX + ax * 11,           wrY = elY + ay * 11;
+    const tpX = wrX + ax * 6.5,          tpY = wrY + ay * 6.5;
+    ctx.strokeStyle = 'rgba(6,5,8,.97)'; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.lineWidth = 5.2;
+    ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(elX, elY); ctx.stroke();   // upper arm / sleeve
+    ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(elX, elY); ctx.lineTo(wrX, wrY); ctx.stroke(); // forearm
+    ctx.lineWidth = 2.3;
+    ctx.beginPath(); ctx.moveTo(wrX, wrY); ctx.lineTo(tpX, tpY); ctx.stroke(); // pointing finger
+    ctx.beginPath(); ctx.arc(wrX, wrY, 2.7, 0, Math.PI * 2); ctx.fill();       // fist
+
     const hx = headLook * 3.4, hy = -52 - Math.abs(headLook) * .7;
     ctx.beginPath(); ctx.ellipse(hx, hy, 7, 8, headLook * .12, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = 'rgba(6,5,8,.92)'; ctx.lineWidth = 2;
@@ -557,6 +575,17 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
     headLook += (lookT - headLook) * es;
     parallaxX += (pxT - parallaxX) * es;
     parallaxY += (pyT - parallaxY) * es;
+
+    // the raised arm points where the cursor is, but never below the horizon —
+    // he is always gesturing at the sky.
+    let adx = 0, ady = -1;
+    if (pact) {
+      let vx = pointer.x - .545, vy = Math.min(pointer.y - .58, -.12);
+      const m = Math.hypot(vx, vy) || 1;
+      adx = vx / m; ady = vy / m;
+    }
+    armX += (adx - armX) * es;
+    armY += (ady - armY) * es;
 
     const sc = canvas.width / width, scy = canvas.height / height;
     // a gentle low-frequency buffet while the storm blows — the wind leaning on you,
