@@ -35,7 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
         'renaissance-card':  'rgba(205, 158, 64, 0.22)',
         'surrealism-card':   'rgba(48, 74, 152, 0.18)',
         'impressionism-card':'rgba(196, 148, 172, 0.20)',
-        'bauhaus-card':      'rgba(208, 58, 38, 0.15)',
         'romanticism-card':  'rgba(108, 130, 152, 0.19)',
     };
 
@@ -114,7 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const interactions = [
         { hour: 1, title: 'RENAISSANCE', meta: 'c. 1400-1600', status: 'Available', site: 'renaissance', top: '#c8a86b', bottom: '#3a2510' },
         { hour: 2, title: 'SURREALISM', meta: '1924-1966', status: 'Available', site: 'impressionism', top: '#ff7a59', bottom: '#77325f' },
-        { hour: 3, title: 'BAUHAUS', meta: '1919-1933', status: 'Coming soon', top: '#f5c84b', bottom: '#283c8f' },
         { hour: 4, title: 'IMPRESSIONISM', meta: 'c. 1874-1886', status: 'Available', site: 'impressionism-time', top: '#a5d96a', bottom: '#4b8aa0' },
         { hour: 5, title: 'ROMANTICISM', meta: 'c. 1798-1850', status: 'Available', site: 'romanticism', top: '#6b7f99', bottom: '#07101c' }
     ];
