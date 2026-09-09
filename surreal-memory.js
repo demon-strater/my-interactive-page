@@ -19,7 +19,7 @@
       <span class="lever-stem" aria-hidden="true"></span><span class="lever-knob" aria-hidden="true"></span>
       <span class="lever-label" aria-hidden="true">PULL <span>↓</span></span>
     </button>
-    <nav class="memory-nav" aria-label="조합 카드 조작"><button type="button" data-back>&larr; Back</button><span>02 / EXQUISITE CORPSE</span><button type="button" data-reset>Refold</button></nav>`;
+    <nav class="memory-nav" aria-label="조합 카드 조작"><button type="button" data-back>&larr; Back</button><span>02 / EXQUISITE CORPSE</span></nav>`;
   const enter = document.createElement('button');
   enter.type = 'button'; enter.className = 'memory-enter';
   enter.textContent = 'Next Dream';
@@ -45,7 +45,6 @@
   const bandButtons = [...scene.querySelectorAll('.corpse-band')];
   const captionEl = scene.querySelector('#corpseCaption');
   const chanceBtn = scene.querySelector('#chanceMeeting');
-  const resetBtn = scene.querySelector('[data-reset]');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   let page = 0, drag = null;
@@ -115,9 +114,9 @@
   }
   function geometry() {
     const compact = width <= 600;
-    let cardW = Math.min(compact ? width - 118 : width * .36, 480);
+    let cardW = Math.min(compact ? width - 96 : width * .42, 540);
     let cardH = cardW * 1.72;
-    const maxH = height * (compact ? .64 : .78);
+    const maxH = height * (compact ? .7 : .84);
     if (cardH > maxH) { cardH = maxH; cardW = cardH / 1.72; }
     const cardX = width * .5 - cardW / 2, top = height * .49 - cardH / 2;
     return { cardX, top, cardW, cardH, bandH: cardH / 3 };
@@ -416,7 +415,9 @@
     if (!crop) { PARTS[band][index](b, t); return; }
     const anchor = asset.image.naturalWidth / 2 - crop.x;
     const span = 2 * Math.max(anchor, crop.w - anchor);
-    const scale = Math.min(b.w * .88 / span, b.h * .96 / crop.h);
+    // Smaller than the band so the artwork clears the card's border rules and
+    // corner flourishes; the outer parts still meet at the two folds.
+    const scale = Math.min(b.w * .74 / span, b.h * .76 / crop.h);
     const w = crop.w * scale, h = crop.h * scale;
     const x = px(b, .5) - anchor * scale;
     const y = band === 0 ? b.y + b.h - h : band === 2 ? b.y : b.y + (b.h - h) / 2;
@@ -467,7 +468,6 @@
     if (rolling && !flipping.some(Boolean)) {
       rolling = false;
       chanceBtn.removeAttribute('aria-disabled');
-      resetBtn.disabled = false;
       scene.classList.remove('is-rolling');
     }
   }
@@ -486,7 +486,6 @@
     if (rolling || flipping.some(Boolean)) return;
     rolling = true;
     chanceBtn.setAttribute('aria-disabled', 'true');
-    resetBtn.disabled = true;
     scene.classList.add('is-rolling');
     setLeverPull(1);
     setTimeout(() => setLeverPull(0), 180);
@@ -521,11 +520,6 @@
     if (suppressLeverClick && e.detail !== 0) { suppressLeverClick = false; return; }
     roll();
   });
-  resetBtn.addEventListener('click', () => {
-    if (rolling) return;
-    for (let i = 0; i < 3; i++) triggerFlip(i, i);
-  });
-
   // The exquisite corpse's own namesake trick: three unrelated fragments, none seeing the others.
   const ADJ = ['velvet', 'glass', 'forgotten', 'insomniac', 'porcelain', 'weightless', 'thunderous', 'tender', 'unfinished', 'borrowed', 'astonished', 'salt-white'];
   const NOUN = ['hour', 'key', 'moth', 'mirror', 'garden', 'telephone', 'ocean', 'ash', 'staircase', 'violin', 'appetite', 'silence'];
