@@ -400,8 +400,7 @@ body.artwork-opening.view-interaction .hub-screen {
 .timeline-card.surrealism-card,
 .timeline-card.impressionism-card,
 .timeline-card.renaissance-card,
-.timeline-card.romanticism-card,
-.timeline-card.bauhaus-card {
+.timeline-card.romanticism-card {
     --art-image: url('morning.png');
     --artwork-left: 60%;
     color: #201915;
@@ -424,15 +423,9 @@ body.artwork-opening.view-interaction .hub-screen {
     --art-image: url('낭만주의.png');
 }
 
-.timeline-card.bauhaus-card {
-    --art-image: url('바우하우스.png');
-    --artwork-left: 60%;
-}
-
 .timeline-card.surrealism-card,
 .timeline-card.impressionism-card,
-.timeline-card.romanticism-card,
-.timeline-card.bauhaus-card {
+.timeline-card.romanticism-card {
     background-image: var(--art-image) !important;
     background-size: var(--art-bg-size, auto 85%) !important;
     background-position: left center !important;
@@ -441,8 +434,7 @@ body.artwork-opening.view-interaction .hub-screen {
 
 .timeline-card.surrealism-card::before,
 .timeline-card.impressionism-card::before,
-.timeline-card.romanticism-card::before,
-.timeline-card.bauhaus-card::before {
+.timeline-card.romanticism-card::before {
     display: none !important;
 }
 
@@ -450,24 +442,21 @@ body.artwork-opening.view-interaction .hub-screen {
 .timeline-card.surrealism-card .card-hour,
 .timeline-card.impressionism-card .card-hour,
 .timeline-card.renaissance-card .card-hour,
-.timeline-card.romanticism-card .card-hour,
-.timeline-card.bauhaus-card .card-hour {
+.timeline-card.romanticism-card .card-hour {
     display: none;
 }
 
 .timeline-card.surrealism-card strong,
 .timeline-card.impressionism-card strong,
 .timeline-card.renaissance-card strong,
-.timeline-card.romanticism-card strong,
-.timeline-card.bauhaus-card strong {
+.timeline-card.romanticism-card strong {
     display: none;
 }
 
 .timeline-card.surrealism-card small,
 .timeline-card.impressionism-card small,
 .timeline-card.renaissance-card small,
-.timeline-card.romanticism-card small,
-.timeline-card.bauhaus-card small {
+.timeline-card.romanticism-card small {
     display: none;
 }
 
@@ -2435,8 +2424,7 @@ body.view-interaction.night-background .handle {
 .timeline-card.surrealism-card,
 .timeline-card.impressionism-card,
 .timeline-card.renaissance-card,
-.timeline-card.romanticism-card,
-.timeline-card.bauhaus-card {
+.timeline-card.romanticism-card {
     border: 0;
     background-color: transparent !important;
     box-shadow: none;
@@ -2444,8 +2432,7 @@ body.view-interaction.night-background .handle {
 
 .timeline-card.surrealism-card,
 .timeline-card.impressionism-card,
-.timeline-card.romanticism-card,
-.timeline-card.bauhaus-card {
+.timeline-card.romanticism-card {
     background-image: var(--art-image) !important;
     background-size: var(--art-bg-size, auto 85%) !important;
     background-position: left center !important;
@@ -2455,8 +2442,7 @@ body.view-interaction.night-background .handle {
 .timeline-card.surrealism-card::after,
 .timeline-card.impressionism-card::after,
 .timeline-card.renaissance-card::after,
-.timeline-card.romanticism-card::after,
-.timeline-card.bauhaus-card::after {
+.timeline-card.romanticism-card::after {
     display: none;
     content: none;
 }
@@ -2593,8 +2579,7 @@ body.view-interaction.night-background .handle {
     .timeline-card.surrealism-card::after,
     .timeline-card.impressionism-card::after,
     .timeline-card.renaissance-card::after,
-    .timeline-card.romanticism-card::after,
-    .timeline-card.bauhaus-card::after {
+    .timeline-card.romanticism-card::after {
         display: none;
         content: none;
     }
@@ -2774,8 +2759,7 @@ body.view-interaction.night-background .handle {
 .timeline-card.surrealism-card,
 .timeline-card.impressionism-card,
 .timeline-card.renaissance-card,
-.timeline-card.romanticism-card,
-.timeline-card.bauhaus-card {
+.timeline-card.romanticism-card {
     background-color: var(--poster-paper) !important;
     background-size: var(--art-bg-size, auto 82%) !important;
     background-position: 7% center !important;
@@ -2799,15 +2783,10 @@ body.view-interaction.night-background .handle {
     display: none !important;
 }
 
-.timeline-card.bauhaus-card {
-    background-size: auto 88% !important;
-}
-
 .timeline-card.surrealism-card::after,
 .timeline-card.impressionism-card::after,
 .timeline-card.renaissance-card::after,
-.timeline-card.romanticism-card::after,
-.timeline-card.bauhaus-card::after {
+.timeline-card.romanticism-card::after {
     content: "";
     display: block;
     position: absolute;
@@ -2971,8 +2950,7 @@ body.view-interaction.night-background .handle {
     .timeline-card.surrealism-card,
     .timeline-card.impressionism-card,
     .timeline-card.renaissance-card,
-    .timeline-card.romanticism-card,
-    .timeline-card.bauhaus-card {
+    .timeline-card.romanticism-card {
         background-position: 50% 34% !important;
         background-size: auto 58% !important;
     }
@@ -2980,8 +2958,7 @@ body.view-interaction.night-background .handle {
     .timeline-card.surrealism-card::after,
     .timeline-card.impressionism-card::after,
     .timeline-card.renaissance-card::after,
-    .timeline-card.romanticism-card::after,
-    .timeline-card.bauhaus-card::after {
+    .timeline-card.romanticism-card::after {
         background:
             linear-gradient(0deg, rgba(244, 240, 230, 0.96) 0 42%, transparent 42% 100%),
             linear-gradient(90deg, transparent 0 50%, rgba(16, 16, 16, 0.12) 50% calc(50% + 2px), transparent calc(50% + 2px) 100%);
@@ -3061,8 +3038,7 @@ body.view-interaction.night-background .handle {
 .timeline-card.surrealism-card::before,
 .timeline-card.impressionism-card::before,
 .timeline-card.renaissance-card::before,
-.timeline-card.romanticism-card::before,
-.timeline-card.bauhaus-card::before {
+.timeline-card.romanticism-card::before {
     display: block !important;
     content: "";
     position: absolute;
@@ -3081,8 +3057,7 @@ body.view-interaction.night-background .handle {
 .timeline-card.surrealism-card::after,
 .timeline-card.impressionism-card::after,
 .timeline-card.renaissance-card::after,
-.timeline-card.romanticism-card::after,
-.timeline-card.bauhaus-card::after {
+.timeline-card.romanticism-card::after {
     display: block !important;
     content: "";
     position: absolute;
@@ -3096,8 +3071,7 @@ body.view-interaction.night-background .handle {
 .timeline-card.surrealism-card .card-artwork,
 .timeline-card.impressionism-card .card-artwork,
 .timeline-card.renaissance-card .card-artwork,
-.timeline-card.romanticism-card .card-artwork,
-.timeline-card.bauhaus-card .card-artwork {
+.timeline-card.romanticism-card .card-artwork {
     left: 64%;
     right: var(--card-pad-x);
     top: var(--card-pad-y);
@@ -3120,8 +3094,7 @@ body.view-interaction.night-background .handle {
 .timeline-card.surrealism-card .card-artwork *,
 .timeline-card.impressionism-card .card-artwork *,
 .timeline-card.renaissance-card .card-artwork *,
-.timeline-card.romanticism-card .card-artwork *,
-.timeline-card.bauhaus-card .card-artwork * {
+.timeline-card.romanticism-card .card-artwork * {
     position: relative;
     z-index: 11;
     transform: none;
@@ -3132,8 +3105,7 @@ body.view-interaction.night-background .handle {
 .timeline-card.surrealism-card .card-artwork span:first-child,
 .timeline-card.impressionism-card .card-artwork span:first-child,
 .timeline-card.renaissance-card .card-artwork span:first-child,
-.timeline-card.romanticism-card .card-artwork span:first-child,
-.timeline-card.bauhaus-card .card-artwork span:first-child {
+.timeline-card.romanticism-card .card-artwork span:first-child {
     align-self: start;
     margin: 0;
 }
@@ -3141,8 +3113,7 @@ body.view-interaction.night-background .handle {
 .timeline-card.surrealism-card .card-artwork em,
 .timeline-card.impressionism-card .card-artwork em,
 .timeline-card.renaissance-card .card-artwork em,
-.timeline-card.romanticism-card .card-artwork em,
-.timeline-card.bauhaus-card .card-artwork em {
+.timeline-card.romanticism-card .card-artwork em {
     align-self: center;
     margin: 0;
     font-size: clamp(1.15rem, 2.15vw, 2.7rem);
@@ -3164,8 +3135,7 @@ body.view-interaction.night-background .handle {
 .timeline-card.surrealism-card .card-artwork span:last-child,
 .timeline-card.impressionism-card .card-artwork span:last-child,
 .timeline-card.renaissance-card .card-artwork span:last-child,
-.timeline-card.romanticism-card .card-artwork span:last-child,
-.timeline-card.bauhaus-card .card-artwork span:last-child {
+.timeline-card.romanticism-card .card-artwork span:last-child {
     align-self: end;
     margin: 0;
     color: rgba(16, 16, 16, 0.62);
@@ -3180,8 +3150,7 @@ body.view-interaction.night-background .handle {
     .timeline-card.surrealism-card::before,
     .timeline-card.impressionism-card::before,
     .timeline-card.renaissance-card::before,
-    .timeline-card.romanticism-card::before,
-    .timeline-card.bauhaus-card::before {
+    .timeline-card.romanticism-card::before {
         left: var(--card-pad-x);
         right: var(--card-pad-x);
         top: var(--card-pad-y);
@@ -3192,8 +3161,7 @@ body.view-interaction.night-background .handle {
     .timeline-card.surrealism-card::after,
     .timeline-card.impressionism-card::after,
     .timeline-card.renaissance-card::after,
-    .timeline-card.romanticism-card::after,
-    .timeline-card.bauhaus-card::after {
+    .timeline-card.romanticism-card::after {
         inset: auto var(--card-pad-x) var(--card-pad-y) var(--card-pad-x);
         width: auto;
         height: 31%;
@@ -3204,8 +3172,7 @@ body.view-interaction.night-background .handle {
     .timeline-card.surrealism-card .card-artwork,
     .timeline-card.impressionism-card .card-artwork,
     .timeline-card.renaissance-card .card-artwork,
-    .timeline-card.romanticism-card .card-artwork,
-    .timeline-card.bauhaus-card .card-artwork {
+    .timeline-card.romanticism-card .card-artwork {
         left: var(--card-pad-x);
         right: var(--card-pad-x);
         top: auto;
@@ -3218,8 +3185,7 @@ body.view-interaction.night-background .handle {
     .timeline-card.surrealism-card .card-artwork em,
     .timeline-card.impressionism-card .card-artwork em,
     .timeline-card.renaissance-card .card-artwork em,
-    .timeline-card.romanticism-card .card-artwork em,
-    .timeline-card.bauhaus-card .card-artwork em {
+    .timeline-card.romanticism-card .card-artwork em {
         font-size: clamp(0.86rem, 5.4vw, 1.45rem);
     }
 }
@@ -3264,12 +3230,10 @@ body.view-interaction.night-background .handle {
 .timeline-card.impressionism-card .card-artwork,
 .timeline-card.renaissance-card .card-artwork,
 .timeline-card.romanticism-card .card-artwork,
-.timeline-card.bauhaus-card .card-artwork,
 .timeline-card.surrealism-card .card-artwork *,
 .timeline-card.impressionism-card .card-artwork *,
 .timeline-card.renaissance-card .card-artwork *,
-.timeline-card.romanticism-card .card-artwork *,
-.timeline-card.bauhaus-card .card-artwork * {
+.timeline-card.romanticism-card .card-artwork * {
     white-space: normal !important;
     overflow-wrap: normal !important;
     word-break: normal !important;
@@ -3369,8 +3333,7 @@ body.view-interaction.night-background .handle {
 .timeline-card.surrealism-card::after,
 .timeline-card.impressionism-card::after,
 .timeline-card.renaissance-card::after,
-.timeline-card.romanticism-card::after,
-.timeline-card.bauhaus-card::after {
+.timeline-card.romanticism-card::after {
     inset: var(--card-pad-y) var(--card-pad-x) var(--card-pad-y) 60% !important;
     width: auto !important;
     z-index: 2 !important;
@@ -3381,16 +3344,14 @@ body.view-interaction.night-background .handle {
 .timeline-card.surrealism-card::before,
 .timeline-card.impressionism-card::before,
 .timeline-card.renaissance-card::before,
-.timeline-card.romanticism-card::before,
-.timeline-card.bauhaus-card::before {
+.timeline-card.romanticism-card::before {
     z-index: 1 !important;
 }
 
 .timeline-card.surrealism-card .card-artwork,
 .timeline-card.impressionism-card .card-artwork,
 .timeline-card.renaissance-card .card-artwork,
-.timeline-card.romanticism-card .card-artwork,
-.timeline-card.bauhaus-card .card-artwork {
+.timeline-card.romanticism-card .card-artwork {
     left: calc(60% + clamp(12px, 1.5vw, 22px)) !important;
     right: calc(var(--card-pad-x) + clamp(10px, 1.2vw, 18px)) !important;
     top: calc(var(--card-pad-y) + clamp(10px, 1.2vw, 18px)) !important;
@@ -3410,8 +3371,7 @@ body.view-interaction.night-background .handle {
 .timeline-card.surrealism-card .card-artwork *,
 .timeline-card.impressionism-card .card-artwork *,
 .timeline-card.renaissance-card .card-artwork *,
-.timeline-card.romanticism-card .card-artwork *,
-.timeline-card.bauhaus-card .card-artwork * {
+.timeline-card.romanticism-card .card-artwork * {
     max-width: 100% !important;
     color: var(--poster-ink) !important;
     background: var(--poster-paper) !important;
@@ -3432,8 +3392,7 @@ body.view-interaction.night-background .handle {
 .timeline-card.surrealism-card .card-artwork em,
 .timeline-card.impressionism-card .card-artwork em,
 .timeline-card.renaissance-card .card-artwork em,
-.timeline-card.romanticism-card .card-artwork em,
-.timeline-card.bauhaus-card .card-artwork em {
+.timeline-card.romanticism-card .card-artwork em {
     font-size: clamp(0.98rem, 1.72vw, 2.05rem) !important;
     line-height: 1 !important;
 }
@@ -3442,8 +3401,7 @@ body.view-interaction.night-background .handle {
     .timeline-card.surrealism-card::after,
     .timeline-card.impressionism-card::after,
     .timeline-card.renaissance-card::after,
-    .timeline-card.romanticism-card::after,
-    .timeline-card.bauhaus-card::after {
+    .timeline-card.romanticism-card::after {
         inset: auto var(--card-pad-x) var(--card-pad-y) var(--card-pad-x) !important;
         height: 34% !important;
         border-left: 0 !important;
@@ -3453,8 +3411,7 @@ body.view-interaction.night-background .handle {
     .timeline-card.surrealism-card .card-artwork,
     .timeline-card.impressionism-card .card-artwork,
     .timeline-card.renaissance-card .card-artwork,
-    .timeline-card.romanticism-card .card-artwork,
-    .timeline-card.bauhaus-card .card-artwork {
+    .timeline-card.romanticism-card .card-artwork {
         left: calc(var(--card-pad-x) + 8px) !important;
         right: calc(var(--card-pad-x) + 8px) !important;
         top: auto !important;
@@ -3466,8 +3423,7 @@ body.view-interaction.night-background .handle {
     .timeline-card.surrealism-card .card-artwork em,
     .timeline-card.impressionism-card .card-artwork em,
     .timeline-card.renaissance-card .card-artwork em,
-    .timeline-card.romanticism-card .card-artwork em,
-    .timeline-card.bauhaus-card .card-artwork em {
+    .timeline-card.romanticism-card .card-artwork em {
         font-size: clamp(0.78rem, 4.6vw, 1.18rem) !important;
         line-height: 1.02 !important;
     }
@@ -3787,14 +3743,6 @@ body.view-interaction.night-background .handle {
     font-weight: 700;
     font-style: italic;
     line-height: 0.86;
-    text-transform: uppercase;
-}
-
-.hub-screen[data-movement="bauhaus"] .feature-readout strong {
-    font-family: 'Poppins', Arial, sans-serif;
-    font-weight: 700;
-    font-style: normal;
-    line-height: 0.78;
     text-transform: uppercase;
 }
 
