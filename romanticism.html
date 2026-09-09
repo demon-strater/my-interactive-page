@@ -14,7 +14,6 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0a1220;col
 header{position:absolute;left:5%;top:7%;z-index:2;pointer-events:none;max-width:min(560px,60%)}
 header span{font:9px/1.7 Arial,sans-serif;letter-spacing:.2em;color:#d9e3ffa8}
 header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;letter-spacing:-.03em;margin:14px 0 0;color:#f5f7ff;text-shadow:0 4px 26px #00000070}
-.caption{position:absolute;left:5%;bottom:6%;z-index:2;max-width:340px;font:11px/1.6 Arial,sans-serif;color:#c9d6f0a8;letter-spacing:.015em;margin:0;pointer-events:none}
 .tag{position:absolute;left:5%;bottom:12.5%;z-index:2;display:flex;align-items:center;gap:10px;pointer-events:none}
 .tag span{font:9px/1.6 Arial,sans-serif;letter-spacing:.18em;color:#c9d6f088}
 .tag strong{font:italic 15px Georgia,serif;font-weight:400;color:#f3e6c8;letter-spacing:.02em}
@@ -45,7 +44,6 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
 @media(max-width:640px){
   header{top:6%;max-width:82%}
   header h1{font-size:27px}
-  .caption{max-width:78%;bottom:15%}
   .tag{bottom:22%}
   .mood{left:3%}
   .slider-wrap{width:30px;height:124px}
@@ -62,7 +60,6 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
 <canvas id="scene" tabindex="0" aria-label="A wanderer above a sea of fog. Move to part the mist; the wanderer's gaze follows you and the vista shifts with depth. Scroll to move the sky from dawn to tempest. Click the mist to open a rift onto a hidden shore, click the wanderer for a note on Romanticism, or click the sky (or press Enter) to release birds. Rest the cursor to summon a line of verse."></canvas>
 <header><span>CASPAR DAVID FRIEDRICH / 1818</span><h1>Wanderer<br>above the fog.</h1></header>
 <div class="tag"><span>ROMANTICISM</span><i></i><strong id="moodLabel">Dawn</strong></div>
-<p class="caption">Move to part the mist — the wanderer watches where you look. Scroll to turn the sky from dawn toward tempest. Click the mist to tear a rift onto the hidden shore; click the wanderer to hear him. Be still, and the fog will speak.</p>
 <div class="mood">
 <svg class="mood-icon" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="#ffd98a"/></svg>
 <div class="slider-wrap"><input id="temperament" type="range" min="0" max="1" step=".001" value=".16" aria-label="Shift the sky from serene dawn to tempest"></div>
