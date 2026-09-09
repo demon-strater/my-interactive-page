@@ -14,7 +14,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0a1220;col
 header{position:absolute;left:5%;top:7%;z-index:2;pointer-events:none;max-width:min(560px,60%)}
 header span{font:9px/1.7 Arial,sans-serif;letter-spacing:.2em;color:#d9e3ffa8}
 header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;letter-spacing:-.03em;margin:14px 0 0;color:#f5f7ff;text-shadow:0 4px 26px #00000070}
-.tag{position:absolute;left:5%;bottom:12.5%;z-index:2;display:flex;align-items:center;gap:10px;pointer-events:none}
+.tag{position:absolute;left:5%;bottom:6.5%;z-index:2;display:flex;align-items:center;gap:10px;pointer-events:none}
 .tag span{font:9px/1.6 Arial,sans-serif;letter-spacing:.18em;color:#c9d6f088}
 .tag strong{font:italic 15px Georgia,serif;font-weight:400;color:#f3e6c8;letter-spacing:.02em}
 .tag i{width:26px;height:1px;background:#c9d6f044;display:block;font-style:normal}
@@ -29,9 +29,6 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
 #temperament:focus-visible{outline:none}
 #temperament:focus-visible::-webkit-slider-thumb{outline:2px solid #ffdf9e;outline-offset:3px}
 .mood small{writing-mode:vertical-rl;font-size:7px;letter-spacing:.24em;color:#c9d6f077}
-.restore{position:absolute;right:5%;bottom:5%;z-index:3;border:1px solid #cfe0ff33;border-radius:30px;background:#0e1830b8;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#eef2fb;padding:9px 17px;font:9px/1 Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
-.restore:hover{background:#16223fd8}
-.restore:focus-visible{outline:2px solid #ffdf9e;outline-offset:4px}
 .wanderer-speech{position:absolute;left:53.5%;bottom:41%;transform:translateX(-50%) translateY(9px);width:min(288px,64vw);z-index:4;background:linear-gradient(180deg,#111c33e6,#0b1524ee);color:#e7ecfb;border:1px solid #cfe0ff2b;border-radius:13px;padding:12px 15px 14px;box-shadow:0 16px 40px #00000078,0 0 0 1px #ffffff10 inset;backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);font:12.5px/1.72 "Nanum Myeongjo",Georgia,serif;letter-spacing:.004em;opacity:0;transition:opacity .5s ease,transform .5s ease;pointer-events:none}
 .wanderer-speech.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .wanderer-speech::after{content:"";position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);border:9px solid transparent;border-bottom:0;border-top-color:#0b1524ee}
@@ -44,11 +41,10 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
 @media(max-width:640px){
   header{top:6%;max-width:82%}
   header h1{font-size:27px}
-  .tag{bottom:22%}
+  .tag{bottom:13%}
   .mood{left:3%}
   .slider-wrap{width:30px;height:124px}
   #temperament{width:124px;height:30px}
-  .restore{right:3%;bottom:3%;padding:7px 13px}
   .wanderer-speech{bottom:45%;width:78vw;font-size:11.5px;line-height:1.72;padding:11px 13px 12px}
   .verse{bottom:27%;max-width:82vw}
   .verse span{font-size:13.5px}
@@ -57,7 +53,7 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
 </style>
 </head>
 <body>
-<canvas id="scene" tabindex="0" aria-label="A wanderer above a sea of fog. Move to part the mist; the wanderer's gaze follows you and the vista shifts with depth. Scroll to move the sky from dawn to tempest. Click the mist to open a rift onto a hidden shore, click the wanderer for a note on Romanticism, or click the sky (or press Enter) to release birds. Rest the cursor to summon a line of verse."></canvas>
+<canvas id="scene" tabindex="0" aria-label="A wanderer above a sea of fog. Move to part the mist; the wanderer turns his head to watch your cursor and the vista shifts with depth. Scroll to move the sky from dawn to tempest. Click anywhere (or press Enter) and a storm surges in from that direction with wind and thunder. Click the wanderer for a note on Romanticism. Rest the cursor to summon a line of verse."></canvas>
 <header><span>CASPAR DAVID FRIEDRICH / 1818</span><h1>Wanderer<br>above the fog.</h1></header>
 <div class="tag"><span>ROMANTICISM</span><i></i><strong id="moodLabel">Dawn</strong></div>
 <div class="mood">
@@ -66,7 +62,6 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
 <svg class="mood-icon" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 9.4a2.6 2.6 0 0 1 4.9-1.3A2.1 2.1 0 0 1 9.4 9.4H2Z" fill="#9fb2d8"/><path d="M5.6 10.4 4.4 13l1.7-.3-1 2.3" stroke="#dbe4f7" stroke-width=".9" fill="none" stroke-linecap="round"/></svg>
 <small>SERENITY&nbsp;—&nbsp;TEMPEST</small>
 </div>
-<button class="restore" id="restore" type="button">Calm the sky</button>
 <div class="wanderer-speech" id="wandererSpeech" role="status" hidden>
 <span class="ws-kicker">낭만주의 · ROMANTICISM</span>
 <p>18세기 말, 낭만주의는 이성과 규칙에 맞서 태어났다. 개인의 감정과 상상력, 그리고 거대한 자연 앞에서 느끼는 숭고함을 예술의 중심에 두었다. 안개 너머를 응시하는 방랑자처럼, 낭만주의는 알 수 없는 세계와 홀로 마주 선 인간을 그린다.</p>
@@ -77,7 +72,6 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
   'use strict';
   const canvas = document.getElementById('scene'), ctx = canvas.getContext('2d');
   const temperamentInput = document.getElementById('temperament');
-  const restoreBtn = document.getElementById('restore');
   const moodLabel = document.getElementById('moodLabel');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -96,9 +90,8 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
   const TAU = Math.PI * 2;
   const easeOutCubic = x => 1 - Math.pow(1 - x, 3);
   const finePointer = matchMedia('(pointer: fine)').matches;
-  let headLook = 0, parallaxX = 0, parallaxY = 0, idle = 0;
-  const reveal = { x: 0, y: 0, age: 0, active: false };
-  const ripples = [];
+  let headLook = 0, pitchLook = 0, parallaxX = 0, parallaxY = 0, idle = 0;
+  const gust = { on: false, age: 0, dir: 1, aimX: .5, aimY: .3, mag: 0, strength: 1 };
 
   function resize() {
     dpr = Math.min(devicePixelRatio || 1, 2);
@@ -116,7 +109,6 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
   }, { passive: true });
 
   temperamentInput.addEventListener('input', () => { temperament = Number(temperamentInput.value); });
-  restoreBtn.addEventListener('click', () => { temperament = .16; temperamentInput.value = '.16'; });
 
   // Turn the wheel to move the sky along the same 0..1 temperament the slider drives.
   canvas.addEventListener('wheel', e => {
@@ -161,98 +153,49 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
   canvas.addEventListener('click', e => {
     idle = 0; hideVerse();
     if (hitWanderer(e.clientX, e.clientY)) { toggleSpeech(); return; }
-    const yf = e.clientY / height;
-    if (yf > .58 && yf < .87) { startReveal(e.clientX, e.clientY); return; }
-    if (yf <= .58) spawnBirds(e.clientX, e.clientY);
+    surgeStorm(e.clientX, e.clientY);
   });
   canvas.addEventListener('keydown', e => {
     if (e.key !== 'Enter' && e.key !== ' ') return;
-    e.preventDefault(); idle = 0; spawnBirds(width * .5, height * .26);
+    e.preventDefault(); idle = 0;
+    surgeStorm(width * (headLook >= 0 ? .82 : .18), height * .2);
   });
 
-  // ── A rift in the sea of fog ──────────────────────────────────────────────
-  // Click the mist and it tears open in a spreading ripple, baring a Gothic ruin
-  // on a hidden shore — Friedrich's Eldena — before the cloud rolls back over it.
-  function startReveal(x, y) {
-    reveal.x = x; reveal.y = clamp(y, height * .56, height * .82);
-    reveal.age = 0; reveal.active = true;
-    ripples.length = 0;
-    for (let i = 0; i < 3; i++) ripples.push({ age: -i * .22 });
+  // ── Click: a storm surges in from the cursor's quarter ────────────────────
+  // The clicked point sets the wind's heading; a gust front sweeps the fog that
+  // way, rain slants after it, thunder rolls, and the sky briefly darkens — the
+  // vastness of weather answering a small gesture.
+  function surgeStorm(cx, cy) {
+    gust.on = true; gust.age = 0;
+    gust.aimX = cx / width; gust.aimY = clamp(cy / height, 0, 1);
+    gust.dir = cx < width * .535 ? -1 : 1;
+    gust.strength = clamp(1.15 - gust.aimY, .5, 1);   // aim higher for a fiercer storm
+    lightning = Math.max(lightning, .92);
+    lightningTimer = 1.3;
+    playStorm(gust.dir, gust.strength);
+    spawnBirds(width * (.52 - gust.dir * .1), height * clamp(gust.aimY, .16, .4));
   }
-  function drawRuin(cx, baseY, s, a) {
-    ctx.fillStyle = `rgba(9,9,15,${a})`;
-    const w = 12 * s, h = 40 * s, th = 3.4 * s;
-    ctx.beginPath();
-    ctx.moveTo(cx - w, baseY);
-    ctx.lineTo(cx - w, baseY - h * .58);
-    ctx.quadraticCurveTo(cx - w, baseY - h, cx, baseY - h);
-    ctx.quadraticCurveTo(cx + w, baseY - h, cx + w, baseY - h * .58);
-    ctx.lineTo(cx + w, baseY);
-    ctx.closePath();
-    const iw = w - th, ih = h - th * 2.4;
-    ctx.moveTo(cx - iw, baseY);
-    ctx.lineTo(cx - iw, baseY - ih * .55);
-    ctx.quadraticCurveTo(cx - iw, baseY - ih, cx, baseY - ih);
-    ctx.quadraticCurveTo(cx + iw, baseY - ih, cx + iw, baseY - ih * .55);
-    ctx.lineTo(cx + iw, baseY);
-    ctx.closePath();
-    ctx.fill('evenodd');
-    ctx.fillRect(cx - w - th, baseY - h * .34, th, h * .34);
-    ctx.strokeStyle = `rgba(9,9,15,${a})`; ctx.lineWidth = 1.3 * s; ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(cx + w + 5 * s, baseY);
-    ctx.lineTo(cx + w + 2.5 * s, baseY - 19 * s);
-    ctx.moveTo(cx + w + 3.4 * s, baseY - 12 * s); ctx.lineTo(cx + w + 9 * s, baseY - 17 * s);
-    ctx.moveTo(cx + w + 3 * s, baseY - 15 * s); ctx.lineTo(cx + w - 1 * s, baseY - 23 * s);
-    ctx.stroke();
-  }
-  function drawReveal(dt) {
-    if (!reveal.active) return;
-    reveal.age += dt;
-    const A = reveal.age;
-    const open = easeOutCubic(clamp(A / .5, 0, 1));
-    const close = 1 - easeOutCubic(clamp((A - 3.1) / 1.3, 0, 1));
-    const k = Math.min(open, close);
-    if (A > 4.6 || k <= .001) { reveal.active = false; ripples.length = 0; return; }
-    const x = reveal.x, y = reveal.y;
-    const maxR = Math.min(width, height) * .17;
-    const R = maxR * (.35 + .65 * k);
-    const fogC = displayTemperament > .55 ? [148, 157, 174] : [240, 236, 224];
-
-    ctx.save();
-    ctx.beginPath(); ctx.arc(x, y, R, 0, TAU); ctx.clip();
-    const g = ctx.createLinearGradient(0, y - R, 0, y + R);
-    g.addColorStop(0, `rgba(52,61,80,${.95 * k})`);
-    g.addColorStop(.5, `rgba(30,36,51,${.97 * k})`);
-    g.addColorStop(1, `rgba(16,19,29,${k})`);
-    ctx.fillStyle = g; ctx.fillRect(x - R, y - R, R * 2, R * 2);
-    const waterY = y + R * .3, s = R / 27;
-    ctx.save();
-    ctx.beginPath(); ctx.rect(x - R, waterY, R * 2, R); ctx.clip();
-    ctx.translate(0, waterY * 2); ctx.scale(1, -1);
-    drawRuin(x, waterY, s * .96, .13 * k);
-    ctx.restore();
-    drawRuin(x, waterY, s, .96 * k);
-    ctx.fillStyle = `rgba(200,214,235,${.16 * k})`;
-    ctx.fillRect(x - R, waterY - .6, R * 2, 1.2);
-    ctx.restore();
-
-    const rim = ctx.createRadialGradient(x, y, R * .5, x, y, R * 1.14);
-    rim.addColorStop(0, rgb(fogC, 0));
-    rim.addColorStop(1, rgb(fogC, .55 * k));
-    ctx.fillStyle = rim; ctx.beginPath(); ctx.arc(x, y, R * 1.14, 0, TAU); ctx.fill();
-    ctx.strokeStyle = `rgba(255,250,236,${.13 * k})`; ctx.lineWidth = 1.4;
-    ctx.beginPath(); ctx.arc(x, y, R, 0, TAU); ctx.stroke();
-
+  function drawGustFront() {
+    if (!gust.on || gust.mag <= .02) return;
+    const travel = clamp(gust.age / 1.1, 0, 1.4);
+    const frontX = width * .535 + gust.dir * travel * width * .95;
+    const band = width * .32;
+    const c = displayTemperament > .5 ? '192,200,216' : '228,225,214';
+    const g = ctx.createLinearGradient(frontX - gust.dir * band, 0, frontX, 0);
+    g.addColorStop(0, `rgba(${c},0)`);
+    g.addColorStop(.72, `rgba(${c},${.11 * gust.mag})`);
+    g.addColorStop(1, `rgba(${c},0)`);
+    ctx.fillStyle = g; ctx.fillRect(0, height * .18, width, height * .56);
     if (!reduced.matches) {
-      for (let i = ripples.length - 1; i >= 0; i--) {
-        const rp = ripples[i]; rp.age += dt;
-        if (rp.age < 0) continue;
-        if (rp.age > 1.9) { ripples.splice(i, 1); continue; }
-        const rr = maxR * .45 + rp.age * 155;
-        const ra = clamp(1 - rp.age / 1.7, 0, 1) * .38;
-        ctx.strokeStyle = rgb(fogC, ra); ctx.lineWidth = 1.3;
-        ctx.beginPath(); ctx.ellipse(x, y, rr, rr * .33, 0, 0, TAU); ctx.stroke();
+      ctx.strokeStyle = `rgba(${c},${.18 * gust.mag})`; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+      for (let i = 0; i < 9; i++) {
+        const p = i / 9;
+        const wy = height * (.22 + p * .46) + Math.sin(elapsed * 3 + i) * 5;
+        const wx = frontX - gust.dir * (24 + p * 150);
+        ctx.beginPath();
+        ctx.moveTo(wx - gust.dir * 44, wy);
+        ctx.quadraticCurveTo(wx, wy - 7, wx + gust.dir * 44, wy);
+        ctx.stroke();
       }
     }
   }
@@ -350,20 +293,21 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
       fogPuffs.push({ xf: (i * 0.6180339887) % 1, row, speed: .01 + row * .0045, size: .13 + Math.random() * .07, wobble: Math.random() * Math.PI * 2 });
     }
   })();
-  function drawFog(t, sky) {
+  function drawFog(t, sky, push) {
     // A dense, overlapping bank of puffs — each one individually parted by the cursor — reads as a
     // continuous sea of cloud filling the valley, per the painting, rather than scattered wisps.
     const rows = 6, fogBaseY = height * .54, fogSpanY = height * .27;
-    const wind = .16 + t * .6;
+    const ap = Math.abs(push || 0);
+    const wind = (.16 + t * .6) * (1 + ap * 2.6);
     const fogColor = t > .55 ? [148, 157, 174] : [240, 236, 224];
     for (const p of fogPuffs) {
       const rowFrac = p.row / rows;
       let y = fogBaseY + rowFrac * fogSpanY + (reduced.matches ? 0 : Math.sin(elapsed * .6 + p.wobble) * 6);
       let x = (((p.xf + elapsed * p.speed * wind) % 1.2) - .1) * width;
-      x += -parallaxX * 24 * (.4 + rowFrac);
-      y += -parallaxY * 9 * (.3 + rowFrac);
-      const size = width * p.size * (.75 + rowFrac * .6);
-      let alpha = .26 + t * .16 + rowFrac * .13;
+      x += -parallaxX * 24 * (.4 + rowFrac) + (push || 0) * width * .34 * (.45 + rowFrac);
+      y += -parallaxY * 9 * (.3 + rowFrac) - ap * 14 * (.3 + rowFrac);
+      const size = width * p.size * (.75 + rowFrac * .6) * (1 + ap * .4);
+      let alpha = (.26 + t * .16 + rowFrac * .13) * (1 + ap * .22);
       if (pointer.active) {
         const dx = x - pointer.x * width, dy = y - pointer.y * height;
         const dist = Math.hypot(dx, dy);
@@ -404,63 +348,188 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
     ctx.fillStyle = '#050508'; ctx.fill();
     ctx.restore();
   }
+  // The Rückenfigur — a back view, so a turn of the head reads as a small profile
+  // (a brow / nose nub) breaking the skull's edge on the side he looks toward.
   function drawWanderer(wind) {
-    const fx = width * .535 - parallaxX * 7, ground = height * .735 - parallaxY * 3;
-    const sway = (reduced.matches ? .3 : Math.sin(elapsed * 1.6)) * wind * 3;
-    ctx.save(); ctx.translate(fx, ground);
-    ctx.fillStyle = 'rgba(6,5,8,.97)';
-    ctx.fillRect(-7, -2, 6, 24); ctx.fillRect(2, -2, 6, 24);
-    ctx.translate(0, -2);
+    const fx = width * .535 - parallaxX * 8, ground = height * .746 - parallaxY * 3;
+    const S = clamp(Math.min(width, height) / 530, 1.2, 2);
+    const g = gust.on ? gust.dir * gust.mag : 0;                 // -1..1 downwind shove
+    const breeze = reduced.matches ? .2 : (Math.sin(elapsed * 1.5) * .5 + Math.sin(elapsed * .73) * .5);
+    const flap = wind * (.5 + breeze * .5) + g * 4.6;            // hem & coat-tails flutter
+    const hairBlow = wind * 1.3 + breeze * 1.6 + g * 8;
+    const liftR = g > 0 ? g * 12 : 0, liftL = g < 0 ? -g * 12 : 0;
+    const ink = 'rgba(8,7,11,.98)';
+
+    ctx.save();
+    ctx.translate(fx, ground);
+    ctx.scale(S, S);
+    ctx.fillStyle = ink;
+
+    // the crag he stands on — kept low so it merges with the outcrop below
     ctx.beginPath();
-    ctx.moveTo(-11, -44);
-    ctx.quadraticCurveTo(-21 - sway, -8, -17 - sway * 1.4, 18);
-    ctx.lineTo(17 + sway * 1.4, 18);
-    ctx.quadraticCurveTo(21 + sway, -8, 11, -44);
-    ctx.quadraticCurveTo(0, -50, -11, -44);
+    ctx.moveTo(-27, 8);
+    ctx.quadraticCurveTo(-22, -3, -4, -5);
+    ctx.quadraticCurveTo(14, -7, 24, 2);
+    ctx.quadraticCurveTo(30, 9, 29, 18);
+    ctx.lineTo(-29, 18); ctx.closePath(); ctx.fill();
+
+    // legs — weight on the back leg, front leg braced higher on the rock
+    ctx.beginPath();
+    ctx.moveTo(-9.5, -33); ctx.lineTo(-3, -33);
+    ctx.lineTo(-4.5, -5); ctx.lineTo(-11, -2); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(-9.5, -1.5, 5.2, 3.4, -.16, 0, TAU); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(2.5, -33); ctx.lineTo(9, -32);
+    ctx.quadraticCurveTo(13.5, -21, 12.5, -12);
+    ctx.lineTo(6, -13); ctx.quadraticCurveTo(3.6, -22, 1, -33); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(12.8, -11, 5.4, 3.5, .22, 0, TAU); ctx.fill();
+
+    // frock coat — fitted torso flaring to a wind-torn skirt
+    ctx.beginPath();
+    ctx.moveTo(-13, -51);
+    ctx.bezierCurveTo(-15.5, -41, -12.5, -37, -11, -34);
+    ctx.bezierCurveTo(-17 - flap * 1.1, -20, -15.5 - flap * 1.5, -10, -14.5 - flap * 1.7, -5 + liftL);
+    ctx.quadraticCurveTo(0, -3 - Math.abs(g) * 2, 14.5 + flap * 1.7, -5 + liftR);
+    ctx.bezierCurveTo(15.5 + flap * 1.5, -10, 17 + flap * 1.1, -20, 11, -34);
+    ctx.bezierCurveTo(12.5, -37, 15.5, -41, 13, -51);
+    ctx.quadraticCurveTo(0, -55, -13, -51);
     ctx.closePath(); ctx.fill();
-    const hx = headLook * 3.6, hy = -52 - Math.abs(headLook) * .8;
-    ctx.beginPath(); ctx.ellipse(hx, hy, 7, 8, headLook * .13, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = 'rgba(6,5,8,.92)'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(13, -28); ctx.lineTo(23 + sway * .6, 22); ctx.stroke();
+
+    // coat-tails whipping from the back vent
+    ctx.beginPath();
+    ctx.moveTo(-3.5, -15);
+    ctx.quadraticCurveTo(-7 - flap * 2.2, -7, -10 - flap * 3.6, 3 + flap * 1.3);
+    ctx.quadraticCurveTo(-4.5, -4, -1, -13); ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(3.5, -15);
+    ctx.quadraticCurveTo(7 + flap * 2.2, -7, 10 + flap * 3.6, 3 + flap * 1.3);
+    ctx.quadraticCurveTo(4.5, -4, 1, -13); ctx.closePath(); ctx.fill();
+
+    // shoulders + standing collar
+    ctx.beginPath();
+    ctx.moveTo(-6, -51); ctx.quadraticCurveTo(0, -53.5, 6, -51);
+    ctx.lineTo(5, -56); ctx.quadraticCurveTo(0, -58, -5, -56); ctx.closePath(); ctx.fill();
+
+    // head, turning to follow the cursor
+    const turn = clamp(headLook, -1, 1), pitch = clamp(pitchLook, -1, 1);
+    const hx = turn * 6.4, hy = -61 - Math.abs(turn) * 1.4 - pitch * 3.4;
+    ctx.save();
+    ctx.translate(hx, hy);
+    ctx.rotate(turn * .34);
+    ctx.beginPath(); ctx.ellipse(0, 0, 7.4, 8.7, 0, 0, TAU); ctx.fill();
+    if (Math.abs(turn) > .12) {                    // brow / nose breaking the silhouette
+      const nd = Math.sign(turn);
+      ctx.beginPath();
+      ctx.moveTo(nd * 6.2, -2);
+      ctx.quadraticCurveTo(nd * (8.8 + Math.abs(turn) * 3.2), 1.4, nd * 6, 4);
+      ctx.quadraticCurveTo(nd * 3.6, 2.2, nd * 4.8, -1.2);
+      ctx.closePath(); ctx.fill();
+    }
+    // wind-blown hair
+    ctx.strokeStyle = ink; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+    const hs = Math.sign(hairBlow || 1);
+    for (let i = -2; i <= 2; i++) {
+      const a0 = -Math.PI / 2 + i * .3;
+      const x0 = Math.cos(a0) * 6.2, y0 = Math.sin(a0) * 7.6;
+      const len = 4 + (2 - Math.abs(i)) * 2.4;
+      ctx.beginPath();
+      ctx.moveTo(x0, y0);
+      ctx.quadraticCurveTo(x0 + hairBlow * .45, y0 - 3.5, x0 + hairBlow + hs * len, y0 - 1 + Math.abs(i) * .8);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // walking cane, planted on the rock to his right
+    ctx.strokeStyle = ink; ctx.lineWidth = 2.1; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(12, -35);
+    ctx.quadraticCurveTo(19, -15, 23.5, 11);
+    ctx.stroke();
+
     ctx.restore();
   }
 
   const rainDrops = [];
   (function buildRain() { for (let i = 0; i < 130; i++) rainDrops.push({ x: Math.random(), y: Math.random(), len: 9 + Math.random() * 15, speed: 560 + Math.random() * 300 }); })();
-  function drawRain(t, dt) {
-    const a = clamp((t - .55) * 2.2, 0, 1);
+  function drawRain(t, dt, gustWind) {
+    const a = clamp((t - .5) * 2.4, 0, 1);
     if (a <= 0) return;
+    const gw = gustWind || 0;
     ctx.strokeStyle = `rgba(210,224,255,${.32 * a})`; ctx.lineWidth = 1;
-    const windX = (t - .5) * 2 * 36;
+    const windX = (t - .5) * 2 * 36 + gw;
+    const fall = 1 + Math.abs(gw) / 240;
     for (const d of rainDrops) {
-      d.y += (d.speed * dt) / height;
+      d.y += (d.speed * fall * dt) / height;
       if (d.y > 1.05) { d.y = -.05; d.x = Math.random(); }
       const x = d.x * width, y = d.y * height;
-      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + windX * .03, y + d.len); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + windX * .045, y + d.len); ctx.stroke();
     }
   }
 
   let audioCtx = null;
-  function playThunder() {
+  function ensureAudio() {
     try {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
-      const now = audioCtx.currentTime;
-      const master = audioCtx.createGain(); master.gain.value = .38; master.connect(audioCtx.destination);
-      const bufferSize = Math.floor(audioCtx.sampleRate * 1.4);
-      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 1.5);
-      const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
-      const low = audioCtx.createBiquadFilter(); low.type = 'lowpass'; low.frequency.value = 320;
-      const g = audioCtx.createGain(); g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(.85, now + .06); g.gain.exponentialRampToValueAtTime(.001, now + 1.3);
-      noise.connect(low); low.connect(g); g.connect(master); noise.start(now);
-    } catch (e) { /* Web Audio unavailable — the flash still lands without thunder. */ }
+      return audioCtx;
+    } catch (e) { return null; }
+  }
+  function noiseBuffer(seconds, decayPow) {
+    const n = Math.max(1, Math.floor(audioCtx.sampleRate * seconds));
+    const buf = audioCtx.createBuffer(1, n, audioCtx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (decayPow ? Math.pow(1 - i / n, decayPow) : 1);
+    return buf;
+  }
+  function playThunder(delay, gain) {
+    const ac = ensureAudio(); if (!ac) return;
+    delay = delay || 0; gain = gain == null ? .8 : gain;
+    const now = ac.currentTime + delay;
+    const master = ac.createGain(); master.gain.value = .4; master.connect(ac.destination);
+    const src = ac.createBufferSource(); src.buffer = noiseBuffer(1.9, 1.4);
+    const low = ac.createBiquadFilter(); low.type = 'lowpass';
+    low.frequency.setValueAtTime(360, now); low.frequency.exponentialRampToValueAtTime(85, now + 1.7);
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(gain, now + .05);
+    g.gain.exponentialRampToValueAtTime(Math.max(.12, gain * .35), now + .5);
+    g.gain.exponentialRampToValueAtTime(.001, now + 1.8);
+    src.connect(low); low.connect(g); g.connect(master); src.start(now); src.stop(now + 1.95);
+  }
+  function playStorm(dir, strength) {
+    const ac = ensureAudio(); if (!ac) return;
+    const now = ac.currentTime;
+    const master = ac.createGain(); master.gain.value = .32; master.connect(ac.destination);
+    let out = master;
+    if (ac.createStereoPanner) { const pan = ac.createStereoPanner(); pan.pan.value = clamp(dir * .55, -1, 1); pan.connect(master); out = pan; }
+    // wind gust — noise through a band-pass that swells open then closes
+    const wind = ac.createBufferSource(); wind.buffer = noiseBuffer(3.3, 0);
+    const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = .7;
+    bp.frequency.setValueAtTime(200, now);
+    bp.frequency.linearRampToValueAtTime(820 + strength * 520, now + .9);
+    bp.frequency.linearRampToValueAtTime(150, now + 3);
+    const wg = ac.createGain();
+    wg.gain.setValueAtTime(0, now);
+    wg.gain.linearRampToValueAtTime(.52 * strength, now + .5);
+    wg.gain.linearRampToValueAtTime(.3 * strength, now + 1.7);
+    wg.gain.exponentialRampToValueAtTime(.001, now + 3.2);
+    wind.connect(bp); bp.connect(wg); wg.connect(out); wind.start(now); wind.stop(now + 3.3);
+    // rain hiss swelling in behind the gust
+    const rain = ac.createBufferSource(); rain.buffer = noiseBuffer(3.5, 0);
+    const hp = ac.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1700;
+    const rg = ac.createGain();
+    rg.gain.setValueAtTime(0, now);
+    rg.gain.linearRampToValueAtTime(.17 * strength, now + 1);
+    rg.gain.linearRampToValueAtTime(.11 * strength, now + 2.3);
+    rg.gain.exponentialRampToValueAtTime(.001, now + 3.4);
+    rain.connect(hp); hp.connect(rg); rg.connect(out); rain.start(now); rain.stop(now + 3.5);
+    // thunder — a near crack, then a distant roll
+    playThunder(.12, .72 * strength);
+    playThunder(.7 + Math.random() * .5, .4 * strength);
   }
   function maybeLightning(t, dt) {
     lightningTimer -= dt;
     if (t > .62 && lightningTimer <= 0) {
-      lightning = 1; playThunder();
+      lightning = 1; playThunder(0, .8);
       lightningTimer = 2 + Math.random() * 5 * (1.6 - t);
     }
     lightning *= reduced.matches ? 0 : .88;
@@ -468,8 +537,9 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
   }
 
   function drawVignette() {
+    const boost = gust.on ? gust.mag * .26 : 0;
     const g = ctx.createRadialGradient(width / 2, height * .55, height * .2, width / 2, height * .55, height * .88);
-    g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.4)');
+    g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, `rgba(0,0,0,${.4 + boost})`);
     ctx.fillStyle = g; ctx.fillRect(0, 0, width, height);
   }
   function drawLightning() {
@@ -488,36 +558,51 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
     const dt = last ? Math.min((now - last) / 1000, .05) : 0; last = now;
     elapsed += dt;
     displayTemperament += (temperament - displayTemperament) * Math.min(1, dt * (reduced.matches ? 8 : 2.2));
-    const t = displayTemperament, sky = sampleSky(t);
+
+    // storm-gust envelope: fast attack, long release
+    if (gust.on) {
+      gust.age += dt;
+      const A = gust.age;
+      gust.mag = (A < .32 ? easeOutCubic(A / .32) : Math.max(0, 1 - (A - .32) / 3)) * gust.strength;
+      if (A > 3.4) { gust.on = false; gust.mag = 0; }
+    }
+    const gv = gust.on ? gust.dir * gust.mag : 0;
+    const renderT = clamp(displayTemperament + gust.mag * .45, 0, 1);
+    const sky = sampleSky(renderT);
     updateBirds(dt);
-    if (!reduced.matches) maybeLightning(t, dt); else lightning = 0;
-    updateMoodLabel(t);
+    if (!reduced.matches) maybeLightning(renderT, dt); else lightning = 0;
+    updateMoodLabel(displayTemperament);
 
     // cursor-driven life: the wanderer's gaze, and layered parallax across the vista
     const pact = finePointer && pointer.active && !reduced.matches;
-    const lookT = pact ? clamp((pointer.x - .535) * 2.4, -1, 1) : 0;
+    const lookT = pact ? clamp((pointer.x - .535) * 2.6, -1, 1) : 0;
+    const pitchT = pact ? clamp((.46 - pointer.y) * 2.2, -1, 1) : 0;
     const pxT = pact ? clamp(pointer.x - .5, -.5, .5) : 0;
     const pyT = pact ? clamp(pointer.y - .5, -.5, .5) : 0;
     const es = Math.min(1, dt * 3);
     headLook += (lookT - headLook) * es;
+    pitchLook += (pitchT - pitchLook) * es;
     parallaxX += (pxT - parallaxX) * es;
     parallaxY += (pyT - parallaxY) * es;
 
     idle += dt;
     if (idle > 6) showVerse();
 
-    ctx.setTransform(canvas.width / width, 0, 0, canvas.height / height, 0, 0);
-    ctx.clearRect(0, 0, width, height);
+    const sc = canvas.width / width, scy = canvas.height / height;
+    const shake = (gust.on && gust.age < .9 && !reduced.matches) ? (1 - gust.age / .9) * gust.strength * 5 : 0;
+    const shx = shake ? (Math.random() - .5) * shake : 0, shy = shake ? (Math.random() - .5) * shake : 0;
+    ctx.setTransform(sc, 0, 0, scy, shx * sc, shy * scy);
+    ctx.clearRect(-8, -8, width + 16, height + 16);
     drawSky(sky);
-    drawStars(t);
-    drawOrb(t);
+    drawStars(renderT);
+    drawOrb(renderT);
     birds.forEach(drawBird);
-    drawMountains(t, sky);
-    drawFog(t, sky);
-    drawReveal(dt);
-    drawRain(t, dt);
+    drawMountains(renderT, sky);
+    drawFog(renderT, sky, gv);
+    drawGustFront();
+    drawRain(renderT, dt, gv * 260);
     drawForegroundLedge();
-    drawWanderer(clamp(t * 1.3, 0, 1.3));
+    drawWanderer(clamp(renderT * 1.3, 0, 1.4));
     drawVignette();
     drawLightning();
 
