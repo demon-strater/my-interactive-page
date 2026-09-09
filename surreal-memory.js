@@ -53,7 +53,7 @@
     host.classList.remove('memory-dragging');
     document.body.classList.toggle('memory-open', !!page);
     room.inert = !!page; scene.inert = !page; enter.tabIndex = page ? -1 : 0;
-    if (page) { resize(); start(); }
+    if (page) { loadArtwork(); resize(); start(); }
   }
   enter.addEventListener('click', () => { setPage(1); bandButtons[0].focus({ preventScroll: true }); });
   scene.querySelector('[data-back]').addEventListener('click', () => { setPage(0); enter.focus({ preventScroll: true }); });
@@ -366,6 +366,50 @@
     }
   ];
   const PARTS = [HEAD, TORSO, LEGS];
+  // Local assets travel with the GitHub Pages deployment, including project subpaths.
+  const ART = NAMES.map((bank, band) => bank.map((name, index) => {
+    const image = new Image();
+    const asset = { image, bounds: null, src: `s${band * 6 + index + 1}.png` };
+    image.decoding = 'async';
+    image.onload = () => {
+      // Measure once, preserving the original PNG and its alpha channel.
+      const probe = document.createElement('canvas');
+      probe.width = image.naturalWidth; probe.height = image.naturalHeight;
+      const probeCtx = probe.getContext('2d', { willReadFrequently: true });
+      probeCtx.drawImage(image, 0, 0);
+      const pixels = probeCtx.getImageData(0, 0, probe.width, probe.height).data;
+      let left = probe.width, right = -1, top = probe.height, bottom = -1;
+      for (let y = 0; y < probe.height; y++) for (let x = 0; x < probe.width; x++) {
+        if (pixels[(y * probe.width + x) * 4 + 3] < 32) continue;
+        left = Math.min(left, x); right = Math.max(right, x);
+        top = Math.min(top, y); bottom = Math.max(bottom, y);
+      }
+      if (right >= left) asset.bounds = { x: left, y: top, w: right - left + 1, h: bottom - top + 1 };
+      if (page) draw();
+    };
+    return asset;
+  }));
+  function loadArtwork() {
+    for (const bank of ART) for (const asset of bank) {
+      if (!asset.image.getAttribute('src')) asset.image.src = asset.src;
+    }
+  }
+  function drawArtwork(b, band, index, t) {
+    const asset = ART[band][index], crop = asset.bounds;
+    if (!crop) { PARTS[band][index](b, t); return; }
+    const anchor = asset.image.naturalWidth / 2 - crop.x;
+    const span = 2 * Math.max(anchor, crop.w - anchor);
+    const scale = Math.min(b.w * .88 / span, b.h * .96 / crop.h);
+    const w = crop.w * scale, h = crop.h * scale;
+    const x = px(b, .5) - anchor * scale;
+    const y = band === 0 ? b.y + b.h - h : band === 2 ? b.y : b.y + (b.h - h) / 2;
+    // Short matching joints bridge varying silhouettes at the two paper folds.
+    ctx.fillStyle = PAPER_FILL; ctx.strokeStyle = INK; ctx.lineWidth = Math.max(1, b.w * .004);
+    const jointW = b.w * .055, jointX = px(b, .5) - jointW / 2;
+    if (band > 0 && y > b.y) { ctx.fillRect(jointX, b.y, jointW, y - b.y + 2); ctx.strokeRect(jointX, b.y - 2, jointW, y - b.y + 4); }
+    if (band < 2 && y + h < b.y + b.h) { ctx.fillRect(jointX, y + h - 2, jointW, b.y + b.h - y - h + 2); ctx.strokeRect(jointX, y + h - 2, jointW, b.y + b.h - y - h + 4); }
+    ctx.drawImage(asset.image, crop.x, crop.y, crop.w, crop.h, x, y, w, h);
+  }
   const bandIndex = [0, 1, 2];
   const flipping = [false, false, false], flipT = [0, 0, 0], flipTo = [0, 0, 0], flipDone = [false, false, false], spins = [0, 0, 0];
 
@@ -479,7 +523,7 @@
       roundRect(g.cardX, g.top, g.cardW, g.cardH, 10); ctx.clip();
       ctx.beginPath(); ctx.rect(b.x, b.y, b.w, b.h); ctx.clip();
       ctx.translate(px(b, .5), 0); ctx.scale(s, 1); ctx.translate(-px(b, .5), 0);
-      PARTS[i][bandIndex[i]](b, t);
+      drawArtwork(b, i, bandIndex[i], t);
       ctx.restore();
     }
   }
