@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Romanticism — The Sublime</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0a1220;color:#eef2fb;font-family:Arial,sans-serif}
@@ -30,6 +33,11 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
 .restore{position:absolute;right:5%;bottom:5%;z-index:3;border:1px solid #cfe0ff33;border-radius:30px;background:#0e1830b8;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#eef2fb;padding:9px 17px;font:9px/1 Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
 .restore:hover{background:#16223fd8}
 .restore:focus-visible{outline:2px solid #ffdf9e;outline-offset:4px}
+.wanderer-speech{position:absolute;left:53.5%;bottom:40%;transform:translateX(-50%) translateY(10px);width:min(350px,72vw);z-index:4;background:linear-gradient(180deg,#f8f0de,#ece0c4);color:#2b2117;border:1px solid #caa15a55;border-radius:15px;padding:16px 21px 18px;box-shadow:0 20px 54px #00000070,0 0 0 1px #ffffff26 inset;font:15.5px/1.85 "Nanum Myeongjo",Georgia,"Batang",serif;letter-spacing:.005em;opacity:0;transition:opacity .5s ease,transform .5s ease;pointer-events:none}
+.wanderer-speech.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.wanderer-speech::after{content:"";position:absolute;left:50%;bottom:-12px;transform:translateX(-50%);border:12px solid transparent;border-bottom:0;border-top-color:#ece0c4}
+.wanderer-speech .ws-kicker{display:block;font:italic 11px/1.5 Georgia,serif;letter-spacing:.18em;color:#8a6a2f;margin:0 0 8px}
+.wanderer-speech p{margin:0}
 @media(max-width:640px){
   header{top:6%;max-width:82%}
   header h1{font-size:27px}
@@ -39,15 +47,16 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
   .slider-wrap{width:30px;height:124px}
   #temperament{width:124px;height:30px}
   .restore{right:3%;bottom:3%;padding:7px 13px}
+  .wanderer-speech{bottom:44%;width:82vw;font-size:13px;line-height:1.78;padding:13px 16px 15px}
 }
 @media(prefers-reduced-motion:reduce){#temperament{transition:none}}
 </style>
 </head>
 <body>
-<canvas id="scene" tabindex="0" aria-label="A wanderer above a sea of fog. Move to part the mist. Drag the sky control from dawn to tempest. Click the sky, or press Enter, to release birds."></canvas>
+<canvas id="scene" tabindex="0" aria-label="A wanderer above a sea of fog. Move to part the mist. Scroll to shift the sky from dawn to tempest. Click the wanderer for a note on Romanticism; click the sky, or press Enter, to release birds."></canvas>
 <header><span>CASPAR DAVID FRIEDRICH / 1818</span><h1>Wanderer<br>above the fog.</h1></header>
 <div class="tag"><span>ROMANTICISM</span><i></i><strong id="moodLabel">Dawn</strong></div>
-<p class="caption">Move to part the mist over the valley. Drag the sky from serene dawn toward the tempest. Click the heavens to loose the birds.</p>
+<p class="caption">Move to part the mist over the valley. Scroll to turn the sky from serene dawn toward the tempest. Click the wanderer to hear him; click the heavens to loose the birds.</p>
 <div class="mood">
 <svg class="mood-icon" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="#ffd98a"/></svg>
 <div class="slider-wrap"><input id="temperament" type="range" min="0" max="1" step=".001" value=".16" aria-label="Shift the sky from serene dawn to tempest"></div>
@@ -55,6 +64,10 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
 <small>SERENITY&nbsp;—&nbsp;TEMPEST</small>
 </div>
 <button class="restore" id="restore" type="button">Calm the sky</button>
+<div class="wanderer-speech" id="wandererSpeech" role="status" hidden>
+<span class="ws-kicker">낭만주의 · ROMANTICISM</span>
+<p>18세기 말, 낭만주의는 이성과 규칙에 맞서 태어났다. 개인의 감정과 상상력, 그리고 거대한 자연 앞에서 느끼는 숭고함을 예술의 중심에 두었다. 안개 너머를 응시하는 방랑자처럼, 낭만주의는 알 수 없는 세계와 홀로 마주 선 인간을 그린다.</p>
+</div>
 <script>
 (() => {
   'use strict';
@@ -87,9 +100,36 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
   canvas.addEventListener('pointermove', setPointer, { passive: true });
   canvas.addEventListener('pointerenter', () => pointer.active = true);
   canvas.addEventListener('pointerleave', () => pointer.active = false);
+  canvas.addEventListener('pointermove', e => {
+    canvas.style.cursor = hitWanderer(e.clientX, e.clientY) ? 'pointer' : 'crosshair';
+  }, { passive: true });
 
   temperamentInput.addEventListener('input', () => { temperament = Number(temperamentInput.value); });
   restoreBtn.addEventListener('click', () => { temperament = .16; temperamentInput.value = '.16'; });
+
+  // Turn the wheel to move the sky along the same 0..1 temperament the slider drives.
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    const scale = e.deltaMode === 1 ? .04 : e.deltaMode === 2 ? .32 : .0012;
+    temperament = clamp(temperament + e.deltaY * scale, 0, 1);
+    temperamentInput.value = temperament.toFixed(3);
+  }, { passive: false });
+
+  // A speech bubble above the figure — a short note on Romanticism, toggled by clicking the wanderer.
+  const speech = document.getElementById('wandererSpeech');
+  let speechVisible = false, speechTimer = 0;
+  function toggleSpeech(force) {
+    speechVisible = force != null ? force : !speechVisible;
+    clearTimeout(speechTimer);
+    if (speechVisible) {
+      speech.hidden = false;
+      requestAnimationFrame(() => speech.classList.add('show'));
+    } else {
+      speech.classList.remove('show');
+      speechTimer = setTimeout(() => { if (!speechVisible) speech.hidden = true; }, 520);
+    }
+  }
+  addEventListener('keydown', e => { if (e.key === 'Escape' && speechVisible) toggleSpeech(false); });
 
   function spawnBirds(x, y) {
     const count = 3 + Math.floor(Math.random() * 3);
@@ -102,7 +142,12 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
       });
     }
   }
+  function hitWanderer(px, py) {
+    const fx = width * .535, ground = height * .735;
+    return px > fx - 46 && px < fx + 46 && py > ground - 72 && py < ground + 30;
+  }
   canvas.addEventListener('click', e => {
+    if (hitWanderer(e.clientX, e.clientY)) { toggleSpeech(); return; }
     if (e.clientY > height * .64) return;
     spawnBirds(e.clientX, e.clientY);
   });
