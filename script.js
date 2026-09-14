@@ -870,6 +870,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const sendEnter = () => {
+            renaissanceFrame.contentWindow?.postMessage('renaissance:enter', window.location.origin);
+        };
         const sendResize = () => {
             try {
                 renaissanceFrame.contentWindow?.postMessage('renaissance:resize', '*');
@@ -879,12 +882,13 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         if (!renaissanceFrame.src) {
-            renaissanceFrame.addEventListener('load', sendResize, { once: true });
+            renaissanceFrame.addEventListener('load', () => { sendResize(); sendEnter(); }, { once: true });
             renaissanceFrame.src = renaissanceFrame.dataset.src || 'renaissance.html';
             return;
         }
 
         if (renaissanceFrame.contentWindow) {
+            sendEnter();
             sendResize();
             setTimeout(sendResize, 120);
             setTimeout(sendResize, 360);
@@ -935,6 +939,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closeInteraction() {
         pauseAllMusic();
+        renaissanceFrame?.contentWindow?.postMessage('renaissance:leave', window.location.origin);
         body.classList.remove('view-interaction', 'view-impressionism', 'view-particle', 'view-schema-architecture', 'view-fluid-collision', 'view-renaissance', 'view-baroque', 'view-romanticism', 'view-impressionism-time', 'night-background');
         body.classList.remove('artwork-opening', 'artwork-arrived');
         body.classList.add('view-hub');
