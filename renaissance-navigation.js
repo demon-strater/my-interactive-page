@@ -36,13 +36,13 @@
     const dx = e.clientX - start.x, dy = e.clientY - start.y, duration = performance.now() - start.at;
     start = null;
     if (e.defaultPrevented || duration > 900 || Math.abs(dx) < 75 || Math.abs(dx) < Math.abs(dy) * 1.7) return;
-    if ((!second && dx < 0) || (second && dx > 0)) {
+    if (arrow && ((!second && dx < 0) || (second && dx > 0))) {
       e.preventDefault(); swallowClick = true; navigate(arrow.href);
     }
   });
   document.addEventListener('pointercancel', () => { start = null; });
   document.addEventListener('keydown', e => {
-    if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.target.closest('input,select,textarea,button,a,[contenteditable]')) return;
+    if (!arrow || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.target.closest('input,select,textarea,button,a,[contenteditable]')) return;
     if ((!second && e.key === 'ArrowRight') || (second && e.key === 'ArrowLeft')) {
       e.preventDefault(); navigate(arrow.href);
     }
