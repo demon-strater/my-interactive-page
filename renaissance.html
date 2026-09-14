@@ -7,8 +7,10 @@
 <title>르네상스 — 그림이 공간이 되는 순간</title>
 <meta name="description" content="눈, 그림판, 공간을 연결하는 시각 실험. 움직이는 투영선과 기둥으로 원근법을 발견하고 아테네 학당으로 이어집니다.">
 <link rel="stylesheet" href="renaissance.css?v=visual-2">
+<link rel="stylesheet" href="renaissance-navigation.css?v=sequence-1">
 </head>
-<body>
+<body class="visual-experience">
+<nav class="experience-nav" aria-label="르네상스 체험 순서"><a href="renaissance.html?v=sequence-1" aria-current="page">01 원근법 알아보기</a><a href="renaissance-perspective.html?v=sequence-1">02 소실점 찍기</a></nav>
 <main id="atelier">
   <header class="masthead"><div class="eyebrow">RENAISSANCE <span>01 / 원근법</span></div><h1 id="sceneTitle">그림일까, 공간일까.</h1></header>
   <div class="playback"><button id="replay" type="button" aria-label="처음부터 다시 보기" title="처음부터">↺</button><button id="play" type="button" aria-label="영상 일시정지" title="일시정지">Ⅱ</button></div>
@@ -24,6 +26,7 @@
       <label id="eyeControl" class="experiment-control" hidden><span>낮게</span><input id="eyeHeight" type="range" min="0.8" max="3.2" step="0.01" value="2" aria-label="관찰자의 눈높이"><span>높게</span></label>
       <button id="artLines" type="button" aria-pressed="true" hidden>안내선 끄기</button>
       <button id="next" type="button">다음 장면 <span aria-hidden="true">→</span></button>
+      <a id="secondExperience" class="next-experience" href="renaissance-perspective.html?v=sequence-1" hidden>소실점 직접 찍어보기 <span aria-hidden="true">→</span></a>
     </div>
     <nav class="chapters" aria-label="시각 실험 장면">
       <button type="button" data-chapter="0" aria-current="step"><span class="chapter-line"><i></i></span><span><b>01</b> 평면의 비밀</span></button>
@@ -37,6 +40,6 @@
   <noscript>이 시각 실험은 JavaScript가 필요합니다.</noscript>
 </main>
 <script src="renaissance-model.js?v=visual-2"></script>
-<script src="renaissance.js?v=visual-2"></script>
+<script src="renaissance.js?v=sequence-1"></script>
 </body>
 </html>

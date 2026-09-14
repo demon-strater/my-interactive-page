@@ -881,7 +881,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        if (!renaissanceFrame.src) {
+        let isFirstExperience = false;
+        try {
+            isFirstExperience = renaissanceFrame.contentWindow?.location.pathname === new URL(renaissanceFrame.dataset.src || 'renaissance.html', window.location.href).pathname;
+        } catch (error) {
+            isFirstExperience = false;
+        }
+        if (!renaissanceFrame.src || !isFirstExperience) {
             renaissanceFrame.addEventListener('load', () => { sendResize(); sendEnter(); }, { once: true });
             renaissanceFrame.src = renaissanceFrame.dataset.src || 'renaissance.html';
             return;

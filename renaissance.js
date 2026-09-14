@@ -213,7 +213,7 @@
     if(c!==currentChapter){
       currentChapter=c;$('sceneTitle').textContent=titles[c];$('gestureHint').textContent=hints[c];$('sceneStatus').textContent=titles[c]+' '+hints[c];
       $('distanceControl').hidden=c!==2;$('eyeControl').hidden=c!==3;$('artLines').hidden=c!==4;$('artSource').hidden=c!==4;$('modelNote').hidden=c===4;
-      $('next').innerHTML=c===4?'처음으로 <span aria-hidden="true">↺</span>':'다음 장면 <span aria-hidden="true">→</span>';
+      $('next').hidden=c===4;$('secondExperience').hidden=c!==4;
       chapters.forEach((b,i)=>{if(i===c)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');});
     }
     chapters.forEach((b,i)=>b.style.setProperty('--progress',clamp((time-M.starts[i])/(M.ends[i]-M.starts[i]))));
