@@ -203,13 +203,13 @@
     items.forEach(item=>item.from={...item.current});
     fromVP={...vanishing};targetVP={x:clamp(x,.015,.985),y:clamp(y,.015,.985)};
     fromLines=lineAmount;targetLines=1;ordered=true;
-    atelier.classList.add('is-ordered');document.getElementById('stateLabel').textContent='II — PERSPECTIVE';animate();
+    atelier.classList.add('is-ordered');document.getElementById('stateLabel').textContent='다른 곳을 눌러 소실점 옮기기';animate();
   }
   function scatter() {
     if(!ready)return;
     items.forEach((item,i)=>{item.from={...item.current};item.to=disorder(i);});
     fromVP={...vanishing};targetVP={x:.5,y:.37};fromLines=lineAmount;targetLines=0;ordered=false;
-    atelier.classList.remove('is-ordered');document.getElementById('stateLabel').textContent='I — DISORDER';animate();
+    atelier.classList.remove('is-ordered');document.getElementById('stateLabel').textContent='화면을 눌러 배치하기';animate();
   }
   atelier.addEventListener('click',e=>{if(e.target.closest('button,a'))return;const r=atelier.getBoundingClientRect();compose((e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height);});
   atelier.addEventListener('keydown',e=>{if(e.target.closest('button,a'))return;if(e.key==='Enter'||e.key===' '){e.preventDefault();compose();}if(e.key==='Escape')scatter();});
@@ -257,5 +257,5 @@
     figures.replaceChildren(...items.map(item=>item.el));
     ready=true;document.getElementById('loadStatus').textContent='';duration=0;frame(performance.now());
   }
-  init().catch(error=>{document.getElementById('loadStatus').textContent='Images unavailable — reload to retry';console.error(error);});
+  init().catch(error=>{document.getElementById('loadStatus').textContent='인물을 불러오지 못했습니다. 새로고침해주세요.';console.error(error);});
 })();
