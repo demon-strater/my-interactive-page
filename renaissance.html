@@ -1,20 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Renaissance — The Geometry of Thought</title>
-<link rel="stylesheet" href="renaissance.css?v=philosophers-chatgpt-3">
+<title>르네상스 — 한 점에서 시작되는 공간</title>
+<meta name="description" content="소실점을 움직이며 르네상스의 원근법을 체험하고, 라파엘로의 아테네 학당에서 인간과 이성에 대한 관심을 발견하세요.">
+<link rel="stylesheet" href="renaissance.css?v=learning-1">
 <link rel="stylesheet" href="internal-navigation.css">
 </head>
 <body>
-<main id="atelier" tabindex="0" aria-label="Eight philosophers in disorder. Click to establish a vanishing point and align them in perspective. Press Enter to compose at the center.">
+<main id="atelier" tabindex="0" aria-label="르네상스 원근법 체험. 장면을 눌러 소실점을 옮기세요. 방향키로 이동하고 Enter로 중앙에 모을 수 있습니다.">
 <canvas id="architecture" aria-hidden="true"></canvas>
 <div id="figures" aria-label="Separate philosopher studies"></div>
 <svg id="guides" aria-hidden="true"><defs><radialGradient id="vpGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#fff8e4" stop-opacity="1"/><stop offset="16%" stop-color="#ffdea0" stop-opacity=".8"/><stop offset="45%" stop-color="#e6ac5c" stop-opacity=".28"/><stop offset="100%" stop-color="#e6ac5c" stop-opacity="0"/></radialGradient><radialGradient id="vpHot" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#fffaf0" stop-opacity=".95"/><stop offset="60%" stop-color="#ffe6b0" stop-opacity=".4"/><stop offset="100%" stop-color="#ffe6b0" stop-opacity="0"/></radialGradient></defs><g id="rays"></g><g id="depths"></g><g id="focus"></g></svg>
-<header class="masthead"><span>RAFFAELLO / A STUDY IN PERSPECTIVE</span><h1>The geometry<br>of thought.</h1></header>
+<header class="masthead"><span>01 / RENAISSANCE · 르네상스</span><h1>한 점에서<br>시작되는 공간.</h1></header>
+<section class="lesson" aria-label="원근법 체험 안내">
+<div class="lesson-track"><span id="lessonStep">01 / 바라보기</span><button id="replay" type="button" disabled>도입 다시 보기</button></div>
+<h2 id="lessonTitle">평평한 그림에 깊이를 만들 수 있을까?</h2>
+<p id="lessonText" aria-live="polite">르네상스의 화가들은 관찰과 기하학으로 눈앞의 공간을 그림에 옮겼습니다. 하나의 점이 흩어진 인물과 공간을 어떻게 연결하는지 살펴보세요.</p>
+<div class="lesson-actions"><button id="beginLesson" type="button" disabled>10초 도입 보기</button><button id="skipLesson" type="button" disabled>바로 체험하기 →</button><button id="viewArtwork" type="button">작품에서 발견하기 ↗</button></div>
+<small>체험 장면은 AI 생성 인물로 재구성했습니다. 원근 효과를 이해하기 위해 크기 차이를 과장했습니다.</small>
+</section>
 <div class="chapter"><span id="stateLabel">I — DISORDER</span><span class="rule"></span><span>RENAISSANCE</span></div>
-<div class="toolbar"><button id="compose" type="button">Compose &#8599;</button><button id="scatter" type="button">Scatter &#8634;</button></div>
-<span id="loadStatus" role="status">Loading figures…</span>
+<div class="toolbar"><button id="compose" type="button">중앙에 모으기</button><button id="scatter" type="button">다시 흩뜨리기</button></div>
+<span id="loadStatus" role="status">인물을 불러오는 중…</span>
 </main>
-<script src="renaissance.js?v=philosophers-chatgpt-3"></script>
+<dialog id="artworkDialog" aria-labelledby="artworkTitle">
+<button id="closeArtwork" class="close-artwork" type="button">체험으로 돌아가기 ×</button>
+<div class="artwork-layout"><figure><div class="artwork-image"><img src="아테네 학당.jpg" alt="거대한 아치 아래 중앙의 플라톤과 아리스토텔레스를 중심으로 고대 철학자들이 토론하는 아테네 학당" width="1792" height="1390"><svg id="artworkGuides" viewBox="0 0 1792 1390" aria-hidden="true" hidden><path d="M 180,220 L 919,655 L 1610,220 M 310,1180 L 919,655 L 1550,1180"/><circle cx="919" cy="655" r="24"/></svg></div><figcaption>라파엘로 · 《아테네 학당》 · 바티칸, 서명의 방<br>소장된 원작의 이미지 · 선은 이해를 돕는 도식입니다.</figcaption></figure>
+<section class="artwork-reading"><span>03 / 작품에서 발견하기</span><h2 id="artworkTitle">공간의 중심에,<br>생각하는 인간.</h2><p>방금 움직인 소실점을 떠올려보세요. 이 그림에서는 건축의 깊이와 반복되는 아치가 시선을 중앙의 두 철학자로 이끕니다.</p><button id="toggleArtworkGuides" type="button" aria-pressed="false">원근법 안내선 켜기</button><h3>01 · 선을 따라가 보세요</h3><p>뒤로 갈수록 좁아지는 공간이 평평한 벽에 깊이를 만듭니다. 가까운 인물과 먼 인물의 크기도 비교해보세요.</p><h3>02 · 두 사람의 손을 보세요</h3><p>중앙의 플라톤은 위를 가리키고, 곁의 아리스토텔레스는 손을 앞으로 펼칩니다. 서로 다른 사유가 한 공간에서 만납니다.</p><h3>03 · 왜 고대의 철학자들일까요?</h3><p>르네상스는 고대 그리스·로마의 문화와 학문을 새롭게 탐구했습니다. 원근법뿐 아니라, 토론하고 배우는 인간에 대한 관심도 이 작품을 읽는 열쇠입니다.</p><a href="https://www.museivaticani.va/content/museivaticani/en/collezioni/musei/stanze-di-raffaello/stanza-della-segnatura/scuola-di-atene.html" target="_blank" rel="noopener noreferrer">작품 해설 출처 · 바티칸 미술관 ↗</a></section></div>
+</dialog>
+<script src="renaissance.js?v=learning-1"></script>
 </body></html>

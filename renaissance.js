@@ -211,13 +211,59 @@
     fromVP={...vanishing};targetVP={x:.5,y:.37};fromLines=lineAmount;targetLines=0;ordered=false;
     atelier.classList.remove('is-ordered');document.getElementById('stateLabel').textContent='I — DISORDER';animate();
   }
-  atelier.addEventListener('click',e=>{if(e.target.closest('button'))return;const r=atelier.getBoundingClientRect();compose((e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height);});
-  atelier.addEventListener('keydown',e=>{if(e.target.closest('button'))return;if(e.key==='Enter'||e.key===' '){e.preventDefault();compose();}if(e.key==='Escape')scatter();});
-  document.getElementById('compose').addEventListener('click',()=>compose());
-  document.getElementById('scatter').addEventListener('click',scatter);
+  const lesson=document.querySelector('.lesson');
+  const title=document.getElementById('lessonTitle'),text=document.getElementById('lessonText'),step=document.getElementById('lessonStep');
+  const begin=document.getElementById('beginLesson'),skip=document.getElementById('skipLesson');
+  const dialog=document.getElementById('artworkDialog');
+  let lessonTimers=[];
+  function stopLesson(){lessonTimers.forEach(clearTimeout);lessonTimers=[];atelier.classList.remove('is-film');}
+  function caption(label,heading,copy){step.textContent=label;title.textContent=heading;text.textContent=copy;}
+  function explore(recenter=true){
+    stopLesson();begin.hidden=true;skip.hidden=true;
+    caption('02 / 직접 움직이기','당신의 손끝이 공간의 기준이 됩니다.','장면의 왼쪽이나 오른쪽을 눌러 소실점을 옮겨보세요. 깊이 방향의 선들이 한 점으로 모이고, 인물의 배치가 그 기준에 맞춰 바뀝니다. 키보드 방향키로도 움직일 수 있습니다.');
+    if(recenter)compose();
+  }
+  function introduction(){
+    if(!ready)return;
+    stopLesson();scatter();atelier.classList.add('is-film');begin.hidden=true;skip.hidden=false;
+    skip.textContent='도입 건너뛰기 →';
+    caption('01 / 바라보기','이 인물들은 같은 공간에 서 있을까요?','지금은 크기와 위치의 기준이 흩어져 있습니다. 이 장면은 비교를 위한 재구성이며, 르네상스 이전의 회화 전체를 나타내지는 않습니다.');
+    if(reduced.matches){explore();return;}
+    lessonTimers.push(setTimeout(()=>{compose();caption('01 / 하나의 기준','깊이를 향한 선들이 한 점으로 모입니다.','이 점을 소실점이라고 합니다. 평행하게 멀어지는 선들이 그림 안에서는 한 점에서 만나는 것처럼 보입니다.');},3200));
+    lessonTimers.push(setTimeout(()=>caption('01 / 공간의 탄생','가까이 있는 것은 크게, 멀리 있는 것은 작게.','인물의 크기와 건축의 선이 함께 깊이를 만듭니다. 르네상스의 화가들은 관찰한 세계를 기하학으로 구성했습니다.'),6500));
+    lessonTimers.push(setTimeout(()=>explore(false),10000));
+  }
+  begin.addEventListener('click',introduction);
+  document.getElementById('replay').addEventListener('click',introduction);
+  skip.addEventListener('click',()=>explore());
+  atelier.addEventListener('click',e=>{
+    if(!ready||e.target.closest('button,a,.lesson'))return;
+    const r=atelier.getBoundingClientRect(),y=e.clientY-r.top;if(y>height)return;
+    explore(false);compose((e.clientX-r.left)/width,y/height);
+    caption('02 / 직접 움직이기','소실점이 옮겨지면, 공간도 다시 짜입니다.','빛나는 점을 기준으로 건축의 선과 인물의 배치가 달라졌습니다. 다른 곳을 눌러 비교한 뒤, 작품에서 이 원리를 찾아보세요.');
+  });
+  atelier.addEventListener('keydown',e=>{
+    if(e.target.closest('button,a,.lesson'))return;
+    if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Enter',' '].includes(e.key)){
+      e.preventDefault();explore(false);
+      compose(e.key==='Enter'||e.key===' '?.5:targetVP.x+(e.key==='ArrowRight'?.08:e.key==='ArrowLeft'?-.08:0),e.key==='Enter'||e.key===' '?.37:targetVP.y+(e.key==='ArrowDown'?.08:e.key==='ArrowUp'?-.08:0));
+    }
+    if(e.key==='Escape'){stopLesson();scatter();}
+  });
+  document.getElementById('compose').addEventListener('click',()=>explore());
+  document.getElementById('scatter').addEventListener('click',()=>{stopLesson();scatter();caption('02 / 비교하기','공간의 기준을 잠시 풀어보았습니다.','인물들의 크기와 위치가 다시 흩어졌습니다. 장면을 눌러 하나의 소실점으로 공간을 다시 구성해보세요.');});
+  document.getElementById('viewArtwork').addEventListener('click',()=>{stopLesson();dialog.showModal();});
+  document.getElementById('closeArtwork').addEventListener('click',()=>dialog.close());
+  dialog.addEventListener('close',()=>{if(ready)explore(false);});
+  document.getElementById('toggleArtworkGuides').addEventListener('click',e=>{
+    const guides=document.getElementById('artworkGuides');guides.hidden=!guides.hidden;
+    e.currentTarget.setAttribute('aria-pressed',String(!guides.hidden));e.currentTarget.textContent=guides.hidden?'원근법 안내선 켜기':'원근법 안내선 끄기';
+  });
   function resize() {
     const oldW=width,oldH=height;
-    width=atelier.clientWidth;height=atelier.clientHeight;
+    width=atelier.clientWidth;height=Math.max(180,atelier.clientHeight-lesson.offsetHeight-58);
+    for(const layer of [canvas,figures,svg])layer.style.height=`${height}px`;
+    document.querySelector('.toolbar').style.top=`${height+8}px`;
     const dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);
     svg.setAttribute('viewBox',`0 0 ${width} ${height}`);
     if(ready) {
@@ -226,6 +272,7 @@
     }else drawRoom();
   }
   new ResizeObserver(resize).observe(atelier);
+  new ResizeObserver(resize).observe(lesson);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ready){if(raf)cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);}});
   async function init() {
     resize();
@@ -255,7 +302,8 @@
     items=loaded.filter(result=>result.status==='fulfilled').map(result=>result.value);
     if(!items.length)throw Error('Images unavailable');
     figures.replaceChildren(...items.map(item=>item.el));
-    ready=true;document.getElementById('loadStatus').textContent='';duration=0;frame(performance.now());
+    ready=true;document.getElementById('loadStatus').textContent=items.length<files.length?'일부 인물을 불러오지 못했습니다. 새로고침으로 다시 시도할 수 있습니다.':'';duration=0;frame(performance.now());
+    for(const id of ['beginLesson','skipLesson','replay'])document.getElementById(id).disabled=false;
   }
-  init().catch(error=>{document.getElementById('loadStatus').textContent='Images unavailable — reload to retry';console.error(error);});
+  init().catch(error=>{document.getElementById('loadStatus').textContent='인물을 불러오지 못했습니다. 새로고침으로 다시 시도해주세요. 작품 감상은 열 수 있습니다.';console.error(error);});
 })();
