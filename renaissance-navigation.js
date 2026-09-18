@@ -46,7 +46,7 @@
       swipeStart = null;
       if (duration > 900 || dx > -75 || Math.abs(dx) < Math.abs(dy) * 1.7) return;
       swallowClick = true;
-      navigate('renaissance.html?v=play-5');
+      navigate('renaissance.html?v=play-6');
     });
     document.addEventListener('pointercancel', () => { swipeStart = null; });
   }

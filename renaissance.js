@@ -3,7 +3,6 @@
   const M=window.PerspectiveModel,{clamp,lerp,smooth,mix,imprint}=M;
   const $=id=>document.getElementById(id),canvas=$('scene'),ctx=canvas.getContext('2d');
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  const timeline=$('timeline'),timelineTrack=$('timelineTrack'),timelineFill=$('timelineFill'),timelineTooltip=$('timelineTooltip');
   const compareOne=$('compareOne'),compareTwo=$('compareTwo');
   const titles=['그림일까, 공간일까.','눈에 닿는 선이, 그림이 된다.','같은 크기. 다른 모습.','눈높이가 세상의 기준이 된다.','그림이 하나의 세계가 된다.'];
   const hints=['옆으로 돌려보면','빛의 선을 따라가 보세요','청록색 기둥을 앞뒤로 끌어보세요','눈을 위아래로 움직여보세요','선을 따라, 그림 속으로'];
@@ -11,8 +10,9 @@
   // Autoplay freezes the scene at each window's start and holds it for the given real-world duration
   // (in ms) so the example artworks never animate underneath the narration — they fully replace it, then hand back.
   // Windows sit right at a chapter boundary (M.chapter switches at 8/18/30/40) so the artworks land only
-  // once a whole chapter has finished narrating, never mid-chapter.
-  const compareWindows=[{start:17.5,end:18,hold:4500},{start:39.5,end:40,hold:5200}];
+  // once a whole chapter has finished narrating, never mid-chapter. The last entry holds on the finished
+  // artwork before looping back to the start, so the piece runs on its own with no player chrome at all.
+  const compareWindows=[{start:17.5,end:18,hold:4500},{start:39.5,end:40,hold:5200},{start:50,end:0,hold:5000,loop:true}];
   let holdRemaining=null,holdAt=null;
   let width=1,height=1,time=reduced.matches?7:0,playing=!reduced.matches,last=0,raf=0,currentChapter=-1;
   let manual={},drag=null,targets={},view=null,artReady=false,artFailed=false,showArtLines=true;
@@ -216,35 +216,29 @@
     if(s.chapter===4&&time<45){const p=view([0,-.45,-3]);label('원리에서 작품으로',{x:p.x,y:p.y+24},gold,1-s.art);}
   }
   function updateUI(){
-    const c=M.chapter(time),s=M.state(time,manual);
+    const c=M.chapter(time);
     if(c!==currentChapter){
-      currentChapter=c;$('sceneTitle').textContent=titles[c];$('sceneStatus').textContent=titles[c]+' '+hints[c];
-      $('distanceControl').hidden=c!==2;$('eyeControl').hidden=c!==3;$('artLines').hidden=c!==4;$('artSource').hidden=c!==4;$('modelNote').hidden=c===4;
-      $('secondExperience').hidden=c!==4;
-      timeline.setAttribute('aria-valuetext',titles[c]);
+      currentChapter=c;$('sceneTitle').textContent=titles[c];$('sceneStatus').textContent=titles[c]+' '+hints[c];$('sceneHint').textContent=hints[c];
+      $('artSource').hidden=c!==4;$('secondExperience').hidden=c!==4;
     }
-    timelineFill.style.width=(time/50*100)+'%';
-    timeline.setAttribute('aria-valuenow',String(Math.round(time)));
     const showCompare1=time>=compareWindows[0].start&&time<compareWindows[0].end,showCompare2=time>=compareWindows[1].start&&time<compareWindows[1].end;
     compareOne.classList.toggle('visible',showCompare1);compareOne.setAttribute('aria-hidden',String(!showCompare1));
     compareTwo.classList.toggle('visible',showCompare2);compareTwo.setAttribute('aria-hidden',String(!showCompare2));
-    $('distance').value=s.distance;$('eyeHeight').value=s.eye;
-    $('filmTime').textContent=`00:${String(Math.floor(time)).padStart(2,'0')} / 00:50`;
-    $('play').textContent=playing?'Ⅱ':'▶';$('play').setAttribute('aria-label',playing?'영상 일시정지':'영상 재생');$('play').title=playing?'일시정지':'재생';
   }
   function frame(now){
     raf=0;if(document.hidden){last=0;return;}
     if(playing){
       const dt=last?Math.min(now-last,100):0;
       if(holdRemaining!==null){
-        // The scene stays frozen on the example artworks; the narration only resumes once they've had their moment.
+        // The scene stays frozen (on an example artwork, or the finished painting at the very end); autoplay
+        // only resumes once it's had its moment, then hands back — or loops back to the start.
         holdRemaining-=dt;
-        if(holdRemaining<=0){time=holdAt.end;holdRemaining=null;holdAt=null;}
+        if(holdRemaining<=0){time=holdAt.end;if(holdAt.loop){manual={};currentChapter=-1;}holdRemaining=null;holdAt=null;}
       }else{
         const prev=time,next=Math.min(50,time+dt/1000);
         const hit=compareWindows.find(w=>prev<w.start&&next>=w.start);
         if(hit){time=hit.start;holdAt=hit;holdRemaining=hit.hold;}
-        else{time=next;if(time>=50)playing=false;}
+        else time=next;
       }
     }
     last=now;updateUI();render();if(playing)raf=requestAnimationFrame(frame);
@@ -256,65 +250,17 @@
     const landing=reduced.matches?[7,16,26,36,50]:[0,11,19,32,44];time=landing[chapter];manual={};playing=autoplay;last=0;holdRemaining=null;holdAt=null;currentChapter=-1;invalidate();
   }
   function setValue(kind,value){
-    pause();
     if(kind==='distance')manual.distance=clamp(value,2,16);else manual.eye=clamp(value,.8,3.2);
     invalidate();
   }
-  $('play').addEventListener('click',()=>{if(time>=50){time=0;manual={};}playing=!playing;last=0;invalidate();});
-  function seekTime(t){pause();time=clamp(t,0,50);manual={};invalidate();}
-  function timeFromEvent(e){
-    const r=timelineTrack.getBoundingClientRect();
-    return clamp((e.clientX-r.left)/r.width)*50;
-  }
-  function showTooltip(e){
-    const t=timeFromEvent(e),r=timelineTrack.getBoundingClientRect();
-    timelineTooltip.textContent=titles[M.chapter(t)];
-    timelineTooltip.style.left=clamp(e.clientX-r.left,0,r.width)+'px';
-    timelineTooltip.classList.add('visible');
-  }
-  function hideTooltip(){timelineTooltip.classList.remove('visible');}
-  let timelineDrag=false;
-  timeline.addEventListener('pointerenter',showTooltip);
-  timeline.addEventListener('pointermove',e=>{showTooltip(e);if(timelineDrag)seekTime(timeFromEvent(e));});
-  timeline.addEventListener('pointerleave',()=>{if(!timelineDrag)hideTooltip();});
-  timeline.addEventListener('pointerdown',e=>{
-    if(e.button!==0)return;
-    timelineDrag=true;timeline.setPointerCapture(e.pointerId);
-    seekTime(timeFromEvent(e));showTooltip(e);e.preventDefault();
-  });
-  function endTimelineDrag(e){
-    if(!timelineDrag)return;timelineDrag=false;
-    if(timeline.hasPointerCapture(e.pointerId))timeline.releasePointerCapture(e.pointerId);
-    hideTooltip();
-  }
-  timeline.addEventListener('pointerup',endTimelineDrag);
-  timeline.addEventListener('pointercancel',endTimelineDrag);
-  timeline.addEventListener('focus',()=>{
-    const r=timelineTrack.getBoundingClientRect();
-    timelineTooltip.textContent=titles[M.chapter(time)];
-    timelineTooltip.style.left=clamp(time/50*r.width,0,r.width)+'px';
-    timelineTooltip.classList.add('visible');
-  });
-  timeline.addEventListener('blur',hideTooltip);
-  timeline.addEventListener('keydown',e=>{
-    const step={ArrowRight:2,ArrowLeft:-2,Home:-50,End:50}[e.key];
-    if(step===undefined)return;
-    e.preventDefault();
-    seekTime(e.key==='Home'?0:e.key==='End'?50:time+step);
-    const r=timelineTrack.getBoundingClientRect();
-    timelineTooltip.textContent=titles[M.chapter(time)];
-    timelineTooltip.style.left=clamp(time/50*r.width,0,r.width)+'px';
-    timelineTooltip.classList.add('visible');
-  });
-  $('distance').addEventListener('input',e=>setValue('distance',+e.target.value));
-  $('eyeHeight').addEventListener('input',e=>setValue('eye',+e.target.value));
-  $('artLines').addEventListener('click',()=>{showArtLines=!showArtLines;$('artLines').setAttribute('aria-pressed',String(showArtLines));$('artLines').textContent=showArtLines?'안내선 끄기':'안내선 켜기';invalidate();});
   function local(event){const r=canvas.getBoundingClientRect();return {x:event.clientX-r.left,y:event.clientY-r.top};}
   canvas.addEventListener('pointerdown',e=>{
     if(e.button!==0)return;
     const p=local(e),c=M.chapter(time),target=c===2?targets.column:c===3?targets.eye:null;
     if(!target||Math.hypot(p.x-target.x,p.y-target.y)>target.r+15)return;
-    pause();drag={id:e.pointerId,kind:c===2?'distance':'eye'};canvas.setPointerCapture(e.pointerId);e.preventDefault();
+    // Grabbing the column or the eye pauses the autoplay so the demonstration doesn't race ahead while it's held.
+    playing=false;last=0;holdRemaining=null;holdAt=null;
+    drag={id:e.pointerId,kind:c===2?'distance':'eye'};canvas.setPointerCapture(e.pointerId);e.preventDefault();
   });
   canvas.addEventListener('pointermove',e=>{
     if(!drag||drag.id!==e.pointerId||!view)return;
@@ -327,11 +273,16 @@
     const t=clamp(((p.x-a.x)*dx+(p.y-a.y)*dy)/(dx*dx+dy*dy||1));value=lerp(lo,hi,t);
     setValue(drag.kind,value);e.preventDefault();
   });
-  function endDrag(e){if(drag&&drag.id===e.pointerId){if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);drag=null;}}
+  function endDrag(e){
+    if(!drag||drag.id!==e.pointerId)return;
+    if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);
+    drag=null;
+    // Letting go hands control back to the film — it simply continues from here, still honoring the placement just made.
+    playing=!reduced.matches;last=0;invalidate();
+  }
   canvas.addEventListener('pointerup',endDrag);canvas.addEventListener('pointercancel',endDrag);canvas.addEventListener('lostpointercapture',()=>{drag=null;});
   canvas.addEventListener('keydown',e=>{
     const c=M.chapter(time),s=M.state(time,manual);
-    if(e.key===' '){e.preventDefault();$('play').click();}
     if(c===2&&['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();setValue('distance',s.distance+(e.key==='ArrowRight'?.5:-.5));}
     if(c===3&&['ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();setValue('eye',s.eye+(e.key==='ArrowUp'?.1:-.1));}
   });
