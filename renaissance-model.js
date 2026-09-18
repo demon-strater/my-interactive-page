@@ -20,7 +20,10 @@
   function chapter(t){return t<8?0:t<18?1:t<30?2:t<40?3:4;}
   function state(t,manual={}){
     const c=chapter(t),turn=smooth(1.8,7,t)*(1-smooth(40,44,t));
-    const distance=manual.distance??(c===2?lerp(2,15,smooth(19,26,t)):10);
+    // Continuous handoff into chapter 2: the cyan column eases from its resting distance (10) down to the
+    // comparison starting point (2) only after the boundary (18), not during the frozen example-artwork
+    // hold that sits right before it — so the value is 10 on both sides of that freeze, with no pop.
+    const distance=manual.distance??(t<19?lerp(10,2,smooth(18,19,t)):c===2?lerp(2,15,smooth(19,26,t)):10);
     const eye=manual.eye??(c===3?2+1.1*Math.sin(clamp((t-31)/7)*Math.PI*2):2);
     return {t,chapter:c,turn,room:smooth(8,11,t)*(1-smooth(40,43,t)),rays:smooth(11,14,t)*(1-smooth(39.5,42,t)),inset:smooth(12,15,t)*(1-smooth(40,42,t)),compare:smooth(18,19.5,t)*(1-smooth(30,31,t)),horizon:smooth(30,32,t),art:smooth(44,47,t),artGuides:smooth(46,49,t),distance,eye,length:lerp(16,24,smooth(30,37,t))};
   }

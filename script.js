@@ -1033,6 +1033,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     backToShelf.addEventListener('click', closeInteraction);
 
+    window.addEventListener('message', event => {
+        if (event.origin !== window.location.origin || event.source !== renaissanceFrame?.contentWindow) return;
+        if (event.data === 'renaissance:home') closeInteraction();
+    });
+
     timelineRail.addEventListener('wheel', event => {
         event.preventDefault();
         const rawDelta = Math.abs(event.deltaY) > Math.abs(event.deltaX) ? event.deltaY : event.deltaX;

@@ -8,10 +8,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="renaissance-perspective.css?v=slide-2">
 <link rel="stylesheet" href="internal-navigation.css">
-<link rel="stylesheet" href="renaissance-navigation.css?v=slide-3">
+<link rel="stylesheet" href="renaissance-navigation.css?v=nav-2">
 </head>
 <body class="perspective-experience">
 <main id="atelier" tabindex="0" aria-label="화면을 눌러 소실점을 정하세요. Enter로 중앙에 모으고 Escape로 흩뜨릴 수 있습니다.">
+<button class="home-button" id="goHome" type="button" aria-label="메인 화면으로 돌아가기"><span aria-hidden="true">⌂</span> 메인 화면</button>
 <canvas id="architecture" aria-hidden="true"></canvas>
 <div id="figures" aria-label="Separate philosopher studies"></div>
 <svg id="guides" aria-hidden="true"><defs><radialGradient id="vpGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#fff8e4" stop-opacity="1"/><stop offset="16%" stop-color="#ffdea0" stop-opacity=".8"/><stop offset="45%" stop-color="#e6ac5c" stop-opacity=".28"/><stop offset="100%" stop-color="#e6ac5c" stop-opacity="0"/></radialGradient><radialGradient id="vpHot" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#fffaf0" stop-opacity=".95"/><stop offset="60%" stop-color="#ffe6b0" stop-opacity=".4"/><stop offset="100%" stop-color="#ffe6b0" stop-opacity="0"/></radialGradient></defs><g id="rays"></g><g id="depths"></g><g id="focus"></g></svg>
@@ -21,5 +22,5 @@
 <span id="loadStatus" role="status">인물을 불러오는 중…</span>
 </main>
 <script src="renaissance-perspective.js?v=slide-1"></script>
-<script src="renaissance-navigation.js?v=slide-3"></script>
+<script src="renaissance-navigation.js?v=nav-3"></script>
 </body></html>

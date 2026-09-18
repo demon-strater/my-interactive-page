@@ -3,10 +3,17 @@
   const M=window.PerspectiveModel,{clamp,lerp,smooth,mix,imprint}=M;
   const $=id=>document.getElementById(id),canvas=$('scene'),ctx=canvas.getContext('2d');
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  const chapters=[...document.querySelectorAll('[data-chapter]')];
+  const timeline=$('timeline'),timelineTrack=$('timelineTrack'),timelineFill=$('timelineFill'),timelineTooltip=$('timelineTooltip');
+  const compareOne=$('compareOne'),compareTwo=$('compareTwo');
   const titles=['그림일까, 공간일까.','눈에 닿는 선이, 그림이 된다.','같은 크기. 다른 모습.','눈높이가 세상의 기준이 된다.','그림이 하나의 세계가 된다.'];
   const hints=['옆으로 돌려보면','빛의 선을 따라가 보세요','청록색 기둥을 앞뒤로 끌어보세요','눈을 위아래로 움직여보세요','선을 따라, 그림 속으로'];
   const gold='#e4bc78',cyan='#8edfd6',ink='#f4e9d5';
+  // Autoplay freezes the scene at each window's start and holds it for the given real-world duration
+  // (in ms) so the example artworks never animate underneath the narration — they fully replace it, then hand back.
+  // Windows sit right at a chapter boundary (M.chapter switches at 8/18/30/40) so the artworks land only
+  // once a whole chapter has finished narrating, never mid-chapter.
+  const compareWindows=[{start:17.5,end:18,hold:4500},{start:39.5,end:40,hold:5200}];
+  let holdRemaining=null,holdAt=null;
   let width=1,height=1,time=reduced.matches?7:0,playing=!reduced.matches,last=0,raf=0,currentChapter=-1;
   let manual={},drag=null,targets={},view=null,artReady=false,artFailed=false,showArtLines=true;
   const artwork=new Image();
@@ -211,26 +218,42 @@
   function updateUI(){
     const c=M.chapter(time),s=M.state(time,manual);
     if(c!==currentChapter){
-      currentChapter=c;$('sceneTitle').textContent=titles[c];$('gestureHint').textContent=hints[c];$('sceneStatus').textContent=titles[c]+' '+hints[c];
+      currentChapter=c;$('sceneTitle').textContent=titles[c];$('sceneStatus').textContent=titles[c]+' '+hints[c];
       $('distanceControl').hidden=c!==2;$('eyeControl').hidden=c!==3;$('artLines').hidden=c!==4;$('artSource').hidden=c!==4;$('modelNote').hidden=c===4;
-      $('next').hidden=c===4;$('secondExperience').hidden=c!==4;
-      chapters.forEach((b,i)=>{if(i===c)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');});
+      $('secondExperience').hidden=c!==4;
+      timeline.setAttribute('aria-valuetext',titles[c]);
     }
-    chapters.forEach((b,i)=>b.style.setProperty('--progress',clamp((time-M.starts[i])/(M.ends[i]-M.starts[i]))));
+    timelineFill.style.width=(time/50*100)+'%';
+    timeline.setAttribute('aria-valuenow',String(Math.round(time)));
+    const showCompare1=time>=compareWindows[0].start&&time<compareWindows[0].end,showCompare2=time>=compareWindows[1].start&&time<compareWindows[1].end;
+    compareOne.classList.toggle('visible',showCompare1);compareOne.setAttribute('aria-hidden',String(!showCompare1));
+    compareTwo.classList.toggle('visible',showCompare2);compareTwo.setAttribute('aria-hidden',String(!showCompare2));
     $('distance').value=s.distance;$('eyeHeight').value=s.eye;
     $('filmTime').textContent=`00:${String(Math.floor(time)).padStart(2,'0')} / 00:50`;
     $('play').textContent=playing?'Ⅱ':'▶';$('play').setAttribute('aria-label',playing?'영상 일시정지':'영상 재생');$('play').title=playing?'일시정지':'재생';
   }
   function frame(now){
     raf=0;if(document.hidden){last=0;return;}
-    if(playing){const dt=last?Math.min((now-last)/1000,.1):0;time=Math.min(50,time+dt);if(time>=50)playing=false;}
+    if(playing){
+      const dt=last?Math.min(now-last,100):0;
+      if(holdRemaining!==null){
+        // The scene stays frozen on the example artworks; the narration only resumes once they've had their moment.
+        holdRemaining-=dt;
+        if(holdRemaining<=0){time=holdAt.end;holdRemaining=null;holdAt=null;}
+      }else{
+        const prev=time,next=Math.min(50,time+dt/1000);
+        const hit=compareWindows.find(w=>prev<w.start&&next>=w.start);
+        if(hit){time=hit.start;holdAt=hit;holdRemaining=hit.hold;}
+        else{time=next;if(time>=50)playing=false;}
+      }
+    }
     last=now;updateUI();render();if(playing)raf=requestAnimationFrame(frame);
   }
   function invalidate(){if(!raf)raf=requestAnimationFrame(frame);}
-  function pause(){playing=false;last=0;invalidate();}
+  function pause(){playing=false;last=0;holdRemaining=null;holdAt=null;invalidate();}
   function seek(chapter,autoplay=!reduced.matches){
     // Manual chapter jumps show the defining visual immediately, then continue its demonstration.
-    const landing=reduced.matches?[7,16,26,36,50]:[0,11,19,32,44];time=landing[chapter];manual={};playing=autoplay;last=0;currentChapter=-1;invalidate();
+    const landing=reduced.matches?[7,16,26,36,50]:[0,11,19,32,44];time=landing[chapter];manual={};playing=autoplay;last=0;holdRemaining=null;holdAt=null;currentChapter=-1;invalidate();
   }
   function setValue(kind,value){
     pause();
@@ -238,9 +261,51 @@
     invalidate();
   }
   $('play').addEventListener('click',()=>{if(time>=50){time=0;manual={};}playing=!playing;last=0;invalidate();});
-  $('replay').addEventListener('click',()=>seek(0));
-  $('next').addEventListener('click',()=>seek((M.chapter(time)+1)%5));
-  chapters.forEach((b,i)=>b.addEventListener('click',()=>seek(i)));
+  function seekTime(t){pause();time=clamp(t,0,50);manual={};invalidate();}
+  function timeFromEvent(e){
+    const r=timelineTrack.getBoundingClientRect();
+    return clamp((e.clientX-r.left)/r.width)*50;
+  }
+  function showTooltip(e){
+    const t=timeFromEvent(e),r=timelineTrack.getBoundingClientRect();
+    timelineTooltip.textContent=titles[M.chapter(t)];
+    timelineTooltip.style.left=clamp(e.clientX-r.left,0,r.width)+'px';
+    timelineTooltip.classList.add('visible');
+  }
+  function hideTooltip(){timelineTooltip.classList.remove('visible');}
+  let timelineDrag=false;
+  timeline.addEventListener('pointerenter',showTooltip);
+  timeline.addEventListener('pointermove',e=>{showTooltip(e);if(timelineDrag)seekTime(timeFromEvent(e));});
+  timeline.addEventListener('pointerleave',()=>{if(!timelineDrag)hideTooltip();});
+  timeline.addEventListener('pointerdown',e=>{
+    if(e.button!==0)return;
+    timelineDrag=true;timeline.setPointerCapture(e.pointerId);
+    seekTime(timeFromEvent(e));showTooltip(e);e.preventDefault();
+  });
+  function endTimelineDrag(e){
+    if(!timelineDrag)return;timelineDrag=false;
+    if(timeline.hasPointerCapture(e.pointerId))timeline.releasePointerCapture(e.pointerId);
+    hideTooltip();
+  }
+  timeline.addEventListener('pointerup',endTimelineDrag);
+  timeline.addEventListener('pointercancel',endTimelineDrag);
+  timeline.addEventListener('focus',()=>{
+    const r=timelineTrack.getBoundingClientRect();
+    timelineTooltip.textContent=titles[M.chapter(time)];
+    timelineTooltip.style.left=clamp(time/50*r.width,0,r.width)+'px';
+    timelineTooltip.classList.add('visible');
+  });
+  timeline.addEventListener('blur',hideTooltip);
+  timeline.addEventListener('keydown',e=>{
+    const step={ArrowRight:2,ArrowLeft:-2,Home:-50,End:50}[e.key];
+    if(step===undefined)return;
+    e.preventDefault();
+    seekTime(e.key==='Home'?0:e.key==='End'?50:time+step);
+    const r=timelineTrack.getBoundingClientRect();
+    timelineTooltip.textContent=titles[M.chapter(time)];
+    timelineTooltip.style.left=clamp(time/50*r.width,0,r.width)+'px';
+    timelineTooltip.classList.add('visible');
+  });
   $('distance').addEventListener('input',e=>setValue('distance',+e.target.value));
   $('eyeHeight').addEventListener('input',e=>setValue('eye',+e.target.value));
   $('artLines').addEventListener('click',()=>{showArtLines=!showArtLines;$('artLines').setAttribute('aria-pressed',String(showArtLines));$('artLines').textContent=showArtLines?'안내선 끄기':'안내선 켜기';invalidate();});

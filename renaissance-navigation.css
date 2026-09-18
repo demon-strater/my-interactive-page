@@ -1,5 +1,9 @@
 ﻿.next-experience{margin-left:auto;min-height:44px;display:flex;align-items:center;gap:12px;color:#efce93;text-decoration:none;font-size:12px;white-space:nowrap}
-@media(max-width:700px){.next-experience{font-size:11px;min-height:34px}.perspective-experience .toolbar button{font-size:11px;min-height:40px}.perspective-experience .chapter{bottom:10%;font-size:9px}}
+.home-button{position:absolute;top:4%;right:5%;z-index:6;display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:0 16px;border:1px solid #e2c07f55;border-radius:999px;background:#241708b0;color:#f7ecd0;font:inherit;font-size:11px;letter-spacing:.06em;cursor:pointer;backdrop-filter:blur(8px)}
+.home-button span{font-size:13px}
+.home-button:hover{background:#8a693352}
+.home-button:focus-visible{outline:2px solid #f8dfa0;outline-offset:4px}
+@media(max-width:700px){.next-experience{font-size:11px;min-height:34px}.perspective-experience .toolbar button{font-size:11px;min-height:40px}.perspective-experience .chapter{bottom:10%;font-size:9px}.home-button{font-size:10px;padding:0 12px;min-height:32px;gap:5px}}
 .perspective-experience #atelier{touch-action:none}
 body[data-leave=next]{animation:experienceExitLeft 180ms ease-in both}body[data-leave=previous]{animation:experienceExitRight 180ms ease-in both}body[data-enter=next]:not([data-leave]){animation:experienceEnterRight 320ms ease-out both}body[data-enter=previous]:not([data-leave]){animation:experienceEnterLeft 320ms ease-out both}
 @keyframes experienceExitLeft{to{transform:translateX(-8%);opacity:0}}@keyframes experienceExitRight{to{transform:translateX(8%);opacity:0}}@keyframes experienceEnterRight{from{transform:translateX(8%);opacity:0}to{transform:translateX(0);opacity:1}}@keyframes experienceEnterLeft{from{transform:translateX(-8%);opacity:0}to{transform:translateX(0);opacity:1}}
