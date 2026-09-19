@@ -5,7 +5,7 @@
   const room = host.querySelector('.surreal-room');
   const scene = document.createElement('section');
   scene.className = 'memory-scene';
-  scene.setAttribute('aria-label', '세 부분으로 나뉜 몸을 조합해 낯선 존재를 만드는 초현실주의 카드 놀이');
+  scene.setAttribute('aria-label', 'A Surrealist card game that combines a body split into three parts to create a strange new being');
   scene.innerHTML = `<canvas aria-hidden="true"></canvas>
     <div class="corpse-hit" id="corpseHit">
       <button class="corpse-band" data-band="0" type="button"></button>
@@ -14,12 +14,12 @@
     </div>
     <div class="memory-title"><span>THE SURREALISTS / CADAVRE EXQUIS, 1925</span><h2>Exquisite<br>Corpse.</h2></div>
     <p class="corpse-caption" id="corpseCaption" aria-live="polite"></p>
-    <button class="chance-meeting" id="chanceMeeting" type="button" aria-label="손잡이를 아래로 당기거나 눌러 무작위 조합">
+    <button class="chance-meeting" id="chanceMeeting" type="button" aria-label="Pull the lever down, or press it, for a random combination">
       <span class="lever-track" aria-hidden="true"></span><span class="lever-base" aria-hidden="true"></span>
       <span class="lever-stem" aria-hidden="true"></span><span class="lever-knob" aria-hidden="true"></span>
       <span class="lever-label" aria-hidden="true">PULL <span>↓</span></span>
     </button>
-    <nav class="memory-nav" aria-label="조합 카드 조작"><button type="button" data-back>&larr; Back</button><span>02 / EXQUISITE CORPSE</span></nav>`;
+    <nav class="memory-nav" aria-label="Combination card controls"><button type="button" data-back>&larr; Back</button><span>02 / EXQUISITE CORPSE</span></nav>`;
   const enter = document.createElement('button');
   enter.type = 'button'; enter.className = 'memory-enter';
   enter.textContent = 'Next Dream';

@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const featureMeta = document.getElementById('featureMeta');
     const siteTransition = document.getElementById('siteTransition');
     const backToShelf = document.getElementById('backToShelf');
+    const goVanishingPoint = document.getElementById('goVanishingPoint');
     const pullChain = document.getElementById('pullChain');
     const leftArrow = document.getElementById('leftArrow');
     const rightArrow = document.getElementById('rightArrow');
@@ -1033,6 +1034,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     backToShelf.addEventListener('click', closeInteraction);
 
+    goVanishingPoint?.addEventListener('click', () => {
+        // Setting the iframe's own src is a plain same-document DOM write, so it always works even
+        // when postMessage between file:// documents is unreliable (as it can be with no dev server).
+        if (renaissanceFrame) renaissanceFrame.src = 'renaissance-perspective.html?v=home-2&enter=next';
+    });
+
     window.addEventListener('message', event => {
         if (event.origin !== window.location.origin || event.source !== renaissanceFrame?.contentWindow) return;
         if (event.data === 'renaissance:home') closeInteraction();
@@ -1041,7 +1048,7 @@ document.addEventListener('DOMContentLoaded', () => {
     timelineRail.addEventListener('wheel', event => {
         event.preventDefault();
         const rawDelta = Math.abs(event.deltaY) > Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
-        // 기기별 deltaY 편차 제한 (트랙패드/마우스 동일 감도 보장)
+        // Cap deltaY variance across devices (keep trackpad/mouse sensitivity consistent)
         const capped = Math.sign(rawDelta) * Math.min(Math.abs(rawDelta), 120);
         carouselTargetOffset -= capped * 0.00135;
         recenterCarouselOffsets(timelineCards.length);

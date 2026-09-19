@@ -25,7 +25,7 @@
     // hold that sits right before it — so the value is 10 on both sides of that freeze, with no pop.
     const distance=manual.distance??(t<19?lerp(10,2,smooth(18,19,t)):c===2?lerp(2,15,smooth(19,26,t)):10);
     const eye=manual.eye??(c===3?2+1.1*Math.sin(clamp((t-31)/7)*Math.PI*2):2);
-    return {t,chapter:c,turn,room:smooth(8,11,t)*(1-smooth(40,43,t)),rays:smooth(11,14,t)*(1-smooth(39.5,42,t)),inset:smooth(12,15,t)*(1-smooth(40,42,t)),compare:smooth(18,19.5,t)*(1-smooth(30,31,t)),horizon:smooth(30,32,t),art:smooth(44,47,t),artGuides:smooth(46,49,t),distance,eye,length:lerp(16,24,smooth(30,37,t))};
+    return {t,chapter:c,turn,room:smooth(8,11,t)*(1-smooth(40,43,t)),rays:smooth(11,14,t)*(1-smooth(39.5,42,t)),inset:smooth(12,15,t)*(1-smooth(36,39.5,t)),compare:smooth(18,19.5,t)*(1-smooth(30,31,t)),horizon:smooth(30,32,t),art:smooth(44,47,t),artGuides:smooth(46,49,t),distance,eye,length:lerp(16,24,smooth(30,37,t))};
   }
   return {clamp,lerp,smooth,mix,dot,sub,imprint,camera,chapter,state,starts,ends,PLANE_Z,EYE_Z,HEIGHT};
 });

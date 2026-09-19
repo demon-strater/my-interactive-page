@@ -1,0 +1,9 @@
+body[data-leave=next]{animation:romExitLeft 180ms ease-in both}
+body[data-leave=previous]{animation:romExitRight 180ms ease-in both}
+body[data-enter=next]:not([data-leave]){animation:romEnterRight 340ms ease-out both}
+body[data-enter=previous]:not([data-leave]){animation:romEnterLeft 340ms ease-out both}
+@keyframes romExitLeft{to{transform:translateX(-6%);opacity:0}}
+@keyframes romExitRight{to{transform:translateX(6%);opacity:0}}
+@keyframes romEnterRight{from{transform:translateX(6%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes romEnterLeft{from{transform:translateX(-6%);opacity:0}to{transform:translateX(0);opacity:1}}
+@media(prefers-reduced-motion:reduce){body[data-enter],body[data-leave]{animation:none!important}}

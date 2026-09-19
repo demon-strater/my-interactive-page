@@ -3,16 +3,19 @@
   const M=window.PerspectiveModel,{clamp,lerp,smooth,mix,imprint}=M;
   const $=id=>document.getElementById(id),canvas=$('scene'),ctx=canvas.getContext('2d');
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+  const SPEED=1.4;
   const compareOne=$('compareOne'),compareTwo=$('compareTwo');
-  const titles=['그림일까, 공간일까.','눈에 닿는 선이, 그림이 된다.','같은 크기. 다른 모습.','눈높이가 세상의 기준이 된다.','그림이 하나의 세계가 된다.'];
-  const hints=['옆으로 돌려보면','빛의 선을 따라가 보세요','청록색 기둥을 앞뒤로 끌어보세요','눈을 위아래로 움직여보세요','선을 따라, 그림 속으로'];
+  const titles=['A picture, or a space?','A world that changes with the eye.','Same size. Different shape.','Eye level becomes the world’s baseline.','The picture becomes a world.'];
+  const hints=['Turn it to the side','Follow the line of light','Drag the teal column back and forth','Move the eye up and down','Follow the lines, into the painting'];
   const gold='#e4bc78',cyan='#8edfd6',ink='#f4e9d5';
   // Autoplay freezes the scene at each window's start and holds it for the given real-world duration
   // (in ms) so the example artworks never animate underneath the narration — they fully replace it, then hand back.
   // Windows sit right at a chapter boundary (M.chapter switches at 8/18/30/40) so the artworks land only
   // once a whole chapter has finished narrating, never mid-chapter. The last entry holds on the finished
   // artwork before looping back to the start, so the piece runs on its own with no player chrome at all.
-  const compareWindows=[{start:17.5,end:18,hold:4500},{start:39.5,end:40,hold:5200},{start:50,end:0,hold:5000,loop:true}];
+  // Window 2 holds longest: the three artworks show plain first with a clear pause, then each gets its
+  // own vanishing point and construction lines revealed on top well after, so that needs extra time.
+  const compareWindows=[{start:17.5,end:18,hold:4500},{start:39.5,end:40,hold:9500},{start:50,end:0,hold:5000,loop:true}];
   let holdRemaining=null,holdAt=null;
   let width=1,height=1,time=reduced.matches?7:0,playing=!reduced.matches,last=0,raf=0,currentChapter=-1;
   let manual={},drag=null,targets={},view=null,artReady=false,artFailed=false,showArtLines=true;
@@ -81,8 +84,8 @@
       const iw=Math.min(width*.69,height*.52*6.4/4.95),ih=iw*4.95/6.4;
       return {main:{x:0,y:0,w:width,h:lerp(height,height*.55,shown)},inset:{x:(width-iw)/2,y:height-ih-22,w:iw,h:ih}};
     }
-    const iw=Math.min(width*.27,height*.73*6.4/4.95),ih=iw*4.95/6.4;
-    return {main:{x:0,y:0,w:width*(1-.31*shown),h:height},inset:{x:width-iw-15,y:(height-ih)/2,w:iw,h:ih}};
+    const iw=Math.min(width*.31,height*.8*6.4/4.95),ih=iw*4.95/6.4;
+    return {main:{x:0,y:0,w:width*(1-.36*shown),h:height},inset:{x:width-iw-60,y:(height-ih)/2,w:iw,h:ih}};
   }
   function makeView(s,r){
     const frontScale=Math.min(r.w*.76/6.4,r.h*.82/4.95);
@@ -103,7 +106,7 @@
       line(a,b,gold,s.horizon*(1-s.art),1,[5,6]);
     }
     ctx.restore();
-    if(s.turn>.4){const top=project([0,4.5,-3]);label('그림판',{x:top.x,y:top.y-20},gold,s.turn);}
+    if(s.turn>.4){const top=project([0,4.5,-3]);label('Picture plane',{x:top.x,y:top.y-20},gold,s.turn);}
     return p;
   }
   function rays(s,project){
@@ -121,7 +124,7 @@
       }
     }
     dot(E,gold,5,a);ctx.save();ctx.globalAlpha=a;ctx.strokeStyle=gold;ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(E.x,E.y,15,9,0,0,Math.PI*2);ctx.stroke();ctx.restore();
-    label('눈',{x:E.x,y:E.y+28},gold,a);
+    label('Eye',{x:E.x,y:E.y+28},gold,a);
     targets.eye={x:E.x,y:E.y,r:28};
     if(s.chapter===3){
       const lo=project([0,.8,-8]),hi=project([0,3.2,-8]);line(lo,hi,gold,.5,1,[3,4]);
@@ -137,7 +140,7 @@
     for(const [x,z,color] of [[-1.25,2,gold],[1.25,s.distance,cyan]]){
       const top=project([x-.6,2.6,z]),base=project([x-.6,0,z]);
       line(top,base,color,a,1.4);line({x:top.x-4,y:top.y},{x:top.x+4,y:top.y},color,a,1.4);line({x:base.x-4,y:base.y},{x:base.x+4,y:base.y},color,a,1.4);
-      label('같은 높이',{x:top.x,y:top.y-19},color,a,'center',10);
+      label('Same height',{x:top.x,y:top.y-19},color,a,'center',10);
     }
     const a0=project([1.25,.03,2]),a1=project([1.25,.03,16]);line(a0,a1,cyan,.5*a,1,[4,5]);
     arrow(a0,Math.atan2(a0.y-a1.y,a0.x-a1.x),cyan);arrow(a1,Math.atan2(a1.y-a0.y,a1.x-a0.x),cyan);
@@ -163,14 +166,14 @@
       dot(vp,ink,3,s.horizon);
     }
     ctx.restore();ctx.strokeStyle='#c9a76d88';ctx.lineWidth=1;ctx.strokeRect(r.x,r.y,r.w,r.h);
-    label('그림에 맺힌 모습',{x:r.x+r.w/2,y:r.y-18},gold,1,'center',10);
+    label('What forms on the picture',{x:r.x+r.w/2,y:r.y-18},gold,1,'center',10);
     if(s.compare>.2){
       for(const [x,z,color] of [[-1.25,2,gold],[1.25,s.distance,cyan]]){
         const top=project([x,2.6,z]),bottom=project([x,0,z]);
         line({x:top.x+12,y:top.y},{x:bottom.x+12,y:bottom.y},color,s.compare,2.5);
       }
     }
-    if(s.chapter===3){label('소실점',{x:vp.x,y:vp.y-17},gold,s.horizon,'center',10);label('눈높이',{x:r.x+r.w-7,y:vp.y+16},gold,s.horizon,'right',9);}
+    if(s.chapter===3){label('Vanishing point',{x:vp.x,y:vp.y-17},gold,s.horizon,'center',10);label('Eye level',{x:r.x+r.w-7,y:vp.y+16},gold,s.horizon,'right',9);}
     ctx.restore();
   }
   function imageTriangle(image,dest,source,alpha){
@@ -196,8 +199,8 @@
         line(a,b,'#fff0a6',.9,2);dot(b,'#fff5c3',3);
       }
       ctx.save();ctx.globalAlpha=s.artGuides;ctx.strokeStyle='#fff0a6';ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(vp.x,vp.y,13,0,Math.PI*2);ctx.stroke();ctx.restore();
-      label('소실점',{x:vp.x,y:vp.y-25},'#fff1b9',s.artGuides);
-      label('깊이 방향 · 도식',{x:dest[3].x+9,y:dest[3].y-16},ink,s.artGuides,'left',9);
+      label('Vanishing point',{x:vp.x,y:vp.y-25},'#fff1b9',s.artGuides);
+      label('Depth direction · diagram',{x:dest[3].x+9,y:dest[3].y-16},ink,s.artGuides,'left',9);
     }
   }
   function render(){
@@ -208,19 +211,24 @@
     if(s.room){
       drawMesh(room,view,.62*s.room);drawMesh(columns,view,s.room);
       const baseA=view([-4,0,-8]),baseB=view([-4,0,s.length]);line(baseA,baseB,'#b8a17b',.16*s.room,1,[2,5]);
-      const pos=view([0,5.4,10]);label('공간',pos,'#c2ae8c',s.room);
+      const pos=view([0,5.4,10]);label('Space',pos,'#c2ae8c',s.room);
     }
     const corners=planeImage(s,view,room,columns);
     rays(s,view);sameSize(s,view);inset(s,r.inset,room,columns);art(s,corners);
-    if(s.chapter===0&&time>3.8){const p=view([0,-.45,-3]);label('한 장의 평면',{x:p.x,y:p.y+25},gold,smooth(3.8,5,time));}
-    if(s.chapter===4&&time<45){const p=view([0,-.45,-3]);label('원리에서 작품으로',{x:p.x,y:p.y+24},gold,1-s.art);}
+    if(s.chapter===0&&time>3.8){const p=view([0,-.45,-3]);label('A single flat plane',{x:p.x,y:p.y+25},gold,smooth(3.8,5,time));}
+    if(s.chapter===4&&time<45){const p=view([0,-.45,-3]);label('From principle to artwork',{x:p.x,y:p.y+24},gold,1-s.art);}
   }
   function updateUI(){
     const c=M.chapter(time);
     if(c!==currentChapter){
-      currentChapter=c;$('sceneTitle').textContent=titles[c];$('sceneStatus').textContent=titles[c]+' '+hints[c];$('sceneHint').textContent=hints[c];
-      $('artSource').hidden=c!==4;$('secondExperience').hidden=c!==4;
+      currentChapter=c;$('sceneTitle').textContent=titles[c];$('sceneStatus').textContent=titles[c]+' '+hints[c];
+      $('artSource').hidden=c!==4;
     }
+    $('playPause').textContent=playing?'Ⅱ':'▷';
+    $('playPause').setAttribute('aria-label',playing?'Pause the film':'Play the film');
+    $('filmTime').textContent='00:'+String(Math.floor(time)).padStart(2,'0')+' / 00:50';
+    $('filmFill').style.width=(time/50*100)+'%';
+    [...$('progress').children].forEach((button,i)=>{button.classList.toggle('active',i===c);button.setAttribute('aria-current',i===c?'step':'false');});
     const showCompare1=time>=compareWindows[0].start&&time<compareWindows[0].end,showCompare2=time>=compareWindows[1].start&&time<compareWindows[1].end;
     compareOne.classList.toggle('visible',showCompare1);compareOne.setAttribute('aria-hidden',String(!showCompare1));
     compareTwo.classList.toggle('visible',showCompare2);compareTwo.setAttribute('aria-hidden',String(!showCompare2));
@@ -235,7 +243,7 @@
         holdRemaining-=dt;
         if(holdRemaining<=0){time=holdAt.end;if(holdAt.loop){manual={};currentChapter=-1;}holdRemaining=null;holdAt=null;}
       }else{
-        const prev=time,next=Math.min(50,time+dt/1000);
+        const prev=time,next=Math.min(50,time+dt/1000*SPEED);
         const hit=compareWindows.find(w=>prev<w.start&&next>=w.start);
         if(hit){time=hit.start;holdAt=hit;holdRemaining=hit.hold;}
         else time=next;
@@ -249,6 +257,10 @@
     // Manual chapter jumps show the defining visual immediately, then continue its demonstration.
     const landing=reduced.matches?[7,16,26,36,50]:[0,11,19,32,44];time=landing[chapter];manual={};playing=autoplay;last=0;holdRemaining=null;holdAt=null;currentChapter=-1;invalidate();
   }
+  [...$('progress').children].forEach((button,i)=>button.addEventListener('click',()=>seek(i,false)));
+  $('playPause').addEventListener('click',()=>{if(playing)pause();else{if(time>=50){time=0;manual={};currentChapter=-1;holdRemaining=null;holdAt=null;}playing=true;last=0;invalidate();}});
+  $('replay').addEventListener('click',()=>{time=0;manual={};playing=!reduced.matches;last=0;holdRemaining=null;holdAt=null;currentChapter=-1;invalidate();});
+  addEventListener('keydown',e=>{if(e.code==='Space'&&e.target===document.body){e.preventDefault();$('playPause').click();}});
   function setValue(kind,value){
     if(kind==='distance')manual.distance=clamp(value,2,16);else manual.eye=clamp(value,.8,3.2);
     invalidate();
@@ -258,9 +270,10 @@
     if(e.button!==0)return;
     const p=local(e),c=M.chapter(time),target=c===2?targets.column:c===3?targets.eye:null;
     if(!target||Math.hypot(p.x-target.x,p.y-target.y)>target.r+15)return;
-    // Grabbing the column or the eye pauses the autoplay so the demonstration doesn't race ahead while it's held.
+    // Grabbing the column or the eye pauses the autoplay so the demonstration doesn't race ahead while it's held,
+    // and stops the gesture from also being read as a swipe-to-navigate drag by the page-level listener.
     playing=false;last=0;holdRemaining=null;holdAt=null;
-    drag={id:e.pointerId,kind:c===2?'distance':'eye'};canvas.setPointerCapture(e.pointerId);e.preventDefault();
+    drag={id:e.pointerId,kind:c===2?'distance':'eye'};canvas.setPointerCapture(e.pointerId);e.preventDefault();e.stopPropagation();
   });
   canvas.addEventListener('pointermove',e=>{
     if(!drag||drag.id!==e.pointerId||!view)return;
@@ -299,10 +312,35 @@
     if(e.data==='renaissance:enter')seek(0);
     if(e.data==='renaissance:leave')pause();
   });
+  // Vanishing-point calibration: double-click anywhere on one of the three example artworks to move
+  // its vanishing point (and the guide lines converging on it) to that spot. Saved per-browser so it
+  // survives reloads, and logged to the console as exact percentages for reporting back.
+  document.querySelectorAll('.img-wrap[data-vp-key]').forEach(wrap=>{
+    const key='renaissance-vp-'+wrap.dataset.vpKey;
+    const lines=wrap.querySelectorAll('.vp-lines line'),dot=wrap.querySelector('.vp-dot'),label=wrap.querySelector('.vp-label');
+    function place(x,y){
+      x=clamp(x,0,100);y=clamp(y,0,100);
+      lines.forEach(l=>{l.setAttribute('x2',x);l.setAttribute('y2',y);});
+      dot.style.left=x+'%';dot.style.top=y+'%';
+      label.style.left=x+'%';label.style.top=y+'%';
+    }
+    const saved=localStorage.getItem(key);
+    if(saved){const [sx,sy]=saved.split(',').map(Number);if(Number.isFinite(sx)&&Number.isFinite(sy))place(sx,sy);}
+    wrap.addEventListener('dblclick',e=>{
+      const r=wrap.getBoundingClientRect();
+      const x=(e.clientX-r.left)/r.width*100,y=(e.clientY-r.top)/r.height*100;
+      place(x,y);
+      localStorage.setItem(key,x.toFixed(2)+','+y.toFixed(2));
+      console.log(`[vanishing-point calibration] ${wrap.dataset.vpKey}: x=${x.toFixed(1)}%, y=${y.toFixed(1)}%`);
+      // Give unlimited practical time to fine-tune without autoplay snatching the overlay away mid-adjustment.
+      if(holdAt&&!holdAt.loop)holdRemaining=Math.max(holdRemaining||0,20000);
+      e.preventDefault();
+    });
+  });
   artwork.onload=()=>{artReady=true;artFailed=false;$('assetError').hidden=true;invalidate();};
   artwork.onerror=()=>{artFailed=true;if(M.chapter(time)===4)$('assetError').hidden=false;invalidate();};
   function loadArt(){artFailed=false;$('assetError').hidden=true;artwork.src=encodeURI('아테네 학당.jpg');}
   $('retryArt').addEventListener('click',loadArt);
-  if(!ctx){$('assetError').hidden=false;$('assetError').textContent='이 브라우저에서 그림을 표시할 수 없습니다.';return;}
+  if(!ctx){$('assetError').hidden=false;$('assetError').textContent='This browser can’t display the artwork.';return;}
   loadArt();resize();
 })();

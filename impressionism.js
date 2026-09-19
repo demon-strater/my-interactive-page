@@ -218,13 +218,13 @@
   function frame(now) {
     raf=0;if(document.hidden||!inView){last=0;return;}
     const dt=last?Math.min((now-last)/1000,.07):0;last=now;
-    if(!page&&playing)time=(time+dt*7/70*roomSpeed.mult)%7;
+    if(!page&&playing)time=(time+dt*7/50*roomSpeed.mult)%7;
     if(page&&fragmentPlaying){
       fractureAge+=dt;
-      if(!shards.length)time=(time+dt*7/70*fragmentSpeed.mult)%7;
+      if(!shards.length)time=(time+dt*7/50*fragmentSpeed.mult)%7;
       // Every pane keeps its own moment flowing at the plain pace by default; selecting one is what hands
       // it to the dial, so only that pane's speed answers to +/-.
-      for(const shard of shards){const target=shard.index===selected?fragmentSpeed.mult:1;shard.speed+=(target-shard.speed)*Math.min(1,dt*4);shard.phase=(shard.phase+dt*7/70*shard.speed)%7;}
+      for(const shard of shards){const target=shard.index===selected?fragmentSpeed.mult:1;shard.speed+=(target-shard.speed)*Math.min(1,dt*4);shard.phase=(shard.phase+dt*7/50*shard.speed)%7;}
     }
     draw();raf=requestAnimationFrame(frame);
   }

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Romanticism 02 — The Sublime</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="romanticism-navigation.css?v=1">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0a1220;color:#eef2fb;font-family:Arial,sans-serif}
+#scene{position:fixed;inset:0;display:block;width:100%;height:100%;cursor:crosshair;outline:none;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+#scene:focus-visible{box-shadow:inset 0 0 0 2px #ffdf9e88}
+header{position:absolute;left:5%;top:7%;z-index:2;pointer-events:none;max-width:min(560px,60%)}
+header span{font:9px/1.7 Arial,sans-serif;letter-spacing:.2em;color:#d9e3ffa8}
+header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;letter-spacing:-.03em;margin:14px 0 0;color:#f5f7ff;text-shadow:0 4px 26px #00000070}
+.tag{position:absolute;left:5%;bottom:6.5%;z-index:2;display:flex;align-items:center;gap:10px;pointer-events:none}
+.tag span{font:9px/1.6 Arial,sans-serif;letter-spacing:.18em;color:#c9d6f088}
+.tag strong{font:italic 15px Georgia,serif;font-weight:400;color:#f3e6c8;letter-spacing:.02em}
+.tag i{width:26px;height:1px;background:#c9d6f044;display:block;font-style:normal}
+.rom-back{position:absolute;top:4%;right:5%;z-index:6;display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:0 15px;border:1px solid #cfe0ff2b;border-radius:999px;background:#111c33c2;color:#e7ecfb;font:11px/1 Arial,sans-serif;letter-spacing:.06em;text-decoration:none;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.rom-back:hover{background:#1a2843d0}
+.rom-back:focus-visible{outline:2px solid #ffdf9e;outline-offset:3px}
+.mood{position:absolute;left:4.5%;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:12px;z-index:3}
+.mood-icon{width:14px;height:14px;display:block}
+.slider-wrap{width:36px;height:168px;display:flex;align-items:center;justify-content:center}
+#temperament{-webkit-appearance:none;appearance:none;width:168px;height:36px;background:transparent;transform:rotate(90deg);cursor:pointer;margin:0}
+#temperament::-webkit-slider-runnable-track{height:3px;border-radius:3px;background:linear-gradient(90deg,#ffd98a,#98a9c9,#232a3d)}
+#temperament::-moz-range-track{height:3px;border-radius:3px;background:linear-gradient(90deg,#ffd98a,#98a9c9,#232a3d)}
+#temperament::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff6e2;border:1px solid #caa15a;box-shadow:0 0 10px #ffdf9e88,0 2px 6px #00000070;margin-top:-6.5px}
+#temperament::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#fff6e2;border:1px solid #caa15a}
+#temperament:focus-visible{outline:none}
+#temperament:focus-visible::-webkit-slider-thumb{outline:2px solid #ffdf9e;outline-offset:3px}
+.mood small{writing-mode:vertical-rl;font-size:7px;letter-spacing:.24em;color:#c9d6f077}
+.wanderer-speech{position:absolute;left:53.5%;bottom:41%;transform:translateX(-50%) translateY(9px);width:min(288px,64vw);z-index:4;background:linear-gradient(180deg,#111c33e6,#0b1524ee);color:#e7ecfb;border:1px solid #cfe0ff2b;border-radius:13px;padding:12px 15px 14px;box-shadow:0 16px 40px #00000078,0 0 0 1px #ffffff10 inset;backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);font:12.5px/1.72 "Nanum Myeongjo",Georgia,serif;letter-spacing:.004em;opacity:0;transition:opacity .5s ease,transform .5s ease;pointer-events:none}
+.wanderer-speech.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.wanderer-speech::after{content:"";position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);border:9px solid transparent;border-bottom:0;border-top-color:#0b1524ee}
+.wanderer-speech .ws-kicker{display:block;font:italic 9.5px/1.5 Georgia,serif;letter-spacing:.2em;color:#f0e2c4bb;margin:0 0 6px}
+.wanderer-speech p{margin:0}
+@media(max-width:640px){
+  header{top:6%;max-width:82%}
+  header h1{font-size:27px}
+  .tag{bottom:13%}
+  .rom-back{font-size:10px;padding:0 12px;min-height:32px;gap:5px}
+  .mood{left:3%}
+  .slider-wrap{width:30px;height:124px}
+  #temperament{width:124px;height:30px}
+  .wanderer-speech{bottom:45%;width:78vw;font-size:11.5px;line-height:1.72;padding:11px 13px 12px}
+}
+@media(prefers-reduced-motion:reduce){#temperament{transition:none}}
+
+.sound-toggle{position:absolute;right:5%;bottom:6.5%;z-index:6;border:1px solid #cfe0ff3b;border-radius:30px;padding:10px 15px;background:#111c3388;color:#e7ecfb;font-size:10px;cursor:pointer}.experience-hint{position:absolute;z-index:3;left:50%;bottom:6.5%;transform:translateX(-50%);font:11px/1.9 Arial,sans-serif;color:#ced8e0aa;text-align:center;pointer-events:none;white-space:nowrap}.storm-blackout header,.storm-blackout .tag,.storm-blackout .mood,.storm-blackout .experience-hint{opacity:0}header,.tag,.mood{transition:opacity .15s}.sound-toggle:focus-visible{outline:2px solid #ffdf9e;outline-offset:4px}@media(max-width:640px){.experience-hint{bottom:5%;font-size:9px}.sound-toggle{bottom:12%;right:5%}}
+</style>
+</head>
+<body class="experience-chapter">
+<button class="sound-toggle" id="soundToggle" aria-pressed="true">Sound on</button><div class="experience-hint">Scroll from day to storm<br>Move the cursor to steer the wind · press and hold to intensify it</div>
+<canvas id="scene" tabindex="0" aria-label="Wanderer above the Sea of Fog. Scroll or use the slider on the left to shift from day to storm. Move the pointer to control rain and wind, and press-and-hold or the Enter key to intensify the storm."></canvas>
+<a class="rom-back" id="romBack" href="romanticism.html?v=1"><span>←</span> Concept</a>
+<header><span>ROMANTICISM / THE SUBLIME</span><h1>Wanderer<br>above the fog.</h1></header>
+<div class="tag"><span>ROMANTICISM · 02</span><i></i><strong id="moodLabel">Dawn</strong></div>
+<div class="mood">
+<svg class="mood-icon" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="#ffd98a"/></svg>
+<div class="slider-wrap"><input id="temperament" type="range" min="0" max="1" step=".001" value=".16" aria-label="Shift the sky from serene dawn to tempest"></div>
+<svg class="mood-icon" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 9.4a2.6 2.6 0 0 1 4.9-1.3A2.1 2.1 0 0 1 9.4 9.4H2Z" fill="#9fb2d8"/><path d="M5.6 10.4 4.4 13l1.7-.3-1 2.3" stroke="#dbe4f7" stroke-width=".9" fill="none" stroke-linecap="round"/></svg>
+<small>SERENITY&nbsp;—&nbsp;TEMPEST</small>
+</div>
+<div class="wanderer-speech" id="wandererSpeech" role="status" hidden>
+<span class="ws-kicker">ROMANTICISM</span>
+<p>In the late 18th century, Romanticism was born in defiance of reason and rule. It placed individual emotion and imagination — and the sublime felt before nature's vastness — at the center of art. Like the wanderer gazing into the fog, Romanticism paints a human being standing alone before an unknowable world.</p>
+</div>
+<script src="romanticism-graphics.js?v=2"></script>
+<script>
+(() => {
+  'use strict';
+  const canvas = document.getElementById('scene'), ctx = canvas.getContext('2d');
+  const temperamentInput = document.getElementById('temperament');
+  const moodLabel = document.getElementById('moodLabel');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const lerp = (a, b, f) => a + (b - a) * f;
+  const lerpColor = (a, b, f) => [lerp(a[0], b[0], f), lerp(a[1], b[1], f), lerp(a[2], b[2], f)];
+  const rgb = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
+
+  let width = 1, height = 1, dpr = 1;
+  let pointer = { x: .5, y: .5, active: false };
+  let temperament = Number(temperamentInput.value);
+  let displayTemperament = temperament;
+  let elapsed = 0, last = 0, raf = 0;
+  let lightning = 0, lightningTimer = 1.4;
+  let transitionAge = -1, transitionFired = false, stormLatched = false, blackout = 0;
+  let pointerVX = 0, pointerVY = 0, pointerStamp = 0, flowX = 0, flowY = 0;
+  let soundEnabled = true, audioUnlocked = false;
+  const soundButton = document.getElementById('soundToggle');
+  soundButton.addEventListener('click', () => {
+    soundEnabled = !soundEnabled;
+    soundButton.textContent = soundEnabled ? 'Sound on' : 'Sound off';
+    soundButton.setAttribute('aria-pressed', String(soundEnabled));
+    if (!soundEnabled) { stopStormAudio(); if(audioCtx) audioCtx.suspend(); }
+    else { audioUnlocked = true; ensureAudio(); }
+  });
+  function unlockAudio() { if(soundEnabled) { audioUnlocked = true; ensureAudio(); } }
+  document.addEventListener('pointerdown', unlockAudio, { passive: true });
+  document.addEventListener('keydown', unlockAudio);
+  function updateTransition(dt, target) {
+    if(target < .48 && transitionAge < 0) stormLatched = false;
+    if(target > .68 && !stormLatched && transitionAge < 0) {
+      stormLatched = true; transitionFired = false; transitionAge = 0;
+    }
+    blackout = 0;
+    if(transitionAge < 0) return;
+    transitionAge += dt;
+    if(reduced.matches) { transitionAge = -1; return; }
+    // Fade out, hold complete darkness, then reveal a new night in one strike.
+    blackout = transitionAge < .64 ? Math.min(1, transitionAge / .5) : 1;
+    if(transitionAge >= .92 && !transitionFired) {
+      transitionFired = true; displayTemperament = Math.max(.88, temperament);
+      lightning = 1.65; lightningTimer = 5; playThunder(0, 1.0);
+    }
+    if(transitionFired) blackout = 0;
+    if(transitionAge > 1.8) transitionAge = -1;
+  }
+  const birds = [];
+
+  const TAU = Math.PI * 2;
+  const finePointer = matchMedia('(pointer: fine)').matches;
+  let headLook = 0, parallaxX = 0, parallaxY = 0;
+  let armX = 0, armY = -1;   // smoothed unit vector of the raised, pointing arm
+  // storm: sustained while a pointer is held down, dying away when released
+  const gust = { held: false, dir: 1, power: 0, turb: 0, v: 0, sv: 0 };
+
+  const graphics = window.createWandererGraphics(ctx,()=>({width,height,elapsed,parallaxX,parallaxY,flowY,pointerVX,headLook,armX,armY,lightning,pointer,gust,reduced}));
+  const {sampleSky,drawSky,drawStars,drawOrb,drawMountains,drawFog,drawForegroundLedge,drawWanderer,drawRainSheets,drawRain,drawVignette,drawLightning}=graphics;
+  function resize() {
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    width = innerWidth; height = innerHeight;
+    canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr);
+  }
+  addEventListener('resize', resize);
+
+  function setPointer(e) {
+    const now = performance.now(), dt = Math.max(.016, (now - pointerStamp) / 1000);
+    const x = e.clientX / width, y = e.clientY / height;
+    if(pointerStamp && now-pointerStamp < 200) {
+      pointerVX = clamp((x-pointer.x)/dt, -3, 3);
+      pointerVY = clamp((y-pointer.y)/dt, -3, 3);
+    }
+    pointerStamp = now; pointer.x = x; pointer.y = y; pointer.active = true;
+  }
+  canvas.addEventListener('pointermove', setPointer, { passive: true });
+  canvas.addEventListener('pointerenter', () => pointer.active = true);
+  canvas.addEventListener('pointerleave', () => { pointer.active = false; if (gust.held) endHold(); });
+  canvas.addEventListener('pointermove', e => {
+    canvas.style.cursor = hitWanderer(e.clientX, e.clientY) ? 'pointer' : 'crosshair';
+  }, { passive: true });
+
+  temperamentInput.addEventListener('input', () => { unlockAudio(); temperament = Number(temperamentInput.value); });
+
+  // Turn the wheel to move the sky along the same 0..1 temperament the slider drives.
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    unlockAudio();
+    const scale = e.deltaMode === 1 ? .04 : e.deltaMode === 2 ? .32 : .0012;
+    temperament = clamp(temperament + e.deltaY * scale, 0, 1);
+    temperamentInput.value = temperament.toFixed(3);
+  }, { passive: false });
+
+  // A speech bubble above the figure — a short note on Romanticism, toggled by clicking the wanderer.
+  const speech = document.getElementById('wandererSpeech');
+  let speechVisible = false, speechTimer = 0;
+  function toggleSpeech(force) {
+    speechVisible = force != null ? force : !speechVisible;
+    clearTimeout(speechTimer);
+    if (speechVisible) {
+      speech.hidden = false;
+      requestAnimationFrame(() => speech.classList.add('show'));
+    } else {
+      speech.classList.remove('show');
+      speechTimer = setTimeout(() => { if (!speechVisible) speech.hidden = true; }, 520);
+    }
+  }
+  addEventListener('keydown', e => { if (e.key === 'Escape' && speechVisible) toggleSpeech(false); });
+
+  function spawnBirds(x, y) {
+    const count = 3 + Math.floor(Math.random() * 3);
+    const dir = x < width / 2 ? 1 : -1;
+    for (let i = 0; i < count; i++) {
+      birds.push({
+        x: x + (Math.random() - .5) * 50, y: y + (Math.random() - .5) * 34,
+        vx: dir * (66 + Math.random() * 44), vy: -6 + Math.random() * 8,
+        phase: Math.random() * 10, age: 0
+      });
+    }
+  }
+  function hitWanderer(px, py) {
+    const fx = width * .535, ground = height * .75;
+    return px > fx - 52 && px < fx + 52 && py > ground - 108 && py < ground + 28;
+  }
+  // ── Hold to summon a storm ───────────────────────────────────────────────
+  // While a pointer is held down the storm blows toward it and keeps building;
+  // release and it falls calm. Direction and force track the pointer live.
+  function beginHold(cx, cy, pointerId) {
+    if (hitWanderer(cx, cy)) { toggleSpeech(); return; }
+    if (pointerId != null && canvas.setPointerCapture) { try { canvas.setPointerCapture(pointerId); } catch (e) {} }
+    pointer.x = cx / width; pointer.y = cy / height; pointer.active = true;
+    gust.held = true;
+    gust.dir = cx < width * .535 ? -1 : 1;
+    startStormAudio();
+    if (gust.power < .12) spawnBirds(width * (.52 - gust.dir * .12), height * clamp(cy / height, .16, .42));
+  }
+  function endHold() {
+    if (!gust.held) return;
+    gust.held = false;
+    stopStormAudio();
+  }
+  canvas.addEventListener('pointerdown', e => beginHold(e.clientX, e.clientY, e.pointerId));
+  canvas.addEventListener('pointerup', endHold);
+  canvas.addEventListener('pointercancel', endHold);
+  canvas.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ' || gust.held) return;
+    e.preventDefault();
+    pointer.x = headLook >= 0 ? .8 : .2; pointer.y = .28;
+    beginHold(pointer.x * width, pointer.y * height, null);
+  });
+  canvas.addEventListener('keyup', e => { if (e.key === 'Enter' || e.key === ' ') endHold(); });
+  canvas.addEventListener('blur', endHold);
+
+  // A wanderer's sky: three temperament stops — dawn, overcast day, tempest — sampled and blended live.
+  function drawBird(b) {
+    const flap = Math.sin(b.age * 10 + b.phase) * 9;
+    ctx.save(); ctx.translate(b.x, b.y);
+    ctx.strokeStyle = 'rgba(18,16,24,.7)'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-9, 0); ctx.quadraticCurveTo(-4, -6 - flap * .3, 0, 0); ctx.quadraticCurveTo(4, -6 + flap * .3, 9, 0); ctx.stroke();
+    ctx.restore();
+  }
+  function updateBirds(dt) {
+    for (let i = birds.length - 1; i >= 0; i--) {
+      const b = birds[i]; b.age += dt;
+      b.x += b.vx * dt; b.y += b.vy * dt + Math.sin(b.age * 3 + b.phase) * 8 * dt;
+      if (b.age > 10 || b.x < -40 || b.x > width + 40) birds.splice(i, 1);
+    }
+  }
+
+  let audioCtx = null;
+  function ensureAudio() {
+    if (!soundEnabled || !audioUnlocked) return null;
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+      return audioCtx;
+    } catch (e) { return null; }
+  }
+  function noiseBuffer(seconds, decayPow) {
+    const n = Math.max(1, Math.floor(audioCtx.sampleRate * seconds));
+    const buf = audioCtx.createBuffer(1, n, audioCtx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (decayPow ? Math.pow(1 - i / n, decayPow) : 1);
+    return buf;
+  }
+  function playThunder(delay, gain) {
+    const ac = ensureAudio(); if (!ac) return;
+    delay = delay || 0; gain = gain == null ? .8 : gain;
+    const now = ac.currentTime + delay;
+    const master = ac.createGain(); master.gain.value = .4; master.connect(ac.destination);
+    const src = ac.createBufferSource(); src.buffer = noiseBuffer(1.9, 1.4);
+    const low = ac.createBiquadFilter(); low.type = 'lowpass';
+    low.frequency.setValueAtTime(360, now); low.frequency.exponentialRampToValueAtTime(85, now + 1.7);
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(gain, now + .05);
+    g.gain.exponentialRampToValueAtTime(Math.max(.12, gain * .35), now + .5);
+    g.gain.exponentialRampToValueAtTime(.001, now + 1.8);
+    src.connect(low); low.connect(g); g.connect(master); src.start(now); src.stop(now + 1.95);
+  }
+  // A sustained storm bed: three looping noise layers (wind / low rumble / rain
+  // hiss) glued by a compressor, gently gusted by two LFOs so it never drones.
+  let stormAudio = null;
+  function loopNoise(ac) {
+    const src = ac.createBufferSource();
+    src.buffer = noiseBuffer(2, 0); src.loop = true;
+    return src;
+  }
+  function startStormAudio() {
+    const ac = ensureAudio(); if (!ac || stormAudio) return;
+    const now = ac.currentTime;
+    const master = ac.createGain(); master.gain.value = 0;
+    const comp = ac.createDynamicsCompressor();
+    comp.threshold.value = -18; comp.ratio.value = 4; comp.attack.value = .01; comp.release.value = .25;
+    master.connect(comp);
+    let pan = null;
+    if (ac.createStereoPanner) { pan = ac.createStereoPanner(); comp.connect(pan); pan.connect(ac.destination); }
+    else comp.connect(ac.destination);
+
+    const wind = loopNoise(ac);
+    const windFilter = ac.createBiquadFilter(); windFilter.type = 'bandpass'; windFilter.Q.value = .55; windFilter.frequency.value = 480;
+    const freqLfo = ac.createOscillator(); freqLfo.type = 'sine'; freqLfo.frequency.value = .16;
+    const freqLfoGain = ac.createGain(); freqLfoGain.gain.value = 300;
+    freqLfo.connect(freqLfoGain); freqLfoGain.connect(windFilter.frequency);
+    const windGain = ac.createGain(); windGain.gain.value = 0;
+    const ampLfo = ac.createOscillator(); ampLfo.type = 'sine'; ampLfo.frequency.value = .26;
+    const ampLfoGain = ac.createGain(); ampLfoGain.gain.value = .1;
+    ampLfo.connect(ampLfoGain); ampLfoGain.connect(windGain.gain);
+    wind.connect(windFilter); windFilter.connect(windGain); windGain.connect(master);
+
+    const rumble = loopNoise(ac);
+    const rumbleFilter = ac.createBiquadFilter(); rumbleFilter.type = 'lowpass'; rumbleFilter.frequency.value = 120;
+    const rumbleGain = ac.createGain(); rumbleGain.gain.value = 0;
+    rumble.connect(rumbleFilter); rumbleFilter.connect(rumbleGain); rumbleGain.connect(master);
+
+    const rain = loopNoise(ac);
+    const rainFilter = ac.createBiquadFilter(); rainFilter.type = 'highpass'; rainFilter.frequency.value = 1650;
+    const rainGain = ac.createGain(); rainGain.gain.value = 0;
+    rain.connect(rainFilter); rainFilter.connect(rainGain); rainGain.connect(master);
+
+    [wind, rumble, rain, freqLfo, ampLfo].forEach(n => n.start(now));
+    master.gain.setTargetAtTime(.7, now, .9);
+    stormAudio = { ac, master, pan, windGain, windFilter, rumbleGain, rainGain,
+      nodes: [wind, rumble, rain, freqLfo, ampLfo] };
+  }
+  function updateStormAudio(power, dir) {
+    if (!stormAudio) return;
+    const { ac, windGain, windFilter, rumbleGain, rainGain, pan } = stormAudio;
+    const now = ac.currentTime;
+    windGain.gain.setTargetAtTime(.2 + power * .5, now, .3);
+    windFilter.frequency.setTargetAtTime(340 + power * 900, now, .5);
+    rumbleGain.gain.setTargetAtTime(power * .34, now, .4);
+    rainGain.gain.setTargetAtTime(Math.max(0, power - .32) * .3, now, .5);
+    if (pan) pan.pan.setTargetAtTime(clamp(dir * .5, -1, 1), now, .25);
+  }
+  function stopStormAudio() {
+    const s = stormAudio; if (!s) return;
+    stormAudio = null;
+    const now = s.ac.currentTime;
+    s.master.gain.cancelScheduledValues(now);
+    s.master.gain.setTargetAtTime(0, now, .7);
+    setTimeout(() => {
+      s.nodes.forEach(n => { try { n.stop(); } catch (e) {} });
+      try { s.master.disconnect(); } catch (e) {}
+      if (s.pan) { try { s.pan.disconnect(); } catch (e) {} }
+    }, 2600);
+  }
+  function maybeLightning(t, dt) {
+    lightningTimer -= dt;
+    if (t > .66 && lightningTimer <= 0) {
+      const far = clamp((t - .66) / .34, .18, 1);          // faint & distant until a real tempest
+      lightning = Math.max(lightning, .28 + far * .55);
+      playThunder(.12 + Math.random() * .4, .32 + far * .5);
+      lightningTimer = 3 + Math.random() * 6 * (1.6 - t);
+    }
+    lightning *= reduced.matches ? 0 : Math.exp(-dt * 8);
+    if (lightning < .01) lightning = 0;
+  }
+
+  function updateMoodLabel(t) {
+    const label = t < .32 ? 'Dawn' : t < .5 ? 'Overcast' : t < .78 ? 'Storm Wind' : 'Tempest';
+    if (moodLabel.textContent !== label) moodLabel.textContent = label;
+  }
+
+  function frame(now) {
+    raf = 0;
+    const dt = last ? Math.min((now - last) / 1000, .05) : 0; last = now;
+    elapsed += dt;
+    displayTemperament += (Math.max(temperament, gust.held ? .86 : 0) - displayTemperament) * Math.min(1, dt * (reduced.matches ? 8 : 2.2));
+
+    // Position steers a persistent wind; movement adds an immediate, decaying impulse.
+    const weather = clamp((displayTemperament - .38) / .5, 0, 1);
+    const velocityDecay = Math.exp(-dt * 4);
+    pointerVX *= velocityDecay; pointerVY *= velocityDecay;
+    const steer = pointer.active ? clamp((pointer.x-.5)*2.8 + pointerVX*.75, -1.65, 1.65) : .22;
+    flowX += (steer-flowX) * (1-Math.exp(-dt*11));
+    flowY += ((pointer.active ? (pointer.y-.5)*1.4 + pointerVY*.7 : 0)-flowY) * (1-Math.exp(-dt*9));
+    const want = gust.held ? clamp(1.35-pointer.y,.65,1) : weather * clamp(.48 + Math.abs(flowX)*.32 + Math.abs(pointerVX)*.2,0,1);
+    gust.power += (want-gust.power)*(1-Math.exp(-dt*(gust.held?4.5:5)));
+    gust.dir += (clamp(flowX,-1.4,1.4)-gust.dir)*(1-Math.exp(-dt*12));
+    updateTransition(dt, Math.max(temperament, gust.held ? .8 : 0));
+    // gustiness: layered slow fluctuation so the wind never sits still
+    const flutter = reduced.matches ? .88
+      : .8 + .2 * (Math.sin(elapsed * 1.5) * .5 + Math.sin(elapsed * 3.1 + 1) * .3 + Math.sin(elapsed * .6) * .2);
+    gust.turb = gust.power * flutter;
+    gust.v = gust.turb;
+    gust.sv = gust.turb * gust.dir;
+    if (gust.power > .08 && soundEnabled && audioUnlocked) { startStormAudio(); updateStormAudio(gust.power, gust.dir); } else if (stormAudio) stopStormAudio();
+
+    const renderT = clamp(displayTemperament + gust.turb * .34, 0, 1);
+    const windPx = (renderT - .42) * 70 + flowX * (weather * 1450 + gust.v * 950);              // horizontal wind for rain / sheets
+    const rainPower = Math.max(clamp((renderT - .5) * 2.2, 0, 1), gust.v * .9);
+    const sky = sampleSky(renderT);
+    updateBirds(dt);
+    if (!reduced.matches && transitionAge < 0) maybeLightning(renderT, dt); else if (reduced.matches) lightning = 0;
+    else if (transitionFired) lightning *= Math.exp(-dt * 9);
+    updateMoodLabel(displayTemperament);
+
+    // cursor-driven life: the wanderer's gaze, and layered parallax across the vista
+    const pact = finePointer && pointer.active && !reduced.matches;
+    const lookT = pact ? clamp((pointer.x - .535) * 2.4, -1, 1) : 0;
+    const pxT = pact ? clamp(pointer.x - .5, -.5, .5) : 0;
+    const pyT = pact ? clamp(pointer.y - .5, -.5, .5) : 0;
+    const es = Math.min(1, dt * 3);
+    headLook += (lookT - headLook) * es;
+    parallaxX += (pxT - parallaxX) * es;
+    parallaxY += (pyT - parallaxY) * es;
+
+    // the raised arm points where the cursor is, but stays well above the horizon
+    // and never swings so far it crosses the head — he is gesturing at the sky.
+    let adx = 0, ady = -1;
+    if (pact) {
+      let vx = pointer.x - .545, vy = pointer.y - .62;
+      const m = Math.hypot(vx, vy) || 1;
+      adx = clamp(vx / m, -.5, .5);          // cap the sideways swing (~40° off vertical)
+      ady = Math.min(vy / m, -.6);           // keep it steeply skyward
+      const n = Math.hypot(adx, ady) || 1;
+      adx /= n; ady /= n;
+    }
+    armX += (adx - armX) * es;
+    armY += (ady - armY) * es;
+    const an = Math.hypot(armX, armY) || 1;  // renormalise so the arm keeps its length mid-swing
+    armX /= an; armY /= an;
+
+    const sc = canvas.width / width, scy = canvas.height / height;
+    // a gentle low-frequency buffet while the storm blows — the wind leaning on you,
+    // not a jitter.
+    const buf = reduced.matches ? 0 : gust.v;
+    const shx = buf ? (Math.sin(elapsed * 5.7) * 1.4 + Math.sin(elapsed * 9.3 + 1) * .6) * buf : 0;
+    const shy = buf ? Math.sin(elapsed * 4.6 + 2) * 1 * buf : 0;
+    ctx.setTransform(sc, 0, 0, scy, shx * sc, shy * scy);
+    ctx.clearRect(-8, -8, width + 16, height + 16);
+    drawSky(sky);
+    drawStars(displayTemperament);
+    drawOrb(renderT);
+    birds.forEach(drawBird);
+    drawMountains(renderT, sky);
+    drawFog(renderT, sky, gust.sv, dt);
+    drawRainSheets(rainPower, windPx);
+    drawRain(rainPower, dt, windPx);
+    drawForegroundLedge();
+    drawWanderer(clamp(renderT * 1.3, 0, 1.3));
+    drawVignette();
+    drawLightning();
+    if(blackout > 0) { ctx.fillStyle = 'rgba(0,0,0,' + blackout + ')'; ctx.fillRect(-8,-8,width+16,height+16); }
+    document.body.classList.toggle('storm-blackout', blackout > .8);
+    canvas.dataset.weather = renderT.toFixed(2);
+    canvas.dataset.wind = windPx.toFixed(0);
+    canvas.dataset.transition = transitionAge < 0 ? 'idle' : transitionFired ? 'reveal' : 'blackout';
+
+    raf = requestAnimationFrame(frame);
+  }
+  function start() { if (!raf) { last = 0; raf = requestAnimationFrame(frame); } }
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { endHold(); stopStormAudio(); if(audioCtx) audioCtx.suspend(); cancelAnimationFrame(raf); raf = 0; } else { if(audioUnlocked && soundEnabled) ensureAudio(); start(); }
+  });
+  resize(); start();
+})();
+</script>
+<script src="romanticism-navigation.js?v=1"></script>
+</body>
+</html>
