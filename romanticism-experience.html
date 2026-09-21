@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Romanticism 02 — The Sublime</title>
+<title>낭만주의 02 — 숭고</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
@@ -54,20 +54,20 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
 </style>
 </head>
 <body class="experience-chapter">
-<button class="sound-toggle" id="soundToggle" aria-pressed="true">Sound on</button><div class="experience-hint">Scroll from day to storm<br>Move the cursor to steer the wind · press and hold to intensify it</div>
-<canvas id="scene" tabindex="0" aria-label="Wanderer above the Sea of Fog. Scroll or use the slider on the left to shift from day to storm. Move the pointer to control rain and wind, and press-and-hold or the Enter key to intensify the storm."></canvas>
-<a class="rom-back" id="romBack" href="romanticism.html?v=1"><span>←</span> Concept</a>
-<header><span>ROMANTICISM / THE SUBLIME</span><h1>Wanderer<br>above the fog.</h1></header>
-<div class="tag"><span>ROMANTICISM · 02</span><i></i><strong id="moodLabel">Dawn</strong></div>
+<button class="sound-toggle" id="soundToggle" aria-pressed="true">소리 켜짐</button><div class="experience-hint">스크롤하면 낮에서 폭풍으로 바뀝니다<br>커서를 움직여 바람의 방향을 조종하고 · 누르고 있으면 바람이 강해집니다</div>
+<canvas id="scene" tabindex="0" aria-label="안개 바다 위의 방랑자. 스크롤하거나 왼쪽 슬라이더를 사용해 낮에서 폭풍으로 바꿔보세요. 포인터를 움직여 비와 바람을 조종하고, 누르고 있거나 Enter 키를 눌러 폭풍을 강하게 만들 수 있습니다."></canvas>
+<a class="rom-back" id="romBack" href="romanticism.html?v=1"><span>←</span> 개념 설명</a>
+<header><span>낭만주의 · 숭고</span><h1>안개 위의<br>방랑자.</h1></header>
+<div class="tag"><span>낭만주의 · 02</span><i></i><strong id="moodLabel">새벽</strong></div>
 <div class="mood">
 <svg class="mood-icon" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="#ffd98a"/></svg>
-<div class="slider-wrap"><input id="temperament" type="range" min="0" max="1" step=".001" value=".16" aria-label="Shift the sky from serene dawn to tempest"></div>
+<div class="slider-wrap"><input id="temperament" type="range" min="0" max="1" step=".001" value=".16" aria-label="하늘을 고요한 새벽에서 폭풍으로 바꾸기"></div>
 <svg class="mood-icon" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 9.4a2.6 2.6 0 0 1 4.9-1.3A2.1 2.1 0 0 1 9.4 9.4H2Z" fill="#9fb2d8"/><path d="M5.6 10.4 4.4 13l1.7-.3-1 2.3" stroke="#dbe4f7" stroke-width=".9" fill="none" stroke-linecap="round"/></svg>
-<small>SERENITY&nbsp;—&nbsp;TEMPEST</small>
+<small>고요함&nbsp;—&nbsp;폭풍</small>
 </div>
 <div class="wanderer-speech" id="wandererSpeech" role="status" hidden>
-<span class="ws-kicker">ROMANTICISM</span>
-<p>In the late 18th century, Romanticism was born in defiance of reason and rule. It placed individual emotion and imagination — and the sublime felt before nature's vastness — at the center of art. Like the wanderer gazing into the fog, Romanticism paints a human being standing alone before an unknowable world.</p>
+<span class="ws-kicker">낭만주의</span>
+<p>18세기 후반, 낭만주의는 이성과 규범에 맞서 태어났다. 개인의 감정과 상상력 — 그리고 자연의 광대함 앞에서 느끼는 숭고함 — 을 예술의 중심에 두었다. 안개를 바라보는 방랑자처럼, 낭만주의는 알 수 없는 세계 앞에 홀로 선 인간을 그린다.</p>
 </div>
 <script src="romanticism-graphics.js?v=2"></script>
 <script>
@@ -94,7 +94,7 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
   const soundButton = document.getElementById('soundToggle');
   soundButton.addEventListener('click', () => {
     soundEnabled = !soundEnabled;
-    soundButton.textContent = soundEnabled ? 'Sound on' : 'Sound off';
+    soundButton.textContent = soundEnabled ? '소리 켜짐' : '소리 꺼짐';
     soundButton.setAttribute('aria-pressed', String(soundEnabled));
     if (!soundEnabled) { stopStormAudio(); if(audioCtx) audioCtx.suspend(); }
     else { audioUnlocked = true; ensureAudio(); }
@@ -351,7 +351,7 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
   }
 
   function updateMoodLabel(t) {
-    const label = t < .32 ? 'Dawn' : t < .5 ? 'Overcast' : t < .78 ? 'Storm Wind' : 'Tempest';
+    const label = t < .32 ? '새벽' : t < .5 ? '흐림' : t < .78 ? '폭풍전야' : '폭풍';
     if (moodLabel.textContent !== label) moodLabel.textContent = label;
   }
 

@@ -4,11 +4,11 @@
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const bounds = [0, 11, 23, 34, 45, 56];
   const chapters = [
-    { title: 'Before form, dots of color.', description: 'What fills the frame isn’t brick or window — it’s dabs of paint. Impressionism paints the color of light before it paints form.' },
-    { title: 'Step back, and it becomes a cathedral.', description: 'The same dots — but the moment you step back, Rouen Cathedral’s facade emerges. Your eye mixes the color into form.' },
-    { title: 'Same cathedral, flowing light.', description: 'The stone never moves, but the color of light shifts from dawn to noon to dusk. Monet painted this same cathedral more than thirty times.' },
-    { title: 'The shadow never stops.', description: 'A cloud’s shadow sweeps across the facade. Light keeps changing even within a single moment, not just over the course of a day.' },
-    { title: 'This moment won’t come again.', description: 'A bird crosses, and the light flickers for an instant. What Impressionism captures isn’t an eternal form, but this moment, which will never return.' }
+    { title: '형태 이전의 색채, 붓점에 대하여', description: '화면을 채우는 것은 벽돌이나 창문이 아니라 색을 찍은 붓점이다. 인상주의는 형태보다 빛의 색을 먼저 그린다.' },
+    { title: '눈이 만들어내는 형태에 대하여', description: '같은 붓점들이지만, 한 발 물러서는 순간 루앙 대성당의 파사드가 나타난다. 우리의 눈이 색을 형태로 조합한다.' },
+    { title: '빛에 따라 달라지는 색에 대하여', description: '돌은 그대로지만, 빛의 색은 새벽에서 정오, 황혼으로 바뀐다. 모네는 같은 대성당을 서른 번 넘게 그렸다.' },
+    { title: '멈추지 않는 그림자에 대하여', description: '구름의 그림자가 파사드를 스쳐 지나간다. 빛은 하루의 흐름뿐 아니라 한순간 안에서도 계속 변한다.' },
+    { title: '다시 오지 않을 이 순간에 대하여', description: '새 한 마리가 지나가고, 빛이 한순간 깜빡인다. 인상주의가 담는 것은 영원한 형태가 아니라 다시 오지 않을 이 순간이다.' }
   ];
   const TOTAL = bounds[bounds.length - 1];
   let w = 1, h = 1, dpr = 1, time = 0, playing = !reduced.matches, last = 0, raf = 0, index = -1;
@@ -26,7 +26,7 @@
         $('sceneStatus').animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 800, easing: 'ease-out', delay: 150 });
       }
     }
-    $('playPause').textContent = playing ? 'Ⅱ' : '▷'; $('playPause').setAttribute('aria-label', playing ? 'Pause the film' : 'Play the film');
+    $('playPause').textContent = playing ? 'Ⅱ' : '▷'; $('playPause').setAttribute('aria-label', playing ? '영상 일시정지' : '영상 재생');
     $('filmTime').textContent = `${format(time)} / ${format(TOTAL)}`; $('filmFill').style.width = `${time / TOTAL * 100}%`;
     $('filmSeek').value = time; $('filmSeek').setAttribute('aria-valuetext', format(time));
     document.body.classList.toggle('film-playing', playing); document.body.classList.toggle('film-ended', time >= TOTAL);

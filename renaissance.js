@@ -5,8 +5,8 @@
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const SPEED=1.4;
   const compareOne=$('compareOne'),compareTwo=$('compareTwo');
-  const titles=['A picture, or a space?','A world that changes with the eye.','Same size. Different shape.','Eye level becomes the world’s baseline.','The picture becomes a world.'];
-  const hints=['Turn it to the side','Follow the line of light','Drag the teal column back and forth','Move the eye up and down','Follow the lines, into the painting'];
+  const titles=['그림과 공간의 착시에 대하여','원근법의 원리에 대하여','거리와 크기의 관계에 대하여','눈높이와 소실점에 대하여','명화 속 원근법에 대하여'];
+  const hints=['화면을 옆으로 돌려 두께를 확인해 보세요','눈에서 뻗어나가는 빛의 선을 따라가 보세요','청록색 기둥을 앞뒤로 드래그해 보세요','눈의 높이를 위아래로 움직여 보세요','선을 따라 그림 속으로 들어가 보세요'];
   const gold='#e4bc78',cyan='#8edfd6',ink='#f4e9d5';
   // Autoplay freezes the scene at each window's start and holds it for the given real-world duration
   // (in ms) so the example artworks never animate underneath the narration — they fully replace it, then hand back.
@@ -106,7 +106,7 @@
       line(a,b,gold,s.horizon*(1-s.art),1,[5,6]);
     }
     ctx.restore();
-    if(s.turn>.4){const top=project([0,4.5,-3]);label('Picture plane',{x:top.x,y:top.y-20},gold,s.turn);}
+    if(s.turn>.4){const top=project([0,4.5,-3]);label('그림의 평면',{x:top.x,y:top.y-20},gold,s.turn);}
     return p;
   }
   function rays(s,project){
@@ -124,7 +124,7 @@
       }
     }
     dot(E,gold,5,a);ctx.save();ctx.globalAlpha=a;ctx.strokeStyle=gold;ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(E.x,E.y,15,9,0,0,Math.PI*2);ctx.stroke();ctx.restore();
-    label('Eye',{x:E.x,y:E.y+28},gold,a);
+    label('눈(시점)',{x:E.x,y:E.y+28},gold,a);
     targets.eye={x:E.x,y:E.y,r:28};
     if(s.chapter===3){
       const lo=project([0,.8,-8]),hi=project([0,3.2,-8]);line(lo,hi,gold,.5,1,[3,4]);
@@ -140,7 +140,7 @@
     for(const [x,z,color] of [[-1.25,2,gold],[1.25,s.distance,cyan]]){
       const top=project([x-.6,2.6,z]),base=project([x-.6,0,z]);
       line(top,base,color,a,1.4);line({x:top.x-4,y:top.y},{x:top.x+4,y:top.y},color,a,1.4);line({x:base.x-4,y:base.y},{x:base.x+4,y:base.y},color,a,1.4);
-      label('Same height',{x:top.x,y:top.y-19},color,a,'center',10);
+      label('같은 높이',{x:top.x,y:top.y-19},color,a,'center',10);
     }
     const a0=project([1.25,.03,2]),a1=project([1.25,.03,16]);line(a0,a1,cyan,.5*a,1,[4,5]);
     arrow(a0,Math.atan2(a0.y-a1.y,a0.x-a1.x),cyan);arrow(a1,Math.atan2(a1.y-a0.y,a1.x-a0.x),cyan);
@@ -166,14 +166,14 @@
       dot(vp,ink,3,s.horizon);
     }
     ctx.restore();ctx.strokeStyle='#c9a76d88';ctx.lineWidth=1;ctx.strokeRect(r.x,r.y,r.w,r.h);
-    label('What forms on the picture',{x:r.x+r.w/2,y:r.y-18},gold,1,'center',10);
+    label('그림 위에 맺히는 상',{x:r.x+r.w/2,y:r.y-18},gold,1,'center',10);
     if(s.compare>.2){
       for(const [x,z,color] of [[-1.25,2,gold],[1.25,s.distance,cyan]]){
         const top=project([x,2.6,z]),bottom=project([x,0,z]);
         line({x:top.x+12,y:top.y},{x:bottom.x+12,y:bottom.y},color,s.compare,2.5);
       }
     }
-    if(s.chapter===3){label('Vanishing point',{x:vp.x,y:vp.y-17},gold,s.horizon,'center',10);label('Eye level',{x:r.x+r.w-7,y:vp.y+16},gold,s.horizon,'right',9);}
+    if(s.chapter===3){label('소실점',{x:vp.x,y:vp.y-17},gold,s.horizon,'center',10);label('눈높이',{x:r.x+r.w-7,y:vp.y+16},gold,s.horizon,'right',9);}
     ctx.restore();
   }
   function imageTriangle(image,dest,source,alpha){
@@ -199,8 +199,8 @@
         line(a,b,'#fff0a6',.9,2);dot(b,'#fff5c3',3);
       }
       ctx.save();ctx.globalAlpha=s.artGuides;ctx.strokeStyle='#fff0a6';ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(vp.x,vp.y,13,0,Math.PI*2);ctx.stroke();ctx.restore();
-      label('Vanishing point',{x:vp.x,y:vp.y-25},'#fff1b9',s.artGuides);
-      label('Depth direction · diagram',{x:dest[3].x+9,y:dest[3].y-16},ink,s.artGuides,'left',9);
+      label('소실점',{x:vp.x,y:vp.y-25},'#fff1b9',s.artGuides);
+      label('깊이 방향 · 도식',{x:dest[3].x+9,y:dest[3].y-16},ink,s.artGuides,'left',9);
     }
   }
   function render(){
@@ -215,8 +215,8 @@
     }
     const corners=planeImage(s,view,room,columns);
     rays(s,view);sameSize(s,view);inset(s,r.inset,room,columns);art(s,corners);
-    if(s.chapter===0&&time>3.8){const p=view([0,-.45,-3]);label('A single flat plane',{x:p.x,y:p.y+25},gold,smooth(3.8,5,time));}
-    if(s.chapter===4&&time<45){const p=view([0,-.45,-3]);label('From principle to artwork',{x:p.x,y:p.y+24},gold,1-s.art);}
+    if(s.chapter===0&&time>3.8){const p=view([0,-.45,-3]);label('하나의 평평한 면',{x:p.x,y:p.y+25},gold,smooth(3.8,5,time));}
+    if(s.chapter===4&&time<45){const p=view([0,-.45,-3]);label('원리에서 실제 그림으로',{x:p.x,y:p.y+24},gold,1-s.art);}
   }
   function updateUI(){
     const c=M.chapter(time);
@@ -225,13 +225,14 @@
       $('artSource').hidden=c!==4;
     }
     $('playPause').textContent=playing?'Ⅱ':'▷';
-    $('playPause').setAttribute('aria-label',playing?'Pause the film':'Play the film');
+    $('playPause').setAttribute('aria-label',playing?'영상 일시정지':'영상 재생');
     $('filmTime').textContent='00:'+String(Math.floor(time)).padStart(2,'0')+' / 00:50';
     $('filmFill').style.width=(time/50*100)+'%';
     [...$('progress').children].forEach((button,i)=>{button.classList.toggle('active',i===c);button.setAttribute('aria-current',i===c?'step':'false');});
     const showCompare1=time>=compareWindows[0].start&&time<compareWindows[0].end,showCompare2=time>=compareWindows[1].start&&time<compareWindows[1].end;
     compareOne.classList.toggle('visible',showCompare1);compareOne.setAttribute('aria-hidden',String(!showCompare1));
     compareTwo.classList.toggle('visible',showCompare2);compareTwo.setAttribute('aria-hidden',String(!showCompare2));
+    document.body.classList.toggle('showing-comparison',showCompare1||showCompare2);
   }
   function frame(now){
     raf=0;if(document.hidden){last=0;return;}
@@ -341,6 +342,6 @@
   artwork.onerror=()=>{artFailed=true;if(M.chapter(time)===4)$('assetError').hidden=false;invalidate();};
   function loadArt(){artFailed=false;$('assetError').hidden=true;artwork.src=encodeURI('아테네 학당.jpg');}
   $('retryArt').addEventListener('click',loadArt);
-  if(!ctx){$('assetError').hidden=false;$('assetError').textContent='This browser can’t display the artwork.';return;}
+  if(!ctx){$('assetError').hidden=false;$('assetError').textContent='이 브라우저에서는 그림을 표시할 수 없습니다.';return;}
   loadArt();resize();
 })();

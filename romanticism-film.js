@@ -3,15 +3,15 @@
   const $=id=>document.getElementById(id),canvas=$('filmScene'),ctx=canvas.getContext('2d');
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const bounds=[0,14,31,47,64,80];
-  const playbackRate=1.5;
-  const chapterNames=['The gaze','The unknown','The sublime','Inner life','The individual'];
+  const playbackRate=1.8;
+  const chapterNames=['뒷모습의 시선','미지와 상상','숭고','풍경과 감정','개인의 내면'];
   // Every chapter pairs a visible model transformation with one reading of the painting.
   const chapters=[
-    {title:'See the world through someone else.',description:'A figure turned away invites us to share his gaze.',from:'Observe him',to:'Share his gaze'},
-    {title:'What you cannot see, you imagine.',description:'Where the fog conceals, imagination begins.',from:'Reveal the valley',to:'Conceal it'},
-    {title:'Small before something immense.',description:'Vast nature brings wonder and unease together.',from:'Human scale',to:'Vast nature'},
-    {title:'The landscape becomes a feeling.',description:'The same landscape, transformed by light.',from:'Cool distance',to:'Warm possibility'},
-    {title:'An entire world. One inner life.',description:'One person’s feeling becomes the subject.',from:'Many figures',to:'One individual'}
+    {title:'뒤돌아 선 인물, 뤼켄피구어에 대하여',description:'돌아선 뒷모습이 그의 시선을 함께 바라보게 한다.',from:'그를 바라보다',to:'그의 시선을 공유하다'},
+    {title:'보이지 않는 것과 상상력에 대하여',description:'안개가 계곡을 가리는 순간, 상상이 시작된다.',from:'드러난 계곡',to:'가려진 계곡'},
+    {title:'숭고(Sublime)에 대하여',description:'거대한 자연 앞에서 인간은 한없이 작아진다.',from:'인간의 크기',to:'거대한 자연'},
+    {title:'풍경에 담기는 감정에 대하여',description:'같은 골짜기가 비바람과 햇빛 속에서 다른 감정을 보여준다.',from:'폭풍과 불확실함',to:'빛과 가능성'},
+    {title:'집단과 개인, 그림의 주인공에 대하여',description:'역사 속 무리 대신, 한 사람의 내면이 그림의 주인공이 된다.',from:'여럿의 무리',to:'한 개인'}
   ];
   // Three pauses ground the abstract camera language in real paintings, each timed to the
   // chapter it caps: the Rückenfigur device recurring across Friedrich's work follows "his back,
@@ -19,8 +19,19 @@
   // Sublime"; and crowded history painting versus one solitary figure sets up "no myth, no history".
   const compareWindows=[{start:13.2,end:14,hold:4.5},{start:46.2,end:47,hold:5},{start:63.2,end:64,hold:6}];
   let holdRemaining=null,holdAt=null;
+  function fitComparisons(){
+    document.body.style.setProperty('--transport-height',document.querySelector('.film-footer').offsetHeight+'px');
+    document.querySelectorAll('.compare-grid').forEach(grid=>{
+      const items=[...grid.querySelectorAll('.compare-item')],gw=grid.clientWidth,gh=grid.clientHeight;
+      const gap=parseFloat(getComputedStyle(grid).gap)||20;
+      const ratios=items.map(item=>{const img=item.querySelector('img');return img.naturalWidth/Math.max(1,img.naturalHeight)||1;});
+      const narrow=innerWidth<=600,three=items.length===3;
+      const common=narrow?Math.max(20,(gh-gap*(items.length-1))/items.length-(three?2:68)):Math.max(20,Math.min(gh-88,(gw-gap*(items.length-1))/ratios.reduce((a,b)=>a+b,0)));
+      items.forEach((item,i)=>{const img=item.querySelector('img'),ih=Math.min(common,gw*(narrow&&three?.45:1)/ratios[i]);img.style.width=ih*ratios[i]+'px';img.style.height=ih+'px';item.style.width=narrow?(three?'100%':Math.min(gw,Math.max(ih*ratios[i],gw*.75))+'px'):ih*ratios[i]+'px';});
+    });
+  }
   let w=1,h=1,dpr=1,time=0,playing=false,last=0,raf=0,index=-1,manual=null,intro=true,drag=null;
-  const dragHints=['Drag to turn the view ↔','Drag to move the fog ↔','Drag to change nature’s scale ↔','Drag to change the light ↔','Drag to reveal the individual ↔'];
+  const dragHints=['드래그해 시점을 돌려보세요 ↔','드래그해 안개를 움직여보세요 ↔','드래그해 자연의 크기를 바꿔보세요 ↔','드래그해 빛을 바꿔보세요 ↔','드래그해 개인을 드러내보세요 ↔'];
   function chapterAt(t){return Math.min(4,bounds.findIndex((v,i)=>i<5&&t<bounds[i+1])<0?4:bounds.findIndex((v,i)=>i<5&&t<bounds[i+1]));}
   function update(){
     const next=chapterAt(time);
@@ -35,8 +46,12 @@
       }
     }
     document.body.classList.toggle('film-playing',playing);document.body.classList.toggle('film-ended',time>=80);
-    $('playPause').textContent=playing?'Pause Ⅱ':time>=80?'Replay ↺':'Play ▷';
-    $('playPause').setAttribute('aria-label',playing?'Pause animation':time>=80?'Replay animation':'Play animation');
+    $('playPause').textContent=playing?'Ⅱ':time>=80?'↺':'▷';
+    $('playPause').setAttribute('aria-label',playing?'애니메이션 일시정지':time>=80?'애니메이션 다시 재생':'애니메이션 재생');
+    $('filmSeek').value=time;$('filmFill').style.width=(time/80*100)+'%';
+    const elapsed=(time+compareWindows.reduce((sum,win)=>sum+(time>=win.end?win.hold:time>=win.start?win.hold-(holdRemaining??0):0),0))/playbackRate;
+    $('filmTime').textContent=`0:${String(Math.floor(elapsed)).padStart(2,'0')} / 0:53`;
+    document.querySelectorAll('[data-film-chapter]').forEach((button,i)=>{button.classList.toggle('active',i===index);button.setAttribute('aria-pressed',String(i===index));});
     // Window order follows chapter order: the Rückenfigur trio lands right after "his back, not
     // his face"; the Sublime pair lands right after that chapter; the history-vs-individual pair
     // lands right before the closing chapter it sets up.
@@ -58,10 +73,10 @@
     const amount=manual===null?phase:manual;
     const nearest=bounds.slice(1,-1).reduce((a,b)=>Math.abs(time-b)<Math.abs(a)?time-b:a,99);
     const transition=reduced.matches||manual!==null?0:Math.abs(nearest)<.85?(nearest+.85)/1.7:0;
-    const header=document.querySelector('.masthead').getBoundingClientRect(),hint=$('dragHint').getBoundingClientRect();
-    window.drawRomanticWorld(ctx,w,h,time,ix,amount,{reduced:reduced.matches,transition,layout:{top:header.bottom+20,bottom:hint.top-18}});
+    const header=document.querySelector('.masthead').getBoundingClientRect(),footer=document.querySelector('.film-footer').getBoundingClientRect();
+    window.drawRomanticWorld(ctx,w,h,time,ix,amount,{reduced:reduced.matches,transition,layout:{top:header.bottom+10,bottom:footer.top-8}});
     canvas.setAttribute('aria-valuenow',String(Math.round(amount*100)));
-    canvas.setAttribute('aria-valuetext',`${chapterNames[ix]}: ${chapters[ix].from} to ${chapters[ix].to}, ${Math.round(amount*100)} percent`);
+    canvas.setAttribute('aria-valuetext',`${chapterNames[ix]}: ${chapters[ix].from}에서 ${chapters[ix].to}(으)로, ${Math.round(amount*100)}퍼센트`);
   }
   function frame(now){
     raf=0;if(document.hidden||!playing)return;
@@ -82,13 +97,43 @@
   function start(){last=0;if(playing&&!raf&&!document.hidden)raf=requestAnimationFrame(frame);}
   function seek(t){manual=null;holdRemaining=null;holdAt=null;time=Math.max(0,Math.min(80,t));update();draw();}
   function toggle(){if(intro)return;manual=null;playing=!playing;if(time>=80)seek(0);update();start();}
-  $('beginStudy').addEventListener('click',()=>{
+  let entering=false;
+  $('beginStudy').addEventListener('click',async()=>{
+    if(entering||!intro)return;
+    entering=true;
+    const painting=$('beginStudy').querySelector('img'),box=painting.getBoundingClientRect();
+    // Use the painted pixels, excluding object-fit letterboxing on narrow screens.
+    const fit=Math.min(box.width/(painting.naturalWidth||box.width),box.height/(painting.naturalHeight||box.height));
+    const rw=(painting.naturalWidth||box.width)*fit,rh=(painting.naturalHeight||box.height)*fit;
+    const rect={left:box.left+(box.width-rw)/2,top:box.top+(box.height-rh)/2,width:rw,height:rh};
+    const portal=painting.cloneNode();
+    portal.removeAttribute('id');portal.alt='';portal.setAttribute('aria-hidden','true');
+    Object.assign(portal.style,{position:'fixed',left:rect.left+'px',top:rect.top+'px',width:rect.width+'px',height:rect.height+'px',objectFit:'fill',zIndex:'100',pointerEvents:'none',transformOrigin:'50% 43%'});
+    if(!reduced.matches)document.body.append(portal);
     intro=false;$('paintingIntro').hidden=true;document.body.classList.remove('artwork-intro');
-    playing=!reduced.matches;seek(0);canvas.focus({preventScroll:true});
-    if(!reduced.matches)canvas.animate([{opacity:0,transform:'scale(.94)'},{opacity:1,transform:'scale(1)'}],{duration:750,easing:'cubic-bezier(.2,.65,.3,1)'});
+    fitComparisons();
+    playing=false;seek(0);
+    if(!reduced.matches){
+      $('atelier').inert=true;document.body.classList.add('entering-painting');
+      const dx=innerWidth*.5-(rect.left+rect.width*.5),dy=innerHeight*.47-(rect.top+rect.height*.43);
+      const scale=Math.max(innerWidth/Math.max(1,rect.width),innerHeight/Math.max(1,rect.height))*2.1;
+      const zoom=portal.animate([
+        {transform:'translate(0,0) scale(1)',opacity:1,filter:'blur(0px)',offset:0},
+        {transform:`translate(${dx*.35}px,${dy*.35}px) scale(1.35)`,opacity:1,filter:'blur(0px)',offset:.32},
+        {transform:`translate(${dx}px,${dy}px) scale(${scale})`,opacity:1,filter:'blur(3px)',offset:.76},
+        {transform:`translate(${dx}px,${dy}px) scale(${scale*1.15})`,opacity:0,filter:'blur(12px)',offset:1}
+      ],{duration:1450,easing:'cubic-bezier(.5,0,.2,1)',fill:'forwards'});
+      const reveal=canvas.animate([{opacity:0,transform:'scale(1.16)'},{opacity:1,transform:'scale(1)'}],{duration:850,delay:600,easing:'ease-out',fill:'both'});
+      await Promise.allSettled([zoom.finished,reveal.finished]);
+      portal.remove();reveal.cancel();$('atelier').inert=false;document.body.classList.remove('entering-painting');
+    }
+    entering=false;playing=!reduced.matches;update();canvas.focus({preventScroll:true});
     start();
   });
   $('playPause').addEventListener('click',toggle);
+  $('replay').addEventListener('click',()=>{if(intro)return;playing=!reduced.matches;seek(0);start();});
+  $('filmSeek').addEventListener('input',e=>{playing=false;seek(Number(e.target.value));});
+  document.querySelectorAll('[data-film-chapter]').forEach((button,i)=>button.addEventListener('click',()=>{playing=false;seek(bounds[i]);}));
   addEventListener('romantic-art-ready',()=>draw());
   function manipulate(value){
     manual=Math.max(0,Math.min(1,value));playing=false;holdRemaining=null;holdAt=null;
@@ -128,6 +173,7 @@
   addEventListener('keydown',e=>{if(e.code==='Space'&&e.target===document.body){e.preventDefault();toggle();}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf);raf=0;last=0;}else start();});
   reduced.addEventListener('change',()=>{playing=false;update();draw();});
-  function resize(){w=innerWidth;h=innerHeight;dpr=Math.min(devicePixelRatio||1,1.5);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);$('paintingIntro').style.top=`${document.querySelector('.masthead').getBoundingClientRect().bottom+18}px`;draw();}
+  function resize(){w=innerWidth;h=innerHeight;dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);$('paintingIntro').style.top=`${document.querySelector('.masthead').getBoundingClientRect().bottom+18}px`;fitComparisons();draw();}
+  document.querySelectorAll('.compare-item img').forEach(img=>img.addEventListener('load',fitComparisons));
   addEventListener('resize',resize);document.fonts.ready.then(resize);update();resize();start();
 })();

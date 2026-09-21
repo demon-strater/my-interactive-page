@@ -203,13 +203,13 @@
     items.forEach(item=>item.from={...item.current});
     fromVP={...vanishing};targetVP={x:clamp(x,.015,.985),y:clamp(y,.015,.985)};
     fromLines=lineAmount;targetLines=1;ordered=true;
-    atelier.classList.add('is-ordered');document.getElementById('stateLabel').textContent='Tap elsewhere to move the vanishing point';animate();
+    atelier.classList.add('is-ordered');document.getElementById('stateLabel').textContent='다른 곳을 탭해 소실점을 옮기세요';animate();
   }
   function scatter() {
     if(!ready)return;
     items.forEach((item,i)=>{item.from={...item.current};item.to=disorder(i);});
     fromVP={...vanishing};targetVP={x:.5,y:.37};fromLines=lineAmount;targetLines=0;ordered=false;
-    atelier.classList.remove('is-ordered');document.getElementById('stateLabel').textContent='Tap to place';animate();
+    atelier.classList.remove('is-ordered');document.getElementById('stateLabel').textContent='탭해서 배치하기';animate();
   }
   atelier.addEventListener('click',e=>{if(e.target.closest('button,a'))return;const r=atelier.getBoundingClientRect();compose((e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height);});
   atelier.addEventListener('keydown',e=>{if(e.target.closest('button,a'))return;if(e.key==='Enter'||e.key===' '){e.preventDefault();compose();}if(e.key==='Escape')scatter();});
@@ -238,7 +238,7 @@
       files=figureFiles;
     }
     const loaded=await Promise.allSettled(files.map(async(file,i)=>{
-      const img=new Image();img.src=encodeURI(file);img.alt=names[i]||`Philosopher ${i+1}`;img.draggable=false;
+      const img=new Image();img.src=encodeURI(file);img.alt=names[i]||`철학자 ${i+1}`;img.draggable=false;
       await img.decode().catch(()=>new Promise((resolve,reject)=>{
         if(img.complete&&img.naturalWidth)resolve();
         else { img.onload=resolve; img.onerror=reject; }
@@ -257,5 +257,5 @@
     figures.replaceChildren(...items.map(item=>item.el));
     ready=true;document.getElementById('loadStatus').textContent='';duration=0;frame(performance.now());
   }
-  init().catch(error=>{document.getElementById('loadStatus').textContent='Couldn\'t load the figures. Please refresh.';console.error(error);});
+  init().catch(error=>{document.getElementById('loadStatus').textContent='인물들을 불러오지 못했습니다. 새로고침해 주세요.';console.error(error);});
 })();

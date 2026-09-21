@@ -4,67 +4,88 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#100e0b">
-<title>Renaissance — When a Painting Becomes a Space</title>
-<meta name="description" content="A visual experiment connecting the eye, the picture plane, and space. Discover perspective through moving projection lines and columns, leading into The School of Athens.">
+<title>르네상스 — 그림이 공간이 될 때</title>
+<meta name="description" content="눈, 그림의 평면, 공간을 잇는 시각적 실험. 움직이는 투영선과 기둥을 통해 원근법을 발견하고, 아테네 학당으로 이어집니다.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="renaissance.css?v=play-10">
 <link rel="stylesheet" href="renaissance-navigation.css?v=nav-2">
+<link rel="stylesheet" href="concept-transport.css?v=1">
 </head>
 <body class="visual-experience">
 <main id="atelier">
-  <header class="masthead"><div class="eyebrow">RENAISSANCE</div><h1 id="sceneTitle">A picture, or a space?</h1></header>
-  <section id="stage" aria-label="An animated perspective model">
-    <canvas id="scene" tabindex="0" aria-label="A visual perspective experiment. In the third scene, drag the teal column; in the fourth scene, drag the eye. You can also use the arrow keys."></canvas>
+  <header class="masthead"><div class="eyebrow">르네상스</div><h1 id="sceneTitle">그림과 공간의 착시에 대하여</h1></header>
+  <section id="stage" aria-label="애니메이션 원근법 모형">
+    <canvas id="scene" tabindex="0" aria-label="시각적 원근법 실험. 세 번째 장면에서는 청록색 기둥을, 네 번째 장면에서는 눈을 드래그할 수 있습니다. 방향키도 사용할 수 있습니다."></canvas>
     <span id="sceneStatus" class="sr-only" role="status"></span>
     <figure class="art-compare" id="compareOne" aria-hidden="true">
+      <h2 class="compare-heading">원근법의 유무에 대하여</h2>
       <div class="compare-grid">
         <div class="compare-item">
-          <span class="compare-tag">No perspective</span>
-          <img src="원근법%20ㄴ.jpg" alt="A flat, overlapping arrangement of objects in a traditional Chaekgado painting">
-          <span class="compare-credit">Chaekgado · Artist unknown</span>
+          <span class="compare-tag">원근법 없음 — 소실점이 없다</span>
+          <span class="img-wrap">
+            <img src="원근법%20ㄴ.jpg" alt="전통 책가도 회화 속 사물들이 원근 없이 평평하게 겹쳐 쌓여 있다">
+            <svg class="vp-lines no-vp" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <line x1="14" y1="52" x2="34" y2="18"></line>
+              <line x1="58" y1="46" x2="93" y2="30"></line>
+              <line x1="40" y1="92" x2="66" y2="68"></line>
+            </svg>
+            <span class="vp-label no-vp-label" style="left:50%;top:6%" aria-hidden="true">사물마다 제각각인 방향</span>
+          </span>
+          <span class="compare-credit">책가도 · 작자 미상</span>
         </div>
         <div class="compare-item">
-          <span class="compare-tag">With perspective</span>
-          <img src="원근법ㅇ.jpg" alt="The Last Supper, with clear lines converging on a single point">
-          <span class="compare-credit">The Last Supper · Leonardo da Vinci</span>
+          <span class="compare-tag">원근법 적용 — 하나의 소실점</span>
+          <span class="img-wrap" data-vp-key="lastsupper">
+            <img src="원근법ㅇ.jpg" alt="최후의 만찬. 선명한 선들이 하나의 점으로 모여든다">
+            <svg class="vp-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <line x1="2" y1="4" x2="50" y2="31"></line>
+              <line x1="2" y1="90" x2="50" y2="31"></line>
+              <line x1="98" y1="4" x2="50" y2="31"></line>
+              <line x1="98" y1="90" x2="50" y2="31"></line>
+            </svg>
+            <span class="vp-dot" style="left:50%;top:31%" aria-hidden="true"></span>
+            <span class="vp-label" style="left:50%;top:31%" aria-hidden="true">소실점</span>
+          </span>
+          <span class="compare-credit">최후의 만찬 · 레오나르도 다빈치</span>
         </div>
       </div>
     </figure>
     <figure class="art-compare" id="compareTwo" aria-hidden="true">
+      <h2 class="compare-heading">소실점의 위치에 대하여</h2>
       <div class="compare-grid three">
         <div class="compare-item">
-          <span class="compare-tag">An intense, dynamic feeling</span>
+          <span class="compare-tag">강렬하고 역동적인 느낌</span>
           <span class="img-wrap" data-vp-key="bridge">
-            <img src="소실점1.jpg" alt="Le Pont de l'Europe, with its vanishing point high on the right">
+            <img src="소실점1.jpg" alt="유럽의 다리. 소실점이 오른쪽 높은 곳에 위치한다">
             <svg class="vp-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
               <line x1="3" y1="97" x2="74" y2="20"></line>
               <line x1="58" y1="97" x2="74" y2="20"></line>
             </svg>
             <span class="vp-dot" style="left:74%;top:20%" aria-hidden="true"></span>
-            <span class="vp-label" style="left:74%;top:20%" aria-hidden="true">Vanishing point</span>
+            <span class="vp-label" style="left:74%;top:20%" aria-hidden="true">소실점</span>
           </span>
-          <span class="compare-credit">Le Pont de l'Europe · Gustave Caillebotte</span>
+          <span class="compare-credit">유럽의 다리 · 귀스타브 카유보트</span>
         </div>
         <div class="compare-item">
-          <span class="compare-tag">A cozy, settled feeling</span>
+          <span class="compare-tag">아늑하고 안정된 느낌</span>
           <span class="img-wrap" data-vp-key="bedroom">
-            <img src="소실점2.jpg" alt="Bedroom in Arles, with its vanishing point centered at eye level">
+            <img src="소실점2.jpg" alt="아를의 침실. 소실점이 눈높이 중앙에 위치한다">
             <svg class="vp-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
               <line x1="2" y1="97" x2="52" y2="36"></line>
               <line x1="98" y1="90" x2="52" y2="36"></line>
               <line x1="2" y1="4" x2="52" y2="36"></line>
             </svg>
             <span class="vp-dot" style="left:52%;top:36%" aria-hidden="true"></span>
-            <span class="vp-label" style="left:52%;top:36%" aria-hidden="true">Vanishing point</span>
+            <span class="vp-label" style="left:52%;top:36%" aria-hidden="true">소실점</span>
           </span>
-          <span class="compare-credit">Bedroom in Arles · Vincent van Gogh</span>
+          <span class="compare-credit">아를의 침실 · 빈센트 반 고흐</span>
         </div>
         <div class="compare-item">
-          <span class="compare-tag">A balanced, majestic feeling</span>
+          <span class="compare-tag">균형 잡히고 장엄한 느낌</span>
           <span class="img-wrap" data-vp-key="athens">
-            <img src="아테네%20학당.jpg" alt="The School of Athens, its vanishing point centered between the two figures">
+            <img src="아테네%20학당.jpg" alt="아테네 학당. 소실점이 두 인물 사이 중앙에 위치한다">
             <svg class="vp-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
               <line x1="28.2" y1="18.9" x2="51.2" y2="47.1"></line>
               <line x1="72.5" y1="18.4" x2="51.2" y2="47.1"></line>
@@ -72,17 +93,18 @@
               <line x1="95" y1="97" x2="51.2" y2="47.1"></line>
             </svg>
             <span class="vp-dot" style="left:51.2%;top:47.1%" aria-hidden="true"></span>
-            <span class="vp-label" style="left:51.2%;top:47.1%" aria-hidden="true">Vanishing point</span>
+            <span class="vp-label" style="left:51.2%;top:47.1%" aria-hidden="true">소실점</span>
           </span>
-          <span class="compare-credit">The School of Athens · Raphael</span>
+          <span class="compare-credit">아테네 학당 · 라파엘로</span>
         </div>
       </div>
     </figure>
-    <div id="assetError" role="status" hidden>Couldn't load the artwork. <button id="retryArt" type="button">Retry</button></div>
-    <a id="artSource" href="https://www.museivaticani.va/content/museivaticani/en/collezioni/musei/stanze-di-raffaello/stanza-della-segnatura/scuola-di-atene.html" target="_blank" rel="noopener noreferrer" hidden>Raphael · The School of Athens / Vatican Museums ↗</a>
+    <div id="assetError" role="status" hidden>그림을 불러오지 못했습니다. <button id="retryArt" type="button">다시 시도</button></div>
+    <a id="artSource" href="https://www.museivaticani.va/content/museivaticani/en/collezioni/musei/stanze-di-raffaello/stanza-della-segnatura/scuola-di-atene.html" target="_blank" rel="noopener noreferrer" hidden>라파엘로 · 아테네 학당 / 바티칸 박물관 ↗</a>
   </section>
-  <footer class="film-footer"><div class="timeline"><div id="filmFill"></div></div><div class="transport"><button id="playPause" aria-label="Pause the film">Ⅱ</button><button id="replay" aria-label="Replay from the start">↺</button><span id="filmTime"></span><nav id="progress" aria-label="Film scenes"><button aria-label="Scene 1">01</button><button aria-label="Scene 2">02</button><button aria-label="Scene 3">03</button><button aria-label="Scene 4">04</button><button aria-label="Scene 5">05</button></nav><a class="next-experience" href="renaissance-perspective.html?v=home-2">Into the space <span>↗</span></a></div></footer>
-  <noscript>This visual experiment requires JavaScript.</noscript>
+  <footer class="film-footer"><div class="timeline"><div id="filmFill"></div></div><div class="transport"><button id="playPause" aria-label="영상 일시정지">Ⅱ</button><button id="replay" aria-label="처음부터 다시 재생">↺</button><span id="filmTime"></span><nav id="progress" aria-label="영상 장면">
+<button aria-label="장면 1">01</button><button aria-label="장면 2">02</button><button aria-label="장면 3">03</button><button aria-label="장면 4">04</button><button aria-label="장면 5">05</button></nav><a class="next-experience" href="renaissance-perspective.html?v=home-2">공간 속으로 <span>↗</span></a></div></footer>
+  <noscript>이 시각적 실험은 자바스크립트가 필요합니다.</noscript>
 </main>
 <script src="renaissance-model.js?v=visual-5"></script>
 <script src="renaissance.js?v=play-13"></script>

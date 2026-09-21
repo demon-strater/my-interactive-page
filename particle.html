@@ -153,11 +153,11 @@
     <canvas id="canvas"></canvas>
     <div class="fallback-title" id="fallbackTitle">particle</div>
     <div id="ui-container">
-        <div class="hint-text">Optical Crystalline Rendering</div>
-        <input type="text" id="textInput" value="particle" placeholder="Enter text" autocomplete="off" spellcheck="false">
+        <div class="hint-text">광학 결정 렌더링</div>
+        <input type="text" id="textInput" value="particle" placeholder="텍스트 입력" autocomplete="off" spellcheck="false">
         <div class="btn-group">
-            <button id="toggleBtn">Scatter</button>
-            <button id="bakeBtn">Bake Glass</button>
+            <button id="toggleBtn">흩뿌리기</button>
+            <button id="bakeBtn">유리로 굳히기</button>
         </div>
     </div>
 
@@ -219,7 +219,7 @@
             if (isGlass) return;
 
             isScattered = !isScattered;
-            toggleBtn.textContent = isScattered ? 'Assemble' : 'Scatter';
+            toggleBtn.textContent = isScattered ? '모으기' : '흩뿌리기';
 
             if (isScattered) {
                 for (const particle of particleArray) {
@@ -234,11 +234,11 @@
 
             if (isGlass) {
                 isScattered = false;
-                toggleBtn.textContent = 'Scatter';
-                bakeBtn.textContent = 'Restore Sand';
+                toggleBtn.textContent = '흩뿌리기';
+                bakeBtn.textContent = '모래로 되돌리기';
                 bakeBtn.classList.add('active');
             } else {
-                bakeBtn.textContent = 'Bake Glass';
+                bakeBtn.textContent = '유리로 굳히기';
                 bakeBtn.classList.remove('active');
             }
         });
