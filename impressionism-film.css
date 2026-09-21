@@ -28,6 +28,20 @@ footer{position:absolute;bottom:5%;left:5%;right:5%;z-index:4}
 .imp-next span{margin-left:28px}
 .film-ended .imp-next{color:#7a3f12;text-shadow:0 0 15px #f0c98a}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.home-link{position:absolute;top:4%;right:5%;z-index:7;display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:0 15px;border:1px solid #4a3b2c33;border-radius:999px;background:#fff8ecc9;color:#382c22;font:11px/1 Arial,'Malgun Gothic',sans-serif;letter-spacing:.06em;text-decoration:none;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);white-space:nowrap}
+.home-link:hover{background:#fff8ec}.home-link[hidden]{display:none}
+/* One-line chapter caption above the timeline; it stays while a comparison hides the masthead. */
+.footer-meta{display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin:0 0 9px;min-height:15px}
+#sceneCaption{margin:0;font:11px/1.4 Arial,'Malgun Gothic',sans-serif;letter-spacing:.02em;color:#6a5a48;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#sceneCaption b{font-weight:400;color:var(--gold);margin-right:8px}
+.showing-comparison .masthead{visibility:hidden}
+/* Colours for the shared comparison panel (concept-compare.css); this page is the light one. */
+.art-compare{--cmp-bg:linear-gradient(#fff8ecf2,#e9dcc4fa);--cmp-ink:var(--ink);--cmp-tag:#8a5f22;--cmp-credit:#6a5a48;--cmp-shadow:0 12px 32px #3a2c1e33;--cmp-hint-ink:#fff8ec;--cmp-hint-bg:#382c22d9}
+.spot-label{position:absolute;transform:translate(-50%,0);font:11.5px/1.4 'Nanum Myeongjo',Georgia,serif;letter-spacing:.02em;color:#382c22;background:#fff8ecdd;padding:3px 9px;border:1px solid #b8863f55;border-radius:3px;white-space:nowrap;opacity:0;transition:opacity .6s ease;pointer-events:none}
+.art-compare.visible .spot-label{opacity:1;transition-delay:3.5s}
+.light-strip{display:block;width:100%;height:9px;border-radius:4px;box-shadow:0 1px 3px #3a2c1e33;opacity:0;transform:scaleX(.6);transform-origin:center;transition:opacity .6s ease,transform .7s cubic-bezier(.22,.61,.36,1)}
+.art-compare.visible .light-strip{opacity:1;transform:scaleX(1);transition-delay:3.15s}
+
 @media(max-width:700px){
 .masthead{padding:18px 6% 0;max-width:calc(100% - 45px)}
 .eyebrow{font-size:8px}
@@ -41,6 +55,9 @@ footer{bottom:4%}
 .imp-next span{margin-left:12px}
 .timeline{margin-bottom:8px}
 #filmTime{font-size:9px}
+.home-link{font-size:10px;padding:0 12px;min-height:32px;gap:5px}
+.footer-meta{margin-bottom:6px}#sceneCaption{font-size:10px}
+.spot-label{display:none}
 }
 @media(max-height:550px) and (min-width:701px){
 .masthead{padding-top:12px}

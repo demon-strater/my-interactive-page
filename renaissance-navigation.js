@@ -26,6 +26,8 @@
   }, true);
   const homeButton = document.getElementById('goHome');
   if (homeButton) {
+    // Inside the hub's iframe the hub already shows its own back control at the top-left.
+    if (window.parent !== window) homeButton.hidden = true;
     homeButton.addEventListener('click', () => {
       if (window.parent !== window) window.parent.postMessage('renaissance:home', window.location.origin);
       else location.href = 'index.html';

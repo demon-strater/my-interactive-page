@@ -1,0 +1,42 @@
+/* Shared layout for the real-painting comparison panels in the concept films.
+   Structure and reveal timing live here; each page sets only the colour variables on .art-compare.
+   concept-compare.js sizes the paintings so a row fills the width or the height, whichever runs out first. */
+.art-compare{position:absolute;left:0;right:0;top:0;bottom:var(--transport-height,90px);margin:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(12px,1.8vh,18px);padding:clamp(14px,2.6vh,26px) 3%;background:var(--cmp-bg,#0b1418);opacity:0;pointer-events:none;transition:opacity .9s cubic-bezier(.22,.61,.36,1);transition-delay:.4s}
+.art-compare.visible{opacity:1;pointer-events:auto;transition-delay:0s}
+.compare-heading{margin:0;max-width:100%;text-align:center;font:400 clamp(19px,2.3vw,31px)/1.25 'Nanum Myeongjo',Georgia,serif;letter-spacing:-.005em;word-break:keep-all;color:var(--cmp-ink,#eee9db);opacity:0;transform:translateY(8px);transition:opacity .7s ease,transform .7s cubic-bezier(.22,.61,.36,1)}
+.art-compare.visible .compare-heading{opacity:1;transform:none;transition-delay:.1s}
+.compare-grid{position:relative;display:flex;justify-content:center;align-items:flex-start;gap:clamp(14px,2vw,28px);width:100%;min-height:0;opacity:0;transform:translateY(12px) scale(.98);filter:blur(6px);transition:opacity .8s ease,transform .8s cubic-bezier(.22,.61,.36,1),filter .8s ease}
+.art-compare.visible .compare-grid{opacity:1;transform:none;filter:blur(0);transition-delay:.2s}
+.compare-item{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0;flex:none}
+.img-wrap{position:relative;display:block;flex:none}
+.img-wrap img{display:block;background:var(--cmp-bg,#0b1418);box-shadow:var(--cmp-shadow,0 12px 32px #0004)}
+.compare-tag{margin:0;font:12px/1.45 Arial,'Malgun Gothic',sans-serif;letter-spacing:.03em;text-align:center;color:var(--cmp-tag,#d4b98a);opacity:0;transition:opacity .5s ease}
+.art-compare.visible .compare-tag{opacity:1;transition-delay:3s}
+.compare-credit{margin:0;font:10.5px/1.5 Arial,'Malgun Gothic',sans-serif;letter-spacing:.03em;text-align:center;color:var(--cmp-credit,#a9a696);opacity:0;transition:opacity .5s ease}
+.art-compare.visible .compare-credit{opacity:1;transition-delay:.58s}
+.compare-note{margin:0;text-align:center;font:400 clamp(14px,1.5vw,18px)/1.5 'Nanum Myeongjo',Georgia,serif;word-break:keep-all;color:var(--cmp-ink,#eee9db);opacity:0;transform:translateY(6px);transition:opacity .6s ease,transform .6s ease}
+.art-compare.visible .compare-note{opacity:1;transform:none;transition-delay:4s}
+/* Hovering the paintings holds the film; the row says so beneath itself. */
+.compare-grid::after{content:attr(data-linger);position:absolute;left:50%;top:100%;transform:translate(-50%,8px);font:11px/1.4 Arial,'Malgun Gothic',sans-serif;letter-spacing:.03em;color:var(--cmp-hint-ink,#f5ddb0);background:var(--cmp-hint-bg,#0b1418d9);padding:4px 11px;border-radius:999px;white-space:nowrap;opacity:0;transition:opacity .3s ease;pointer-events:none}
+.compare-grid:hover::after{opacity:1}
+@media(hover:none){.compare-grid::after{display:none}}
+/* Narrow screens stack the rows: painting on the left, its caption and credit beside it. */
+@media(max-width:600px){
+ .art-compare{padding:12px 4%;gap:10px}
+ .compare-heading{font-size:17px}
+ .compare-grid{flex-direction:column;align-items:stretch;gap:10px}
+ .compare-item{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:1fr auto auto auto 1fr;column-gap:12px;row-gap:4px;width:100%}
+ .compare-item .img-wrap{grid-column:1;grid-row:1/6}
+ .compare-item .compare-tag{grid-column:2;grid-row:2;text-align:left;font-size:11px}
+ .compare-item .light-strip{grid-column:2;grid-row:3}
+ .compare-item .compare-credit{grid-column:2;grid-row:4;text-align:left;font-size:9.5px}
+ /* A wide painting takes the whole row with its caption beneath (concept-compare.js adds .wide). */
+ .compare-item.wide{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto auto;justify-items:center}
+ .compare-item.wide .img-wrap{grid-column:1;grid-row:1}
+ .compare-item.wide .compare-tag{grid-column:1;grid-row:2;text-align:center}
+ .compare-item.wide .light-strip{grid-column:1;grid-row:3;width:100%}
+ .compare-item.wide .compare-credit{grid-column:1;grid-row:4;text-align:center}
+ .compare-note{font-size:13px}
+}
+@media(max-height:500px){.art-compare{padding-top:10px;padding-bottom:8px;gap:8px}.compare-heading{font-size:18px}.compare-item{gap:5px}.compare-tag{font-size:10.5px}.compare-credit{font-size:9.5px}}
+@media(prefers-reduced-motion:reduce){.art-compare,.compare-heading,.compare-grid,.compare-item,.compare-tag,.compare-credit,.compare-note{transition:none!important}}

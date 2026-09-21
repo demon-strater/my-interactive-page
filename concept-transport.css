@@ -1,0 +1,30 @@
+/* Shared compact controls keep both concept studies anchored to the bottom. */
+.film-footer{margin:0 4.5%;padding:8px 0 max(12px,env(safe-area-inset-bottom));}
+/* A one-line "where am I" caption stays visible even while a comparison hides the masthead. */
+.footer-meta{display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin:0 0 9px;min-height:15px}
+.footer-meta #sceneCaption{margin:0;font:11px/1.4 Arial,'Malgun Gothic',sans-serif;letter-spacing:.02em;color:#a4b4b3;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.footer-meta #sceneCaption b{font-weight:400;color:#d4b98a;margin-right:8px}
+.footer-meta #dragHint{margin:0;flex:none}
+.film-footer .timeline{height:1px;margin:0 0 10px;background:#d2dace38;position:relative}
+.film-footer #filmFill{height:1px;background:#d4b98a}
+.film-footer .transport{display:flex;align-items:center;gap:12px;flex-wrap:nowrap;min-height:38px}
+.film-footer .transport button{font:12px Arial,sans-serif;padding:4px;min-width:32px;min-height:36px;color:#b9c7c6}
+.film-footer .transport #playPause{width:36px;min-width:36px;height:36px;border:1px solid #d9d2bd50;border-radius:50%;font-size:15px;letter-spacing:0}
+.film-footer .transport #replay{font-size:22px}
+.film-footer #filmTime{font:10px monospace;color:#9aacad;white-space:nowrap}
+.film-footer #progress,.film-footer .study-chapters{display:flex;flex:1;justify-content:center;align-items:center;gap:18px;margin:0;max-width:none;order:0;flex-basis:auto}
+.film-footer #progress button,.film-footer .study-chapters button{font-size:10px;letter-spacing:.06em}
+.film-footer .study-chapters button.active::before{content:none}
+.film-footer .transport button.active{color:#f5ddb0}
+.film-footer .next-experience,.film-footer .rom-next{position:static;margin:0;font:12px Arial,sans-serif;white-space:nowrap;color:#ecdfc5;text-decoration:none;border:0;border-bottom:1px solid #dfc59b55;padding:9px 0}
+@media(max-width:700px){
+ .film-footer{margin:0 5%;padding-bottom:max(10px,env(safe-area-inset-bottom))}
+ .film-footer .transport{gap:5px;flex-wrap:nowrap}
+ .film-footer #progress,.film-footer .study-chapters{gap:0;justify-content:space-evenly;flex:1;order:0;margin:0}
+ .film-footer #progress button,.film-footer .study-chapters button{min-width:25px;min-height:36px;font-size:9px;padding:3px}
+ .film-footer #filmTime{display:none}
+ .footer-meta{margin-bottom:6px}.footer-meta #sceneCaption{font-size:10px}
+ .film-footer .transport #replay{min-width:26px}
+ .film-footer .next-experience,.film-footer .rom-next{font-size:10px;white-space:normal;max-width:70px;line-height:1.3;text-align:right}
+}
+@media(max-height:500px){.film-footer{padding-top:3px;padding-bottom:8px}.film-footer .timeline{margin-bottom:6px}}

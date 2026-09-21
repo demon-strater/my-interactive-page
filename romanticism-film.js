@@ -17,19 +17,20 @@
   // chapter it caps: the Rückenfigur device recurring across Friedrich's work follows "his back,
   // not his face"; the same nature read as terror (Turner) and as awe (Friedrich) follows "the
   // Sublime"; and crowded history painting versus one solitary figure sets up "no myth, no history".
-  const compareWindows=[{start:13.2,end:14,hold:4.5},{start:46.2,end:47,hold:5},{start:63.2,end:64,hold:6}];
-  let holdRemaining=null,holdAt=null;
-  function fitComparisons(){
-    document.body.style.setProperty('--transport-height',document.querySelector('.film-footer').offsetHeight+'px');
-    document.querySelectorAll('.compare-grid').forEach(grid=>{
-      const items=[...grid.querySelectorAll('.compare-item')],gw=grid.clientWidth,gh=grid.clientHeight;
-      const gap=parseFloat(getComputedStyle(grid).gap)||20;
-      const ratios=items.map(item=>{const img=item.querySelector('img');return img.naturalWidth/Math.max(1,img.naturalHeight)||1;});
-      const narrow=innerWidth<=600,three=items.length===3;
-      const common=narrow?Math.max(20,(gh-gap*(items.length-1))/items.length-(three?2:68)):Math.max(20,Math.min(gh-88,(gw-gap*(items.length-1))/ratios.reduce((a,b)=>a+b,0)));
-      items.forEach((item,i)=>{const img=item.querySelector('img'),ih=Math.min(common,gw*(narrow&&three?.45:1)/ratios[i]);img.style.width=ih*ratios[i]+'px';img.style.height=ih+'px';item.style.width=narrow?(three?'100%':Math.min(gw,Math.max(ih*ratios[i],gw*.75))+'px'):ih*ratios[i]+'px';});
-    });
-  }
+  // Holds are in the film's own units; divide by playbackRate for real seconds. Each pause is long
+  // enough to look at the paintings alone first (the captions and highlights fade in ~3s later).
+  const compareWindows=[{start:13.2,end:14,hold:14.4},{start:46.2,end:47,hold:12.6},{start:63.2,end:64,hold:12.6}];
+  const runtime=(80+compareWindows.reduce((sum,win)=>sum+win.hold,0))/playbackRate;
+  const clock=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+  let holdRemaining=null,holdAt=null,lingering=false;
+  document.querySelectorAll('.compare-grid').forEach(grid=>{
+    grid.addEventListener('mouseenter',()=>{lingering=true;});
+    grid.addEventListener('mouseleave',()=>{lingering=false;});
+  });
+  // Inside the hub's iframe the hub already shows its own back control.
+  if(window.parent!==window)$('goHome').hidden=true;
+  // Painting sizes and --transport-height come from the shared concept-compare.js.
+  const fitComparisons=()=>window.fitComparisons?.();
   let w=1,h=1,dpr=1,time=0,playing=false,last=0,raf=0,index=-1,manual=null,intro=true,drag=null;
   const dragHints=['드래그해 시점을 돌려보세요 ↔','드래그해 안개를 움직여보세요 ↔','드래그해 자연의 크기를 바꿔보세요 ↔','드래그해 빛을 바꿔보세요 ↔','드래그해 개인을 드러내보세요 ↔'];
   function chapterAt(t){return Math.min(4,bounds.findIndex((v,i)=>i<5&&t<bounds[i+1])<0?4:bounds.findIndex((v,i)=>i<5&&t<bounds[i+1]));}
@@ -39,6 +40,7 @@
       index=next;document.body.dataset.chapter=index;const c=chapters[index];
       $('sceneTitle').getAnimations().forEach(a=>a.cancel());$('sceneTitle').textContent=c.title;
       $('sceneStatus').getAnimations().forEach(a=>a.cancel());$('sceneStatus').textContent=c.description;
+      $('sceneCaption').replaceChildren(Object.assign(document.createElement('b'),{textContent:`${index+1} / ${chapters.length}`}),c.title);
       $('dragHint').textContent=dragHints[index];
       if(!reduced.matches&&playing){
         $('sceneTitle').animate([{opacity:0,transform:'translateY(12px)'},{opacity:1,transform:'translateY(0)'}],{duration:900,easing:'ease-out'});
@@ -50,7 +52,7 @@
     $('playPause').setAttribute('aria-label',playing?'애니메이션 일시정지':time>=80?'애니메이션 다시 재생':'애니메이션 재생');
     $('filmSeek').value=time;$('filmFill').style.width=(time/80*100)+'%';
     const elapsed=(time+compareWindows.reduce((sum,win)=>sum+(time>=win.end?win.hold:time>=win.start?win.hold-(holdRemaining??0):0),0))/playbackRate;
-    $('filmTime').textContent=`0:${String(Math.floor(elapsed)).padStart(2,'0')} / 0:53`;
+    $('filmTime').textContent=`${clock(elapsed)} / ${clock(runtime)}`;
     document.querySelectorAll('[data-film-chapter]').forEach((button,i)=>{button.classList.toggle('active',i===index);button.setAttribute('aria-pressed',String(i===index));});
     // Window order follows chapter order: the Rückenfigur trio lands right after "his back, not
     // his face"; the Sublime pair lands right after that chapter; the history-vs-individual pair
@@ -84,7 +86,8 @@
     if(holdRemaining!==null){
       // Autoplay freezes on the paired artworks rather than animating underneath them,
       // so the comparison never has to compete with a moving landscape for attention.
-      holdRemaining-=dt;
+      // A pointer resting on the paintings holds the countdown as well.
+      if(!lingering)holdRemaining-=dt;
       if(holdRemaining<=0){holdRemaining=null;holdAt=null;}
     }else{
       const next=Math.min(80,time+dt);
@@ -174,6 +177,5 @@
   document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf);raf=0;last=0;}else start();});
   reduced.addEventListener('change',()=>{playing=false;update();draw();});
   function resize(){w=innerWidth;h=innerHeight;dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);$('paintingIntro').style.top=`${document.querySelector('.masthead').getBoundingClientRect().bottom+18}px`;fitComparisons();draw();}
-  document.querySelectorAll('.compare-item img').forEach(img=>img.addEventListener('load',fitComparisons));
   addEventListener('resize',resize);document.fonts.ready.then(resize);update();resize();start();
 })();

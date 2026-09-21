@@ -13,10 +13,17 @@
   // Windows sit right at a chapter boundary (M.chapter switches at 8/18/30/40) so the artworks land only
   // once a whole chapter has finished narrating, never mid-chapter. The last entry holds on the finished
   // artwork before looping back to the start, so the piece runs on its own with no player chrome at all.
-  // Window 2 holds longest: the three artworks show plain first with a clear pause, then each gets its
-  // own vanishing point and construction lines revealed on top well after, so that needs extra time.
-  const compareWindows=[{start:17.5,end:18,hold:4500},{start:39.5,end:40,hold:9500},{start:50,end:0,hold:5000,loop:true}];
-  let holdRemaining=null,holdAt=null;
+  // Every window gives the paintings a few seconds on their own before the captions, construction
+  // lines and vanishing points fade in on top (see the transition delays in renaissance.css), so the
+  // hold has to cover looking first and reading after. The last entry pauses on the finished School of
+  // Athens for the same reason, before its guides draw in. updateUI indexes windows 0 and 1 by
+  // position, so new windows are appended rather than inserted.
+  const compareWindows=[{start:17.5,end:18,hold:7500},{start:39.5,end:40,hold:10000},{start:50,end:0,hold:5000,loop:true},{start:47.6,end:47.6,hold:2600}];
+  let holdRemaining=null,holdAt=null,lingering=false;
+  document.querySelectorAll('.compare-grid').forEach(grid=>{
+    grid.addEventListener('mouseenter',()=>{lingering=true;});
+    grid.addEventListener('mouseleave',()=>{lingering=false;});
+  });
   let width=1,height=1,time=reduced.matches?7:0,playing=!reduced.matches,last=0,raf=0,currentChapter=-1;
   let manual={},drag=null,targets={},view=null,artReady=false,artFailed=false,showArtLines=true;
   const artwork=new Image();
@@ -222,6 +229,7 @@
     const c=M.chapter(time);
     if(c!==currentChapter){
       currentChapter=c;$('sceneTitle').textContent=titles[c];$('sceneStatus').textContent=titles[c]+' '+hints[c];
+      $('sceneCaption').replaceChildren(Object.assign(document.createElement('b'),{textContent:`${c+1} / ${titles.length}`}),titles[c]);
       $('artSource').hidden=c!==4;
     }
     $('playPause').textContent=playing?'Ⅱ':'▷';
@@ -240,8 +248,9 @@
       const dt=last?Math.min(now-last,100):0;
       if(holdRemaining!==null){
         // The scene stays frozen (on an example artwork, or the finished painting at the very end); autoplay
-        // only resumes once it's had its moment, then hands back — or loops back to the start.
-        holdRemaining-=dt;
+        // only resumes once it's had its moment, then hands back — or loops back to the start. While the
+        // pointer rests on the paintings the countdown waits too, so a viewer can look as long as they like.
+        if(!lingering)holdRemaining-=dt;
         if(holdRemaining<=0){time=holdAt.end;if(holdAt.loop){manual={};currentChapter=-1;}holdRemaining=null;holdAt=null;}
       }else{
         const prev=time,next=Math.min(50,time+dt/1000*SPEED);
