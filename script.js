@@ -118,6 +118,15 @@ document.addEventListener('DOMContentLoaded', () => {
         { hour: 5, title: 'ROMANTICISM', meta: 'c. 1798-1850', status: 'Available', site: 'romanticism', top: '#6b7f99', bottom: '#07101c' }
     ];
 
+    // The work each movement was explaining, shown full-screen on the way back to the hub.
+    // `crop` (fractions of the source image) cuts a single painting out of a larger photograph.
+    const finaleArtworks = {
+        renaissance: { movement: '르네상스', title: '아테네 학당', meta: '라파엘로 산치오 · 1509–1511', src: '아테네 학당.jpg' },
+        impressionism: { movement: '초현실주의', title: '빛의 제국', meta: '르네 마그리트 · 1956', src: '초현실1.png', crop: { x: 0.356, y: 0.071, w: 0.293, h: 0.729 } },
+        'impressionism-time': { movement: '인상주의', title: '루앙 대성당', meta: '클로드 모네 · 1894', src: '1.png' },
+        romanticism: { movement: '낭만주의', title: '안개 바다 위의 방랑자', meta: '카스파르 다비드 프리드리히 · 1818', src: '낭만주의.png' }
+    };
+
     function activeKey() {
         return isNight ? 'night' : 'morning';
     }
@@ -773,6 +782,8 @@ document.addEventListener('DOMContentLoaded', () => {
         body.classList.remove('measuring');
         body.classList.remove('view-impressionism', 'view-particle', 'view-schema-architecture', 'view-fluid-collision', 'view-renaissance', 'view-baroque', 'view-romanticism', 'view-impressionism-time');
         body.classList.add('view-interaction', `view-${interaction.site}`);
+        openSite = interaction.site;
+        finaleShown = false;
 
         if (interaction.site === 'impressionism') {
             isNight = false;
@@ -944,7 +955,67 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    const artFinale = document.getElementById('artFinale');
+    const finaleArt = document.getElementById('finaleArt');
+    let openSite = null, finaleShown = false;
+
+    function showFinale(site) {
+        const art = finaleArtworks[site];
+        if (!art || !artFinale) return false;
+        pauseAllMusic();
+        const image = new Image();
+        image.src = art.src;
+        const apply = () => {
+            const sw = image.naturalWidth || 1000, sh = image.naturalHeight || 1000;
+            const crop = art.crop;
+            const ratio = crop ? (sw * crop.w) / (sh * crop.h) : sw / sh;
+            // Leave room for the caption and the button below the painting.
+            finaleArt.style.aspectRatio = String(ratio);
+            finaleArt.style.width = `min(96vw, ${ratio * 66}vh)`;
+            finaleArt.style.backgroundImage = `url('${encodeURI(art.src)}')`;
+            if (crop) {
+                finaleArt.style.backgroundSize = `${100 / crop.w}% ${100 / crop.h}%`;
+                finaleArt.style.backgroundPosition = `${crop.x / (1 - crop.w) * 100}% ${crop.y / (1 - crop.h) * 100}%`;
+            } else {
+                finaleArt.style.backgroundSize = 'contain';
+                finaleArt.style.backgroundPosition = 'center';
+            }
+        };
+        if (image.complete && image.naturalWidth) apply(); else image.onload = apply;
+        finaleArt.setAttribute('aria-label', `${art.title} · ${art.meta}`);
+        document.getElementById('finaleMovement').textContent = art.movement;
+        document.getElementById('finaleTitle').textContent = art.title;
+        document.getElementById('finaleMeta').textContent = art.meta;
+        artFinale.hidden = false;
+        body.classList.add('showing-finale');
+        requestAnimationFrame(() => artFinale.classList.add('visible'));
+        document.getElementById('finaleHome').focus({ preventScroll: true });
+        finaleShown = true;
+        return true;
+    }
+    function hideFinale() {
+        if (!artFinale || artFinale.hidden) return;
+        artFinale.classList.remove('visible');
+        artFinale.hidden = true;
+        body.classList.remove('showing-finale');
+    }
+
+    // Leaving a movement lands on its representative work first; the next request actually exits.
+    function leaveInteraction() {
+        if (!finaleShown && showFinale(openSite)) return;
+        hideFinale();
+        closeInteraction();
+    }
+
+    document.getElementById('finaleHome')?.addEventListener('click', () => { hideFinale(); closeInteraction(); });
+    addEventListener('keydown', event => {
+        if (event.key === 'Escape' && artFinale && !artFinale.hidden) { hideFinale(); closeInteraction(); }
+    });
+
     function closeInteraction() {
+        hideFinale();
+        openSite = null;
+        finaleShown = false;
         pauseAllMusic();
         renaissanceFrame?.contentWindow?.postMessage('renaissance:leave', window.location.origin);
         body.classList.remove('view-interaction', 'view-impressionism', 'view-particle', 'view-schema-architecture', 'view-fluid-collision', 'view-renaissance', 'view-baroque', 'view-romanticism', 'view-impressionism-time', 'night-background');
@@ -1032,7 +1103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateScenes();
     }
 
-    backToShelf.addEventListener('click', closeInteraction);
+    backToShelf.addEventListener('click', leaveInteraction);
 
     goVanishingPoint?.addEventListener('click', () => {
         // Setting the iframe's own src is a plain same-document DOM write, so it always works even
@@ -1042,7 +1113,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('message', event => {
         if (event.origin !== window.location.origin || event.source !== renaissanceFrame?.contentWindow) return;
-        if (event.data === 'renaissance:home') closeInteraction();
+        if (event.data === 'renaissance:home') leaveInteraction();
     });
 
     timelineRail.addEventListener('wheel', event => {
@@ -1129,11 +1200,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     window.addEventListener('handhome', () => {
-        if (!body.classList.contains('view-hub')) closeInteraction();
+        if (!body.classList.contains('view-hub')) leaveInteraction();
     });
 
     window.addEventListener('handback', () => {
-        if (!body.classList.contains('view-hub')) closeInteraction();
+        if (!body.classList.contains('view-hub')) leaveInteraction();
     });
 
     let handPointerTarget = null;
