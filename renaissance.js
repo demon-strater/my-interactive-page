@@ -5,7 +5,7 @@
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const SPEED=1.4;
   const compareOne=$('compareOne'),compareTwo=$('compareTwo');
-  const titles=['그림과 공간의 착시에 대하여','원근법의 원리에 대하여','거리와 크기의 관계에 대하여','눈높이와 소실점에 대하여','명화 속 원근법에 대하여'];
+  const titles=['평평한 그림 속에 깊이를 만드는 착시','원근법: 모든 선은 한 점으로 모인다','멀리 있을수록 작게 그린다','보는 사람의 눈높이가 소실점을 정한다','《아테네 학당》 속에 숨은 원근법'];
   const hints=['화면을 옆으로 돌려 두께를 확인해 보세요','눈에서 뻗어나가는 빛의 선을 따라가 보세요','청록색 기둥을 앞뒤로 드래그해 보세요','눈의 높이를 위아래로 움직여 보세요','선을 따라 그림 속으로 들어가 보세요'];
   const gold='#e4bc78',cyan='#8edfd6',ink='#f4e9d5';
   // Autoplay freezes the scene at each window's start and holds it for the given real-world duration
@@ -227,6 +227,8 @@
   }
   function updateUI(){
     const c=M.chapter(time);
+    document.body.dataset.chapter=c;
+    document.body.classList.toggle('film-playing',playing);
     if(c!==currentChapter){
       currentChapter=c;$('sceneTitle').textContent=titles[c];$('sceneStatus').textContent=titles[c]+' '+hints[c];
       $('sceneCaption').replaceChildren(Object.assign(document.createElement('b'),{textContent:`${c+1} / ${titles.length}`}),titles[c]);

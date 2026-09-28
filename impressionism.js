@@ -60,7 +60,7 @@
   gallery.addEventListener('pointerup',endDrag);gallery.addEventListener('pointercancel',endDrag);
   gallery.addEventListener('lostpointercapture',()=>{if(drag)setPage(page);});
   gallery.addEventListener('keydown',e=>{if(e.target.closest('input'))return;if(e.key==='ArrowRight'){setPage(1);hammer.focus();}if(e.key==='ArrowLeft'){setPage(0);document.getElementById('nextPage').focus();}});
-  function syncButtons(){play.textContent=playing?'Pause II':'Play';play.setAttribute('aria-label',playing?'Pause daylight':'Play daylight');pause.textContent=fragmentPlaying?'Pause II':'Play';pause.setAttribute('aria-pressed',String(!fragmentPlaying));}
+  function syncButtons(){play.textContent=playing?'일시정지 II':'재생';play.setAttribute('aria-label',playing?'빛의 흐름 일시정지':'빛의 흐름 재생');pause.textContent=fragmentPlaying?'일시정지 II':'재생';pause.setAttribute('aria-pressed',String(!fragmentPlaying));}
   play.addEventListener('click',()=>{playing=!playing;syncButtons();start();});
   pause.addEventListener('click',()=>{fragmentPlaying=!fragmentPlaying;syncButtons();start();});
   scrubber.addEventListener('input',()=>{time=Number(scrubber.value)%7;playing=false;syncButtons();draw();});
@@ -185,7 +185,7 @@
     updateTone();
     if(!page){blend(wholeCtx,time);scrubber.value=String(time);document.getElementById('wholeTime').textContent=clock(time);return;}
     const w=fragment.width,h=fragment.height;
-    if(!shards.length){blend(ctx,time);document.getElementById('fragmentTime').textContent='One light';return;}
+    if(!shards.length){blend(ctx,time);document.getElementById('fragmentTime').textContent='하나의 빛';return;}
     ctx.fillStyle='#3c3840';ctx.fillRect(0,0,w,h);
     const reveal=reduced.matches?1:smooth(clamp(fractureAge/1.1,0,1));
     for(const shard of shards){
@@ -233,8 +233,9 @@
   document.addEventListener('visibilitychange',start);
   async function init(){
     images=await Promise.all(['2.png','1.png','3.png','4.png','5.png','6.png','7.png'].map(async src=>{const img=new Image();img.src=src;await img.decode();return img;}));
-    avgColors=images.map(averageColor);
+    // Opened from file://, the canvas is tainted and getImageData throws; the wall tone is optional, the paintings are not.
+    try{avgColors=images.map(averageColor);}catch(e){avgColors=[];console.warn(e);}
     ready=true;resize();syncButtons();document.getElementById('imageStatus').textContent='';setPage(0);start();
   }
-  init().catch(e=>{document.getElementById('imageStatus').textContent='Images unavailable — reload to retry';console.error(e);});
+  init().catch(e=>{document.getElementById('imageStatus').textContent='이미지를 불러오지 못했습니다 — 새로고침해 주세요';console.error(e);});
 })();

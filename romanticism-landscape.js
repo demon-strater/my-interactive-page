@@ -13,9 +13,7 @@ function elevation(x,z){
 }
 const NX=68,NZ=44,grid=[];
 for(let j=0;j<=NZ;j++){const row=[];for(let i=0;i<=NX;i++){const x=-7+i*14/NX,z=-4+j*10/NZ;row.push({x,z,y:elevation(x,z)});}grid.push(row);}
-const terrain=window.createRomanticTerrain?.(elevation);
-const art=new Image();art.src='romanticism-wanderer.jpg';art.addEventListener('load',()=>window.dispatchEvent(new Event('romantic-art-ready')));
-function line(c,pts,color,width=1){c.beginPath();pts.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.strokeStyle=color;c.lineWidth=width;c.stroke();}
+const terrain=window.createRomanticTerrain?.(elevation);function line(c,pts,color,width=1){c.beginPath();pts.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.strokeStyle=color;c.lineWidth=width;c.stroke();}
 function poly(c,pts,color,seam=false){c.beginPath();pts.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(seam){c.strokeStyle=color;c.lineWidth=.65;c.stroke();}}
 function text(c,s,x,y,size=10,color=gold,align='left'){c.font=size+'px Arial, sans-serif';c.textAlign=align;c.fillStyle=color;c.fillText(s,x,y);}
 function wrappedText(c,value,x,y,width,size,color){
@@ -110,7 +108,6 @@ function render(c,w,h,time,index,amount,settings={}){
  }else if(index===2){c.save();for(let j=0;j<22;j++){const pts=[];for(let k=0;k<48;k++){const x=-6.3+k*.268,z=1.2+j*.18,y=2+Math.sin(x*.38+j*.07-t*.13)*(.6+p)+j*.055;pts.push(project(x,y,z));}c.setLineDash([30+j*2,90]);c.lineDashOffset=-t*(12+j*.4);line(c,pts,'rgba(213,195,157,'+(.06+p*.12)+')',.7);}c.restore();callout(c,head,leftX,leftY,'인간의 크기','작고 연약하지만, 여전히 바라본다.');callout(c,project(2,3.2*vast,3),rightX,rightY,'숭고','압도하는 것 앞의 경이로움.');
  }else if(index===3){callout(c,project(2,2,3),rightX,rightY,'같은 풍경','빛이 감정의 의미를 바꾼다.');callout(c,head,leftX,leftY,'내면',p<.5?'불확실함과 거리감.':'고요함과 가능성.');
  }else{callout(c,head,leftX,leftY,'개인','한 사람의 경험이 그림의 주제가 된다.');callout(c,project(2,2.8,3),rightX,rightY,'감정이 된 자연','바깥의 세계, 안의 반응.');}
- if(index===4&&p>.78&&art.complete&&art.naturalWidth){c.save();c.globalAlpha=ease((p-.78)/.22);c.fillStyle='#0b1418';c.fillRect(0,area.top,w,area.bottom-area.top);const ah=Math.min(area.bottom-area.top-40,w*.83*art.naturalHeight/art.naturalWidth),aw=ah*art.naturalWidth/art.naturalHeight,ax=(w-aw)/2,ay=area.top;c.drawImage(art,ax,ay,aw,ah);text(c,'카스파르 다비드 프리드리히 · 1818',w/2,ay+ah+27,13,gold,'center');c.restore();}
 }
 window.drawRomanticWorld=render;
 })();

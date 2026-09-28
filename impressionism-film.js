@@ -4,11 +4,11 @@
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const bounds = [0, 11, 23, 34, 45, 56];
   const chapters = [
-    { title: '형태 이전의 색채, 붓점에 대하여', description: '화면을 채우는 것은 벽돌이나 창문이 아니라 색을 찍은 붓점이다. 인상주의는 형태보다 빛의 색을 먼저 그린다.' },
-    { title: '눈이 만들어내는 형태에 대하여', description: '같은 붓점들이지만, 한 발 물러서는 순간 루앙 대성당의 파사드가 나타난다. 우리의 눈이 색을 형태로 조합한다.' },
-    { title: '빛에 따라 달라지는 색에 대하여', description: '돌은 그대로지만, 빛의 색은 새벽에서 정오, 황혼으로 바뀐다. 모네는 같은 대성당을 서른 번 넘게 그렸다.' },
-    { title: '멈추지 않는 그림자에 대하여', description: '구름의 그림자가 파사드를 스쳐 지나간다. 빛은 하루의 흐름뿐 아니라 한순간 안에서도 계속 변한다.' },
-    { title: '다시 오지 않을 이 순간에 대하여', description: '새 한 마리가 지나가고, 빛이 한순간 깜빡인다. 인상주의가 담는 것은 영원한 형태가 아니라 다시 오지 않을 이 순간이다.' }
+    { title: '가까이서 보면, 형태가 아닌 색의 점들', description: '화면을 채우는 것은 벽돌이나 창문이 아니라 색을 찍은 붓점이다. 인상주의는 형태보다 빛의 색을 먼저 그린다.' },
+    { title: '물러서면, 눈이 색점을 성당으로 합친다', description: '같은 붓점들이지만, 한 발 물러서는 순간 루앙 대성당의 파사드가 나타난다. 우리의 눈이 색을 형태로 조합한다.' },
+    { title: '같은 성당도 시간마다 색이 다르다', description: '돌은 그대로지만, 빛의 색은 새벽에서 정오, 황혼으로 바뀐다. 모네는 같은 대성당을 서른 번 넘게 그렸다.' },
+    { title: '빛은 한순간에도 계속 변한다', description: '구름의 그림자가 파사드를 스쳐 지나간다. 빛은 하루의 흐름뿐 아니라 한순간 안에서도 계속 변한다.' },
+    { title: '인상주의는 지나가는 한순간을 그린다', description: '새 한 마리가 지나가고, 빛이 한순간 깜빡인다. 인상주의가 담는 것은 영원한 형태가 아니라 다시 오지 않을 이 순간이다.' }
   ];
   const TOTAL = bounds[bounds.length - 1];
   // The film freezes on Monet's real cathedral series right as the "light changes the color" chapter

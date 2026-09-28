@@ -118,15 +118,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { hour: 5, title: 'ROMANTICISM', meta: 'c. 1798-1850', status: 'Available', site: 'romanticism', top: '#6b7f99', bottom: '#07101c' }
     ];
 
-    // The work each movement was explaining, shown full-screen on the way back to the hub.
-    // `crop` (fractions of the source image) cuts a single painting out of a larger photograph.
-    const finaleArtworks = {
-        renaissance: { movement: '르네상스', title: '아테네 학당', meta: '라파엘로 산치오 · 1509–1511', src: '아테네 학당.jpg' },
-        impressionism: { movement: '초현실주의', title: '빛의 제국', meta: '르네 마그리트 · 1956', src: '초현실1.png', crop: { x: 0.356, y: 0.071, w: 0.293, h: 0.729 } },
-        'impressionism-time': { movement: '인상주의', title: '루앙 대성당', meta: '클로드 모네 · 1894', src: '1.png' },
-        romanticism: { movement: '낭만주의', title: '안개 바다 위의 방랑자', meta: '카스파르 다비드 프리드리히 · 1818', src: '낭만주의.png' }
-    };
-
     function activeKey() {
         return isNight ? 'night' : 'morning';
     }
@@ -182,6 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playSound(audio, label) {
+        if (window.ArtAudio && !window.ArtAudio.enabled) return;
         audio.currentTime = 0;
         audio.play().catch(error => console.error(`${label} play failed:`, error));
     }
@@ -832,7 +824,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSiteTransition(interaction);
 
         // Pre-load iframes immediately
-        if (interaction.site === 'impressionism-time' && impressionismTimeFrame && !impressionismTimeFrame.src) {
+        if (interaction.site === 'impressionism-time' && impressionismTimeFrame && (!impressionismTimeFrame.src || impressionismTimeFrame.src.includes('-finale.html'))) {
             impressionismTimeFrame.src = impressionismTimeFrame.dataset.src || 'impressionism.html';
         }
 
@@ -950,66 +942,47 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (!impressionismTimeFrame.src) {
+        // A frame last left on the closing artwork page starts over from the study itself.
+        if (!impressionismTimeFrame.src || impressionismTimeFrame.src.includes('-finale.html')) {
             impressionismTimeFrame.src = impressionismTimeFrame.dataset.src || 'impressionism.html';
         }
     }
 
-    const artFinale = document.getElementById('artFinale');
-    const finaleArt = document.getElementById('finaleArt');
+    const surrealFinaleFrame = document.querySelector('.surreal-finale-frame');
     let openSite = null, finaleShown = false;
 
+    // Every movement ends on its representative work, drawn in the movement's own page layout.
+    // Iframe movements load it in place; Surrealism lives in the hub, so it gets a frame of its own.
+    const finaleFrames = {
+        renaissance: [renaissanceFrame, 'renaissance-finale.html?v=3'],
+        impressionism: [surrealFinaleFrame, 'surrealism-finale.html?v=1'],
+        romanticism: [romanticismFrame, 'romanticism-finale.html?v=3'],
+        'impressionism-time': [impressionismTimeFrame, 'impressionism-finale.html?v=3']
+    };
+
     function showFinale(site) {
-        const art = finaleArtworks[site];
-        if (!art || !artFinale) return false;
+        const [frame, finalePage] = finaleFrames[site] || [];
+        if (!frame) return false;
         pauseAllMusic();
-        const image = new Image();
-        image.src = art.src;
-        const apply = () => {
-            const sw = image.naturalWidth || 1000, sh = image.naturalHeight || 1000;
-            const crop = art.crop;
-            const ratio = crop ? (sw * crop.w) / (sh * crop.h) : sw / sh;
-            // Leave room for the caption and the button below the painting.
-            finaleArt.style.aspectRatio = String(ratio);
-            finaleArt.style.width = `min(96vw, ${ratio * 62}vh)`;
-            finaleArt.style.backgroundImage = `url('${encodeURI(art.src)}')`;
-            if (crop) {
-                finaleArt.style.backgroundSize = `${100 / crop.w}% ${100 / crop.h}%`;
-                finaleArt.style.backgroundPosition = `${crop.x / (1 - crop.w) * 100}% ${crop.y / (1 - crop.h) * 100}%`;
-            } else {
-                finaleArt.style.backgroundSize = 'contain';
-                finaleArt.style.backgroundPosition = 'center';
-            }
-        };
-        if (image.complete && image.naturalWidth) apply(); else image.onload = apply;
-        finaleArt.setAttribute('aria-label', `${art.title} · ${art.meta}`);
-        document.getElementById('finaleMovement').textContent = art.movement;
-        document.getElementById('finaleTitle').textContent = art.title;
-        document.getElementById('finaleMeta').textContent = art.meta;
-        artFinale.hidden = false;
-        body.classList.add('showing-finale');
-        requestAnimationFrame(() => artFinale.classList.add('visible'));
-        document.getElementById('finaleHome').focus({ preventScroll: true });
+        frame.src = finalePage;
+        frame.hidden = false;
+        body.classList.add('showing-concept-finale');
         finaleShown = true;
         return true;
     }
     function hideFinale() {
-        if (!artFinale || artFinale.hidden) return;
-        artFinale.classList.remove('visible');
-        artFinale.hidden = true;
-        body.classList.remove('showing-finale');
+        body.classList.remove('showing-concept-finale');
+        if (surrealFinaleFrame) surrealFinaleFrame.hidden = true;
     }
 
     // Leaving a movement lands on its representative work first; the next request actually exits.
     function leaveInteraction() {
         if (!finaleShown && showFinale(openSite)) return;
-        hideFinale();
         closeInteraction();
     }
 
-    document.getElementById('finaleHome')?.addEventListener('click', () => { hideFinale(); closeInteraction(); });
     addEventListener('keydown', event => {
-        if (event.key === 'Escape' && artFinale && !artFinale.hidden) { hideFinale(); closeInteraction(); }
+        if (event.key === 'Escape' && finaleShown) closeInteraction();
     });
 
     function closeInteraction() {
@@ -1035,7 +1008,7 @@ document.addEventListener('DOMContentLoaded', () => {
         inactive.currentTime = 0;
         stopProgressLoop();
 
-        if (isMusicPlaying) {
+        if (isMusicPlaying && (!window.ArtAudio || window.ArtAudio.enabled) && !document.hidden) {
             current.play().catch(error => console.error('Music play failed:', error));
             playPauseBtn.innerHTML = '&#10073;&#10073;';
             playPauseBtn.setAttribute('aria-label', 'Pause');
@@ -1047,6 +1020,9 @@ document.addEventListener('DOMContentLoaded', () => {
             updateProgress();
         }
     }
+
+    window.addEventListener('art-audio-change', managePlayback);
+    document.addEventListener('visibilitychange', managePlayback);
 
     function updateTrackUI() {
         const current = activeTrack();
@@ -1112,8 +1088,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     window.addEventListener('message', event => {
-        if (event.origin !== window.location.origin || event.source !== renaissanceFrame?.contentWindow) return;
-        if (event.data === 'renaissance:home') leaveInteraction();
+        if (event.origin !== window.location.origin) return;
+        if (event.data === 'renaissance:home' && event.source === renaissanceFrame?.contentWindow) leaveInteraction();
     });
 
     timelineRail.addEventListener('wheel', event => {

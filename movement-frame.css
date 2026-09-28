@@ -1,0 +1,20 @@
+/* Movement frame — the one layout every movement page shares (concept film, interaction, closing work).
+   Loaded last on each page, so the masthead sits in the same place with the same type sizes everywhere;
+   each page keeps its own background, colours and content as the variation.
+   .mf-head      eyebrow + heading block, top-left
+   .mf-flow      a masthead that takes part in its page's grid flow instead of floating
+   .mf-narrow    a masthead that must stay left of a centred painting */
+:root{--mf-top:clamp(22px,5.5vh,48px);--mf-side:5%;--mf-title:clamp(26px,2.9vw,40px)}
+body .mf-head{position:absolute;left:var(--mf-side);top:var(--mf-top);right:auto;bottom:auto;width:auto;max-width:calc(100% - 2 * var(--mf-side) - 110px);margin:0;padding:0;z-index:4;text-align:left;word-break:keep-all;pointer-events:none}
+body .mf-head.mf-flow{position:relative;left:auto;top:auto;max-width:none;padding:var(--mf-top) calc(var(--mf-side) + 110px) 0 var(--mf-side)}
+body .mf-head.mf-narrow{max-width:24%}
+body .mf-eyebrow{display:block;margin:0;font:10px/1.6 Arial,'Malgun Gothic',sans-serif;letter-spacing:.2em}
+body .mf-title{margin:10px 0 0;font:400 var(--mf-title)/1.2 'Nanum Myeongjo',Georgia,serif;font-style:normal;letter-spacing:-.005em}
+body .mf-sub{margin:10px 0 0;max-width:40em;font:14px/1.6 Arial,'Malgun Gothic',sans-serif;letter-spacing:.01em}
+@media(max-width:700px){
+ :root{--mf-top:18px;--mf-title:24px}
+ body .mf-head,body .mf-head.mf-narrow{max-width:calc(100% - 2 * var(--mf-side) - 110px)}
+ body .mf-eyebrow{font-size:9px}
+ body .mf-sub{font-size:13px}
+}
+@media(max-height:500px) and (min-width:701px){:root{--mf-top:14px;--mf-title:24px}}

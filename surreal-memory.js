@@ -5,29 +5,29 @@
   const room = host.querySelector('.surreal-room');
   const scene = document.createElement('section');
   scene.className = 'memory-scene';
-  scene.setAttribute('aria-label', 'A Surrealist card game that combines a body split into three parts to create a strange new being');
+  scene.setAttribute('aria-label', '세 부분으로 나뉜 몸을 이어 낯선 존재를 만드는 초현실주의 카드 놀이');
   scene.innerHTML = `<canvas aria-hidden="true"></canvas>
     <div class="corpse-hit" id="corpseHit">
       <button class="corpse-band" data-band="0" type="button"></button>
       <button class="corpse-band" data-band="1" type="button"></button>
       <button class="corpse-band" data-band="2" type="button"></button>
     </div>
-    <div class="memory-title"><span>THE SURREALISTS / CADAVRE EXQUIS, 1925</span><h2>Exquisite<br>Corpse.</h2></div>
+    <div class="memory-title mf-head mf-narrow"><span class="mf-eyebrow">초현실주의 / 02</span><h2 class="mf-title">세 조각을 이어<br>낯선 몸을 만드세요.</h2><p class="mf-sub">초현실주의자들은 서로 보지 않고 몸을 나눠 그리는 놀이 ‘우아한 시체’(1925)로 우연이 만든 이미지를 찾았습니다.</p></div>
     <p class="corpse-caption" id="corpseCaption" aria-live="polite"></p>
-    <button class="chance-meeting" id="chanceMeeting" type="button" aria-label="Pull the lever down, or press it, for a random combination">
+    <button class="chance-meeting" id="chanceMeeting" type="button" aria-label="레버를 아래로 당기거나 눌러 무작위로 조합하기">
       <span class="lever-track" aria-hidden="true"></span><span class="lever-base" aria-hidden="true"></span>
       <span class="lever-stem" aria-hidden="true"></span><span class="lever-knob" aria-hidden="true"></span>
-      <span class="lever-label" aria-hidden="true">PULL <span>↓</span></span>
+      <span class="lever-label" aria-hidden="true">당기기 <span>↓</span></span>
     </button>
-    <nav class="memory-nav" aria-label="Combination card controls"><button type="button" data-back>&larr; Back</button><span>02 / EXQUISITE CORPSE</span></nav>`;
+    <nav class="memory-nav" aria-label="조합 카드 조작"><button type="button" data-back>&larr; 뒤로</button><span>초현실주의 · 02 / 우아한 시체</span></nav>`;
   const enter = document.createElement('button');
   enter.type = 'button'; enter.className = 'memory-enter';
-  enter.textContent = 'Next Dream';
+  enter.textContent = '우아한 시체 놀이 →';
   host.append(scene, enter);
   const musicToggle = document.createElement('button');
   musicToggle.type = 'button';
   musicToggle.className = 'room-clock-music';
-  musicToggle.setAttribute('aria-label', 'Play music');
+  musicToggle.setAttribute('aria-label', '음악 재생');
   musicToggle.setAttribute('aria-pressed', 'false');
   room.append(musicToggle);
   const playerButton = document.getElementById('playPauseBtn');
@@ -35,7 +35,7 @@
   function syncMusicToggle() {
     const playing = playerButton.getAttribute('aria-label') === 'Pause';
     musicToggle.setAttribute('aria-pressed', String(playing));
-    musicToggle.setAttribute('aria-label', playing ? 'Pause music' : 'Play music');
+    musicToggle.setAttribute('aria-label', playing ? '음악 일시정지' : '음악 재생');
   }
   new MutationObserver(syncMusicToggle).observe(playerButton, { attributes: true, attributeFilter: ['aria-label'] });
   syncMusicToggle();
@@ -133,9 +133,9 @@
 
   // --- The three folds: each a bank of six unrelated parts, chosen blind of one another. ---
   const NAMES = [
-    ['Melting Clock', 'Open Birdcage', 'Butterfly Eye', 'Apple for a Face', 'Candle Flame', 'Crescent Moon'],
-    ['Chest of Drawers', "Grandfather's Clock", 'Caged Ribs', 'Upright Piano', 'Thundercloud', 'Hollow Tree'],
-    ['Flamingo Legs', 'Pendulum Legs', "Barber's Pole", 'Tangled Roots', 'Riding a Cloud', 'Umbrella Ribs']
+    ['녹아내리는 시계', '열린 새장', '나비 눈', '사과 얼굴', '촛불', '초승달'],
+    ['서랍장', '괘종시계', '새장 갈비뼈', '업라이트 피아노', '먹구름', '속 빈 나무'],
+    ['플라밍고 다리', '진자 다리', '이발소 기둥', '엉킨 뿌리', '구름 타기', '우산살']
   ];
   const INK = '#2a1f14', PAPER_FILL = '#f4ead0', GOLD = '#a97c3f';
   const px = (b, f) => b.x + f * b.w, py = (b, f) => b.y + f * b.h;
@@ -443,6 +443,7 @@
   let audioCtx = null;
   function playFlip() {
     try {
+      if (window.ArtAudio && !window.ArtAudio.enabled) return;
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const now = audioCtx.currentTime;
@@ -481,8 +482,8 @@
     }
   }
   function updateBandLabels() {
-    const zh = ['Head', 'Torso', 'Legs'];
-    bandButtons.forEach((btn, i) => btn.setAttribute('aria-label', `Change the ${zh[i].toLowerCase()} — now ${NAMES[i][bandIndex[i]]}`));
+    const parts = ['머리', '몸통', '다리'];
+    bandButtons.forEach((btn, i) => btn.setAttribute('aria-label', `${parts[i]} 바꾸기 — 지금은 ${NAMES[i][bandIndex[i]]}`));
   }
   bandButtons.forEach(btn => btn.addEventListener('click', () => {
     if (rolling) return;
@@ -530,13 +531,14 @@
     roll();
   });
   // The exquisite corpse's own namesake trick: three unrelated fragments, none seeing the others.
-  const ADJ = ['velvet', 'glass', 'forgotten', 'insomniac', 'porcelain', 'weightless', 'thunderous', 'tender', 'unfinished', 'borrowed', 'astonished', 'salt-white'];
-  const NOUN = ['hour', 'key', 'moth', 'mirror', 'garden', 'telephone', 'ocean', 'ash', 'staircase', 'violin', 'appetite', 'silence'];
-  const VERB = ['wears', 'devours', 'dreams of', 'forgets', 'waters', 'folds into', 'swallows', 'becomes', 'collects', 'misplaces', 'interrupts', 'rehearses'];
-  const OBJ = ['a cloud of keys', 'the last umbrella', 'a burning violin', 'its own shadow', 'a drawer of eyes', "tomorrow's weather", 'a second moon', 'the sound of drawers', 'a folded ocean', "someone else's name", 'a very small storm', 'the wrong century'];
+  // Each word carries its own particle, so any pick reads as a Korean sentence.
+  const ADJ = ['벨벳 같은', '유리로 된', '잊힌', '잠 못 드는', '도자기로 된', '무게 없는', '천둥 같은', '다정한', '미완성의', '빌려 온', '깜짝 놀란', '소금처럼 흰'];
+  const NOUN = ['시간이', '열쇠가', '나방이', '거울이', '정원이', '전화기가', '바다가', '재가', '계단이', '바이올린이', '식욕이', '침묵이'];
+  const VERB = ['입는다', '삼킨다', '꿈꾼다', '잊는다', '접는다', '껴안는다', '집어삼킨다', '모은다', '잃어버린다', '가로막는다', '연습한다', '기억한다'];
+  const OBJ = ['열쇠 구름을', '마지막 우산을', '불타는 바이올린을', '자기 그림자를', '눈이 든 서랍을', '내일의 날씨를', '두 번째 달을', '서랍 여닫는 소리를', '접힌 바다를', '남의 이름을', '아주 작은 폭풍을', '엉뚱한 세기를'];
   function regenerateCaption() {
     const pick = arr => arr[Math.floor(Math.random() * arr.length)];
-    captionEl.textContent = `The ${pick(ADJ)} ${pick(NOUN)} ${pick(VERB)} ${pick(OBJ)}.`;
+    captionEl.textContent = `${pick(ADJ)} ${pick(NOUN)} ${pick(OBJ)} ${pick(VERB)}.`;
   }
 
   const clouds = [];

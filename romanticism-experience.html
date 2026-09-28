@@ -19,7 +19,7 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
 .tag span{font:9px/1.6 Arial,sans-serif;letter-spacing:.18em;color:#c9d6f088}
 .tag strong{font:italic 15px Georgia,serif;font-weight:400;color:#f3e6c8;letter-spacing:.02em}
 .tag i{width:26px;height:1px;background:#c9d6f044;display:block;font-style:normal}
-.rom-back{position:absolute;top:4%;right:5%;z-index:6;display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:0 15px;border:1px solid #cfe0ff2b;border-radius:999px;background:#111c33c2;color:#e7ecfb;font:11px/1 Arial,sans-serif;letter-spacing:.06em;text-decoration:none;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.rom-back{position:absolute;bottom:5.5%;right:5%;z-index:6;display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:0 15px;border:1px solid #cfe0ff2b;border-radius:999px;background:#111c33c2;color:#e7ecfb;font:11px/1 Arial,sans-serif;letter-spacing:.06em;text-decoration:none;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .rom-back:hover{background:#1a2843d0}
 .rom-back:focus-visible{outline:2px solid #ffdf9e;outline-offset:3px}
 .mood{position:absolute;left:4.5%;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:12px;z-index:3}
@@ -42,7 +42,7 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
   header{top:6%;max-width:82%}
   header h1{font-size:27px}
   .tag{bottom:13%}
-  .rom-back{font-size:10px;padding:0 12px;min-height:32px;gap:5px}
+  .rom-back{bottom:12.5%;font-size:10px;padding:0 12px;min-height:32px;gap:5px}
   .mood{left:3%}
   .slider-wrap{width:30px;height:124px}
   #temperament{width:124px;height:30px}
@@ -52,12 +52,13 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
 
 .sound-toggle{position:absolute;right:5%;bottom:6.5%;z-index:6;border:1px solid #cfe0ff3b;border-radius:30px;padding:10px 15px;background:#111c3388;color:#e7ecfb;font-size:10px;cursor:pointer}.experience-hint{position:absolute;z-index:3;left:50%;bottom:6.5%;transform:translateX(-50%);font:11px/1.9 Arial,sans-serif;color:#ced8e0aa;text-align:center;pointer-events:none;white-space:nowrap}.storm-blackout header,.storm-blackout .tag,.storm-blackout .mood,.storm-blackout .experience-hint{opacity:0}header,.tag,.mood{transition:opacity .15s}.sound-toggle:focus-visible{outline:2px solid #ffdf9e;outline-offset:4px}@media(max-width:640px){.experience-hint{bottom:5%;font-size:9px}.sound-toggle{bottom:12%;right:5%}}
 </style>
-</head>
+<link rel="stylesheet" href="movement-frame.css?v=1">
+<script src="art-audio.js?v=1" defer></script></head>
 <body class="experience-chapter">
 <button class="sound-toggle" id="soundToggle" aria-pressed="true">소리 켜짐</button><div class="experience-hint">화면을 클릭하면 폭풍으로 넘어갑니다<br>누른 채 커서를 움직이면 비바람이 커서를 따라옵니다</div>
 <canvas id="scene" tabindex="0" aria-label="안개 바다 위의 방랑자. 화면을 클릭하면 고요한 새벽에서 폭풍으로 넘어갑니다. 누른 채 커서를 움직이면 비바람의 방향이 따라오고, 스크롤이나 왼쪽 슬라이더로 직접 날씨를 조절할 수도 있습니다."></canvas>
 <a class="rom-back" id="romBack" href="romanticism.html?v=1"><span>←</span> 개념 설명</a>
-<header><span>낭만주의 · 숭고</span><h1>안개 위의<br>방랑자.</h1></header>
+<header class="mf-head"><span class="mf-eyebrow">낭만주의 / 02</span><h1 class="mf-title">안개 위의<br>방랑자.</h1></header>
 <div class="tag"><span>낭만주의 · 02</span><i></i><strong id="moodLabel">새벽</strong></div>
 <div class="mood">
 <div class="slider-wrap"><input id="temperament" type="range" min="0" max="1" step=".001" value=".16" aria-label="하늘을 고요한 새벽에서 폭풍으로 바꾸기"></div>
@@ -93,10 +94,17 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
   const soundButton = document.getElementById('soundToggle');
   soundButton.addEventListener('click', () => {
     soundEnabled = !soundEnabled;
+    window.ArtAudio?.setEnabled(soundEnabled);
     soundButton.textContent = soundEnabled ? '소리 켜짐' : '소리 꺼짐';
     soundButton.setAttribute('aria-pressed', String(soundEnabled));
     if (!soundEnabled) { stopStormAudio(); if(audioCtx) audioCtx.suspend(); }
     else { audioUnlocked = true; ensureAudio(); }
+  });
+  window.addEventListener('art-audio-change', () => {
+    soundEnabled = window.ArtAudio.enabled;
+    soundButton.textContent = soundEnabled ? '소리 켜짐' : '소리 꺼짐';
+    soundButton.setAttribute('aria-pressed', String(soundEnabled));
+    if (!soundEnabled) { stopStormAudio(); if (audioCtx) audioCtx.suspend(); }
   });
   function unlockAudio() { if(soundEnabled) { audioUnlocked = true; ensureAudio(); } }
   document.addEventListener('pointerdown', unlockAudio, { passive: true });
@@ -282,7 +290,7 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
 
   let audioCtx = null;
   function ensureAudio() {
-    if (!soundEnabled || !audioUnlocked) return null;
+    if (!soundEnabled || !audioUnlocked || (window.ArtAudio && !window.ArtAudio.enabled)) return null;
     try {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
@@ -420,7 +428,7 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
     gust.turb = gust.power * flutter;
     gust.v = gust.turb;
     gust.sv = gust.turb * gust.dir;
-    if (gust.power > .08 && soundEnabled && audioUnlocked) { startStormAudio(); updateStormAudio(gust.power, gust.dir); } else if (stormAudio) stopStormAudio();
+    if (gust.power > .08 && soundEnabled && audioUnlocked && (!window.ArtAudio || window.ArtAudio.enabled)) { startStormAudio(); updateStormAudio(gust.power, gust.dir); } else if (stormAudio) stopStormAudio();
 
     const renderT = clamp(displayTemperament + gust.turb * .34, 0, 1);
     const windPx = (renderT - .42) * 70 + flowX * (weather * 1450 + gust.v * 950);              // horizontal wind for rain / sheets

@@ -4,14 +4,14 @@
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const bounds=[0,14,31,47,64,80];
   const playbackRate=1.8;
-  const chapterNames=['뒷모습의 시선','미지와 상상','숭고','풍경과 감정','개인의 내면'];
+  const chapterNames=['뒷모습의 인물','보이지 않는 것','자연 앞의 경외','풍경 속 감정','개인의 내면'];
   // Every chapter pairs a visible model transformation with one reading of the painting.
   const chapters=[
-    {title:'뒤돌아 선 인물, 뤼켄피구어에 대하여',description:'돌아선 뒷모습이 그의 시선을 함께 바라보게 한다.',from:'그를 바라보다',to:'그의 시선을 공유하다'},
-    {title:'보이지 않는 것과 상상력에 대하여',description:'안개가 계곡을 가리는 순간, 상상이 시작된다.',from:'드러난 계곡',to:'가려진 계곡'},
-    {title:'숭고(Sublime)에 대하여',description:'거대한 자연 앞에서 인간은 한없이 작아진다.',from:'인간의 크기',to:'거대한 자연'},
-    {title:'풍경에 담기는 감정에 대하여',description:'같은 골짜기가 비바람과 햇빛 속에서 다른 감정을 보여준다.',from:'폭풍과 불확실함',to:'빛과 가능성'},
-    {title:'집단과 개인, 그림의 주인공에 대하여',description:'역사 속 무리 대신, 한 사람의 내면이 그림의 주인공이 된다.',from:'여럿의 무리',to:'한 개인'}
+    {title:'뒷모습의 인물, 그의 눈으로 풍경을 보다',description:'얼굴 대신 뒷모습을 그리면(‘뤼켄피구어’), 우리는 그를 바라보는 대신 그의 시선으로 풍경을 보게 된다.',from:'그를 바라보다',to:'그의 시선을 공유하다'},
+    {title:'보이지 않는 것에 대한 상상력',description:'안개가 계곡을 가리는 순간, 상상이 시작된다.',from:'드러난 계곡',to:'가려진 계곡'},
+    {title:'거대한 자연 앞에서 느끼는 두려움과 경외',description:'거대한 자연 앞에서 인간은 한없이 작아진다. 낭만주의는 이 감정을 ‘숭고(Sublime)’라고 불렀다.',from:'인간의 크기',to:'거대한 자연'},
+    {title:'풍경으로 그린 인간의 감정',description:'같은 골짜기가 비바람과 햇빛 속에서 다른 감정을 보여준다.',from:'폭풍과 불확실함',to:'빛과 가능성'},
+    {title:'역사 속 영웅이 아닌, 한 개인이 주인공이 되다',description:'역사 속 무리 대신, 한 사람의 내면이 그림의 주인공이 된다.',from:'여럿의 무리',to:'한 개인'}
   ];
   // Three pauses ground the abstract camera language in real paintings, each timed to the
   // chapter it caps: the Rückenfigur device recurring across Friedrich's work follows "his back,
@@ -137,7 +137,6 @@
   $('replay').addEventListener('click',()=>{if(intro)return;playing=!reduced.matches;seek(0);start();});
   $('filmSeek').addEventListener('input',e=>{playing=false;seek(Number(e.target.value));});
   document.querySelectorAll('[data-film-chapter]').forEach((button,i)=>button.addEventListener('click',()=>{playing=false;seek(bounds[i]);}));
-  addEventListener('romantic-art-ready',()=>draw());
   function manipulate(value){
     manual=Math.max(0,Math.min(1,value));playing=false;holdRemaining=null;holdAt=null;
     // Manipulation stays inside this chapter and never opens a timed comparison overlay.

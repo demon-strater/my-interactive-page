@@ -1,0 +1,23 @@
+/* Closing artwork, drawn inside each movement's own concept layout.
+   Each *-finale.html page loads its movement's stylesheets first, so the background and
+   colours are the concept page's; the masthead comes from movement-frame.css, and this
+   file only centres the painting with its title underneath. */
+.finale-stage{display:flex;justify-content:center;align-items:center;min-height:0;min-width:0;padding:clamp(12px,2.5vh,28px) 5% clamp(28px,6vh,60px)}
+/* Pages whose masthead is absolutely positioned (Romanticism) get their top edge from concept-finale.js. */
+.finale-stage.overlay{position:absolute;left:5%;right:5%;top:var(--finale-top,140px);bottom:clamp(28px,6vh,60px);padding:0;z-index:1}
+.finale-stage figure{margin:0;width:100%;height:100%;min-height:0;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:clamp(14px,2.2vh,22px);text-align:center}
+/* Fit inside both dimensions (leaving room for the caption), so a wide fresco and a tall canvas both centre cleanly. */
+.finale-stage img{display:block;min-width:0;min-height:0;width:auto;height:auto;max-width:100%;max-height:calc(100% - 80px);filter:drop-shadow(0 14px 34px #0008);opacity:0;transform:scale(.985);transition:opacity 1.1s ease,transform 1.1s cubic-bezier(.22,.61,.36,1)}
+.finale-stage figcaption{display:grid;gap:6px;opacity:0;transition:opacity .8s ease .5s}
+.finale-stage figcaption strong{font:400 clamp(18px,1.7vw,24px)/1.3 'Nanum Myeongjo',Georgia,serif;letter-spacing:.01em;color:#efe6d4}
+.finale-stage figcaption span{font:12px/1.5 Arial,'Malgun Gothic',sans-serif;letter-spacing:.06em;color:#a39d90}
+.finale-ready .finale-stage img{opacity:1;transform:none}
+.finale-ready .finale-stage figcaption{opacity:1}
+.finale-page #goHome{text-decoration:none}
+/* Impressionism keeps its gallery wall: the masthead sits at the left, the painting hangs in the middle. */
+.finale-stage.gallery{position:absolute;top:6vh;bottom:5vh;left:27%;right:27%;padding:0}
+.finale-stage.gallery img{filter:none;box-shadow:0 2px 4px #4839222b,0 20px 50px #48392233}
+.finale-stage.gallery figcaption strong{color:#1a1712}
+.finale-stage.gallery figcaption span{color:#4a4238}
+@media(max-width:700px){.finale-stage figcaption strong{font-size:17px}.finale-stage figcaption span{font-size:11px}.finale-stage.gallery{top:calc(18px + 120px);left:5%;right:5%}}
+@media(prefers-reduced-motion:reduce){.finale-stage img,.finale-stage figcaption{transition:none}}

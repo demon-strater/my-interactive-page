@@ -10,7 +10,7 @@ h1{margin:0;color:#d7c7b5;font-size:clamp(2rem,6vw,5rem);font-style:italic;font-
 p{max-width:380px;margin:9px 0 0;color:rgba(229,222,212,.68);font:700 12px/1.45 Inter,system-ui,sans-serif}
 .actions{position:fixed;right:clamp(14px,2.4vw,24px);top:clamp(14px,2.4vw,24px);display:flex;flex-wrap:wrap;gap:8px;z-index:3;padding:6px;border:1px solid rgba(229,222,212,.16);border-radius:8px;background:rgba(23,21,18,.5);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}.actions button{min-height:36px;border:1px solid rgba(229,222,212,.28);border-radius:8px;color:#e5ded4;background:rgba(23,21,18,.62);padding:0 11px;font:800 10px Inter,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}@media(max-width:560px){.hud{right:14px}.actions{left:14px;justify-content:flex-end}}
 </style>
-</head>
+<script src="art-audio.js?v=1" defer></script></head>
 <body><div id="app"></div><div class="actions" onpointerdown="event.stopPropagation()" onclick="event.stopPropagation()"><button id="resetBtn" type="button">초기화</button><button id="dropBtn" type="button">무게추 떨어뜨리기</button></div><section class="hud"><h1>사실주의</h1><p>냉혹한 균형: 마우스 위치가 받침점을 기울입니다. 아무것도 저절로 안정되지 않습니다. 스크롤하면 중력이 바뀝니다.</p></section>
 <script type="module">
 import * as THREE from 'https://unpkg.com/three@0.164.1/build/three.module.js';
@@ -35,7 +35,7 @@ const geos=[new THREE.BoxGeometry(.9,.9,.9),new THREE.SphereGeometry(.55,32,16),
 function spawnObject(i,x=(Math.random()-.5)*6,z=(Math.random()-.5)*2.6,y=1+i*.32){const mesh=new THREE.Mesh(geos[i%3],new THREE.MeshStandardMaterial({color:[0x9f6b4b,0xb7ad9c,0x5e6b71][i%3],roughness:.65}));
  mesh.position.set(x,y,z);scene.add(mesh);
  const shape=i%3===1?new CANNON.Sphere(.55):new CANNON.Box(new CANNON.Vec3(.45,.45,.45));
- const body=new CANNON.Body({mass:1,shape,position:new CANNON.Vec3(x,y,z),angularDamping:.02,linearDamping:.01});world.addBody(body);objects.push({mesh,body});return {mesh,body}}
+ const body=new CANNON.Body({mass:1,shape,position:new CANNON.Vec3(x,y,z),angularDamping:.02,linearDamping:.01});body.addEventListener('collide', e => { const speed = Math.abs(e.contact.getImpactVelocityAlongNormal()); if (speed > 1.2) window.ArtAudio?.effect('impact', Math.min(1, speed / 8)); });world.addBody(body);objects.push({mesh,body});return {mesh,body}}
 for(let i=0;i<18;i++)spawnObject(i);
 let tiltX=0,tiltZ=0;
 addEventListener('pointermove',e=>{tiltZ=(e.clientX/innerWidth-.5)*.55;tiltX=-(e.clientY/innerHeight-.5)*.42});

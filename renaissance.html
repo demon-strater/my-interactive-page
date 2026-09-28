@@ -13,11 +13,12 @@
 <link rel="stylesheet" href="renaissance-navigation.css?v=nav-2">
 <link rel="stylesheet" href="concept-transport.css?v=2">
 <link rel="stylesheet" href="concept-compare.css?v=1">
-</head>
+<link rel="stylesheet" href="movement-frame.css?v=1">
+<script src="art-audio.js?v=1" defer></script></head>
 <body class="visual-experience">
 <main id="atelier">
   <button class="home-button" id="goHome" type="button"><span>←</span> 메인으로</button>
-  <header class="masthead"><div class="eyebrow">르네상스</div><h1 id="sceneTitle">그림과 공간의 착시에 대하여</h1></header>
+  <header class="masthead mf-head mf-flow"><div class="eyebrow mf-eyebrow">르네상스 / 01</div><h1 id="sceneTitle" class="mf-title">평평한 그림 속에 깊이를 만드는 착시</h1></header>
   <section id="stage" aria-label="애니메이션 원근법 모형">
     <canvas id="scene" tabindex="0" aria-label="시각적 원근법 실험. 세 번째 장면에서는 청록색 기둥을, 네 번째 장면에서는 눈을 드래그할 수 있습니다. 방향키도 사용할 수 있습니다."></canvas>
     <span id="sceneStatus" class="sr-only" role="status"></span>
@@ -25,7 +26,7 @@
     <a id="artSource" href="https://www.museivaticani.va/content/museivaticani/en/collezioni/musei/stanze-di-raffaello/stanza-della-segnatura/scuola-di-atene.html" target="_blank" rel="noopener noreferrer" hidden>라파엘로 · 아테네 학당 / 바티칸 박물관 ↗</a>
   </section>
   <figure class="art-compare" id="compareOne" aria-hidden="true">
-    <h2 class="compare-heading">원근법의 유무에 대하여</h2>
+    <h2 class="compare-heading">원근법이 없는 그림 vs. 있는 그림</h2>
     <div class="compare-grid" data-linger="마우스를 치우면 계속 진행됩니다">
       <div class="compare-item">
         <span class="img-wrap">
@@ -58,7 +59,7 @@
     </div>
   </figure>
   <figure class="art-compare" id="compareTwo" aria-hidden="true">
-    <h2 class="compare-heading">소실점의 위치에 대하여</h2>
+    <h2 class="compare-heading">소실점 위치에 따라 달라지는 그림의 느낌</h2>
     <div class="compare-grid three" data-linger="마우스를 치우면 계속 진행됩니다">
       <div class="compare-item">
         <span class="img-wrap" data-vp-key="bridge">

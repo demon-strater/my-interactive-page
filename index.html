@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Four Art Movements</title>
-    <link rel="stylesheet" href="style.css?v=vp-nav-2">
-</head>
+    <link rel="stylesheet" href="style.css?v=frame-1">
+<script src="art-audio.js?v=1" defer></script></head>
 <body class="view-hub">
     <div class="cinematic-stage" id="cinematicStage">
         <section class="hub-screen" id="hubScreen" aria-label="Interaction hub" data-movement="renaissance">
@@ -89,7 +89,7 @@
                 </header>
 
                 <main class="main-container surreal-room" aria-label="Surrealism room window">
-                    <div class="dream-room-title"><span>01 / SURREALISM</span><h2>The Dream<br>Room.</h2></div>
+                    <div class="dream-room-title mf-head mf-narrow"><span class="mf-eyebrow">초현실주의 / 01</span><h2 class="mf-title">낮과 밤이<br>공존하는 방.</h2></div>
                     <section class="music-player side-player" id="musicPlayer" aria-label="Music control">
                         <div class="now-playing">
                             <div>
@@ -137,6 +137,7 @@
                     <span class="side-table"></span>
                 </div>
             </main>
+            <iframe class="surreal-finale-frame" title="초현실주의 — 빛의 제국" hidden></iframe>
         </div>
 
         <button class="pull-chain" id="pullChain" aria-label="Switch day and night">
@@ -194,22 +195,11 @@
 
         <div class="interaction-content impressionism-time-site" aria-label="Impressionism interaction">
             <main class="impressionism-time-stage" aria-label="Impressionism time and temperature stage">
-                <iframe class="impressionism-time-frame" data-src="impressionism.html?v=film-1" title="Impressionism Time Study"></iframe>
+                <iframe class="impressionism-time-frame" data-src="impressionism.html?v=glass-1" title="인상주의 — 빛의 조각들"></iframe>
             </main>
         </div>
     </section>
 
-    <section class="art-finale" id="artFinale" hidden aria-label="이 사조의 대표 작품">
-        <figure class="finale-figure">
-            <span class="finale-art" id="finaleArt" role="img"></span>
-            <figcaption class="finale-caption">
-                <span class="finale-movement" id="finaleMovement"></span>
-                <strong class="finale-title" id="finaleTitle"></strong>
-                <span class="finale-meta" id="finaleMeta"></span>
-            </figcaption>
-        </figure>
-        <button class="finale-home" id="finaleHome" type="button">메인으로 돌아가기</button>
-    </section>
     </div>
 
     <aside class="hand-tracker" id="handTracker" aria-label="Hand gesture controls">
@@ -225,9 +215,12 @@
     </aside>
     <div class="hand-cursor" id="handCursor" aria-hidden="true"></div>
 
-    <script src="script.js?v=vp-nav-2"></script>
-    <link rel="stylesheet" href="surreal-memory.css?v=corpse-card-s1-s18">
-    <script src="surreal-memory.js?v=corpse-card-s1-s18" defer></script>
+    <script src="script.js?v=frame-1"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="surreal-memory.css?v=frame-1">
+    <link rel="stylesheet" href="movement-frame.css?v=1">
+    <script src="surreal-memory.js?v=frame-1" defer></script>
     <script type="module" src="hand-tracking.js?v=hand-ux-state-1"></script>
 </body>
 </html>
