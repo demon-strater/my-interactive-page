@@ -54,13 +54,12 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
 </style>
 </head>
 <body class="experience-chapter">
-<button class="sound-toggle" id="soundToggle" aria-pressed="true">소리 켜짐</button><div class="experience-hint">스크롤하면 낮에서 폭풍으로 바뀝니다<br>커서를 움직여 바람의 방향을 조종하고 · 누르고 있으면 바람이 강해집니다</div>
-<canvas id="scene" tabindex="0" aria-label="안개 바다 위의 방랑자. 스크롤하거나 왼쪽 슬라이더를 사용해 낮에서 폭풍으로 바꿔보세요. 포인터를 움직여 비와 바람을 조종하고, 누르고 있거나 Enter 키를 눌러 폭풍을 강하게 만들 수 있습니다."></canvas>
+<button class="sound-toggle" id="soundToggle" aria-pressed="true">소리 켜짐</button><div class="experience-hint">화면을 클릭하면 폭풍으로 넘어갑니다<br>누른 채 커서를 움직이면 비바람이 커서를 따라옵니다</div>
+<canvas id="scene" tabindex="0" aria-label="안개 바다 위의 방랑자. 화면을 클릭하면 고요한 새벽에서 폭풍으로 넘어갑니다. 누른 채 커서를 움직이면 비바람의 방향이 따라오고, 스크롤이나 왼쪽 슬라이더로 직접 날씨를 조절할 수도 있습니다."></canvas>
 <a class="rom-back" id="romBack" href="romanticism.html?v=1"><span>←</span> 개념 설명</a>
 <header><span>낭만주의 · 숭고</span><h1>안개 위의<br>방랑자.</h1></header>
 <div class="tag"><span>낭만주의 · 02</span><i></i><strong id="moodLabel">새벽</strong></div>
 <div class="mood">
-<svg class="mood-icon" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="#ffd98a"/></svg>
 <div class="slider-wrap"><input id="temperament" type="range" min="0" max="1" step=".001" value=".16" aria-label="하늘을 고요한 새벽에서 폭풍으로 바꾸기"></div>
 <svg class="mood-icon" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 9.4a2.6 2.6 0 0 1 4.9-1.3A2.1 2.1 0 0 1 9.4 9.4H2Z" fill="#9fb2d8"/><path d="M5.6 10.4 4.4 13l1.7-.3-1 2.3" stroke="#dbe4f7" stroke-width=".9" fill="none" stroke-linecap="round"/></svg>
 <small>고요함&nbsp;—&nbsp;폭풍</small>
@@ -154,12 +153,29 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
     canvas.style.cursor = hitWanderer(e.clientX, e.clientY) ? 'pointer' : 'crosshair';
   }, { passive: true });
 
-  temperamentInput.addEventListener('input', () => { unlockAudio(); temperament = Number(temperamentInput.value); });
+  temperamentInput.addEventListener('input', () => { unlockAudio(); ride = null; temperament = Number(temperamentInput.value); });
+
+  // A click rides the sky across on its own — the same journey a long scroll makes, animated.
+  // Any manual scroll or slider move cancels it, so the viewer always keeps the last word.
+  let ride = null;
+  function rideTo(target, duration = 2.4) {
+    ride = { from: temperament, to: target, age: 0, duration: reduced.matches ? .01 : duration };
+  }
+  function advanceRide(dt) {
+    if (!ride) return;
+    ride.age += dt;
+    const p = Math.min(1, ride.age / ride.duration);
+    const eased = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+    temperament = lerp(ride.from, ride.to, eased);
+    temperamentInput.value = temperament.toFixed(3);
+    if (p >= 1) ride = null;
+  }
 
   // Turn the wheel to move the sky along the same 0..1 temperament the slider drives.
   canvas.addEventListener('wheel', e => {
     e.preventDefault();
     unlockAudio();
+    ride = null;
     const scale = e.deltaMode === 1 ? .04 : e.deltaMode === 2 ? .32 : .0012;
     temperament = clamp(temperament + e.deltaY * scale, 0, 1);
     temperamentInput.value = temperament.toFixed(3);
@@ -196,12 +212,14 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
     const fx = width * .535, ground = height * .75;
     return px > fx - 52 && px < fx + 52 && py > ground - 108 && py < ground + 28;
   }
-  // ── Hold to summon a storm ───────────────────────────────────────────────
-  // While a pointer is held down the storm blows toward it and keeps building;
-  // release and it falls calm. Direction and force track the pointer live.
-  function beginHold(cx, cy, pointerId) {
-    if (hitWanderer(cx, cy)) { toggleSpeech(); return; }
-    if (pointerId != null && canvas.setPointerCapture) { try { canvas.setPointerCapture(pointerId); } catch (e) {} }
+  // ── Press to steer the storm, click to ride into it ──────────────────────
+  // Holding the pointer down blows the storm toward it and keeps building, so the rain only
+  // follows the cursor while it is held — moving a free cursor just turns the wanderer's head
+  // and arm. A press that neither moves nor lingers is read as a click instead, and rides the
+  // sky between calm and tempest.
+  const HOLD_DELAY = 260, TAP_SLOP = 6;
+  let press = null;
+  function beginHold(cx, cy) {
     pointer.x = cx / width; pointer.y = cy / height; pointer.active = true;
     gust.held = true;
     gust.dir = cx < width * .535 ? -1 : 1;
@@ -213,14 +231,35 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
     gust.held = false;
     stopStormAudio();
   }
-  canvas.addEventListener('pointerdown', e => beginHold(e.clientX, e.clientY, e.pointerId));
-  canvas.addEventListener('pointerup', endHold);
-  canvas.addEventListener('pointercancel', endHold);
+  function startPress(cx, cy, pointerId) {
+    if (hitWanderer(cx, cy)) { toggleSpeech(); return; }
+    if (pointerId != null && canvas.setPointerCapture) { try { canvas.setPointerCapture(pointerId); } catch (e) {} }
+    pointer.x = cx / width; pointer.y = cy / height; pointer.active = true;
+    press = { x: cx, y: cy, holding: false, timer: 0 };
+    press.timer = setTimeout(() => { if (press) { press.holding = true; beginHold(cx, cy); } }, HOLD_DELAY);
+  }
+  function finishPress() {
+    if (!press) { endHold(); return; }
+    clearTimeout(press.timer);
+    const wasTap = !press.holding;
+    press = null;
+    endHold();
+    if (wasTap) rideTo(temperament > .6 ? .12 : .92);
+  }
+  canvas.addEventListener('pointerdown', e => startPress(e.clientX, e.clientY, e.pointerId));
+  canvas.addEventListener('pointermove', e => {
+    if (!press || press.holding) return;
+    if (Math.hypot(e.clientX - press.x, e.clientY - press.y) > TAP_SLOP) {
+      clearTimeout(press.timer); press.holding = true; beginHold(e.clientX, e.clientY);
+    }
+  }, { passive: true });
+  canvas.addEventListener('pointerup', finishPress);
+  canvas.addEventListener('pointercancel', () => { if (press) clearTimeout(press.timer); press = null; endHold(); });
   canvas.addEventListener('keydown', e => {
     if (e.key !== 'Enter' && e.key !== ' ' || gust.held) return;
     e.preventDefault();
     pointer.x = headLook >= 0 ? .8 : .2; pointer.y = .28;
-    beginHold(pointer.x * width, pointer.y * height, null);
+    beginHold(pointer.x * width, pointer.y * height);
   });
   canvas.addEventListener('keyup', e => { if (e.key === 'Enter' || e.key === ' ') endHold(); });
   canvas.addEventListener('blur', endHold);
@@ -359,16 +398,19 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
     raf = 0;
     const dt = last ? Math.min((now - last) / 1000, .05) : 0; last = now;
     elapsed += dt;
+    advanceRide(dt);
     displayTemperament += (Math.max(temperament, gust.held ? .86 : 0) - displayTemperament) * Math.min(1, dt * (reduced.matches ? 8 : 2.2));
 
-    // Position steers a persistent wind; movement adds an immediate, decaying impulse.
+    // Only a held pointer steers the weather; a free cursor is left to the wanderer's gaze and
+    // arm, so the rain no longer chases a cursor that is merely passing over the scene.
     const weather = clamp((displayTemperament - .38) / .5, 0, 1);
     const velocityDecay = Math.exp(-dt * 4);
     pointerVX *= velocityDecay; pointerVY *= velocityDecay;
-    const steer = pointer.active ? clamp((pointer.x-.5)*2.8 + pointerVX*.75, -1.65, 1.65) : .22;
+    const steering = gust.held && pointer.active;
+    const steer = steering ? clamp((pointer.x-.5)*2.8 + pointerVX*.75, -1.65, 1.65) : .22;
     flowX += (steer-flowX) * (1-Math.exp(-dt*11));
-    flowY += ((pointer.active ? (pointer.y-.5)*1.4 + pointerVY*.7 : 0)-flowY) * (1-Math.exp(-dt*9));
-    const want = gust.held ? clamp(1.35-pointer.y,.65,1) : weather * clamp(.48 + Math.abs(flowX)*.32 + Math.abs(pointerVX)*.2,0,1);
+    flowY += ((steering ? (pointer.y-.5)*1.4 + pointerVY*.7 : 0)-flowY) * (1-Math.exp(-dt*9));
+    const want = gust.held ? clamp(1.35-pointer.y,.65,1) : weather * clamp(.48 + Math.abs(flowX)*.32,0,1);
     gust.power += (want-gust.power)*(1-Math.exp(-dt*(gust.held?4.5:5)));
     gust.dir += (clamp(flowX,-1.4,1.4)-gust.dir)*(1-Math.exp(-dt*12));
     updateTransition(dt, Math.max(temperament, gust.held ? .8 : 0));

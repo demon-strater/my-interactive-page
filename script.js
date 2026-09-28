@@ -971,7 +971,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const ratio = crop ? (sw * crop.w) / (sh * crop.h) : sw / sh;
             // Leave room for the caption and the button below the painting.
             finaleArt.style.aspectRatio = String(ratio);
-            finaleArt.style.width = `min(96vw, ${ratio * 66}vh)`;
+            finaleArt.style.width = `min(96vw, ${ratio * 62}vh)`;
             finaleArt.style.backgroundImage = `url('${encodeURI(art.src)}')`;
             if (crop) {
                 finaleArt.style.backgroundSize = `${100 / crop.w}% ${100 / crop.h}%`;

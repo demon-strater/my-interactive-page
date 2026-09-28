@@ -4088,31 +4088,54 @@ body.view-impressionism .memory-title {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 5px;
+    gap: 7px;
     text-align: center;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: opacity 0.8s ease 0.45s, transform 0.8s ease 0.45s;
 }
-.art-finale.visible .finale-caption { opacity: 1; transform: none; }
+/* The movement is the headline here — the painting is the evidence for it. */
 .finale-movement {
-    font-size: 10.5px;
-    letter-spacing: 0.1em;
-    color: #c8a86b;
+    display: flex;
+    align-items: center;
+    gap: clamp(10px, 1.6vw, 18px);
+    font-family: 'Nanum Myeongjo', Georgia, serif;
+    font-size: clamp(27px, 3.6vw, 47px);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    line-height: 1.15;
+    color: #e8c88d;
+    text-shadow: 0 2px 30px rgba(226, 192, 127, 0.3);
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.9s ease 0.4s, transform 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) 0.4s;
 }
+.finale-movement::before,
+.finale-movement::after {
+    content: '';
+    width: clamp(18px, 4.5vw, 62px);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(232, 200, 141, 0.6));
+}
+.finale-movement::after { background: linear-gradient(90deg, rgba(232, 200, 141, 0.6), transparent); }
+.art-finale.visible .finale-movement { opacity: 1; transform: none; }
 .finale-title {
     font-family: 'Nanum Myeongjo', Georgia, serif;
-    font-size: clamp(20px, 2.6vw, 34px);
+    font-size: clamp(15px, 1.75vw, 22px);
     font-weight: 400;
-    letter-spacing: -0.01em;
-    color: #f2e9d8;
+    letter-spacing: 0.005em;
+    color: #efe6d4;
     word-break: keep-all;
+    opacity: 0;
+    transition: opacity 0.8s ease 0.72s;
 }
+.art-finale.visible .finale-title { opacity: 1; }
 .finale-meta {
     font-size: clamp(11px, 1.2vw, 13px);
     letter-spacing: 0.04em;
     color: #9d9483;
+    opacity: 0;
+    transition: opacity 0.8s ease 0.88s;
 }
+.art-finale.visible .finale-meta { opacity: 1; }
 .finale-home {
     min-height: 40px;
     padding: 0 20px;
@@ -4124,7 +4147,7 @@ body.view-impressionism .memory-title {
     letter-spacing: 0.08em;
     cursor: pointer;
     opacity: 0;
-    transition: opacity 0.7s ease 0.85s, background 0.3s ease;
+    transition: opacity 0.7s ease 1.05s, background 0.3s ease;
 }
 .art-finale.visible .finale-home { opacity: 1; }
 .finale-home:hover { background: rgba(138, 105, 51, 0.5); }
@@ -4132,9 +4155,10 @@ body.view-impressionism .memory-title {
 body.showing-finale .interaction-screen { visibility: hidden; }
 @media (max-width: 700px) {
     .art-finale { padding: 16px 5%; gap: 12px; }
-    .finale-title { font-size: 19px; }
-    .finale-movement { font-size: 9px; }
+    .finale-movement { font-size: 25px; gap: 9px; }
+    .finale-movement::before, .finale-movement::after { width: 16px; }
+    .finale-title { font-size: 14.5px; }
 }
 @media (prefers-reduced-motion: reduce) {
-    .art-finale, .finale-art, .finale-caption, .finale-home { transition: none !important; }
+    .art-finale, .finale-art, .finale-movement, .finale-title, .finale-meta, .finale-home { transition: none !important; }
 }
