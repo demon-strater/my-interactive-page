@@ -5,8 +5,8 @@
   const palettes = {
     renaissance: [48, 55, 60, 64, 67, 72], 'renaissance-perspective': [48, 55, 60, 64, 67, 72],
     baroque: [45, 52, 57, 60, 64, 69], romanticism: [38, 45, 50, 53, 57, 62],
-    impressionism: [53, 60, 62, 67, 69, 74], 'post-impressionism': [48, 55, 62, 64, 69, 72],
-    surrealism: [45, 52, 59, 60, 64, 71], futurism: [40, 47, 52, 55, 59, 64],
+    impressionism: [53, 60, 62, 67, 69, 74], 'impressionism-film': [53, 60, 62, 67, 69, 74], 'post-impressionism': [48, 55, 62, 64, 69, 72],
+    surrealism: [45, 52, 59, 60, 64, 71], 'surrealism-film': [45, 52, 59, 60, 64, 71], futurism: [40, 47, 52, 55, 59, 64],
     'abstract-expressionism': [43, 50, 58, 60, 65, 70]
   };
   const key = 'art-sound-enabled';
@@ -103,8 +103,13 @@
   }
   const button = document.createElement('button');
   button.id = 'artSoundToggle'; button.type = 'button';
-  button.style.cssText = 'position:fixed;right:14px;top:14px;z-index:2147483646;border:1px solid #ffffff55;border-radius:24px;padding:9px 13px;background:#171b22db;color:#fff;font:12px system-ui;cursor:pointer;backdrop-filter:blur(10px)';
-  function render() { button.textContent = enabled ? '♪ 소리 켜짐' : '♪ 소리 꺼짐'; button.setAttribute('aria-pressed', String(enabled)); button.setAttribute('aria-label', enabled ? '전체 소리 끄기' : '전체 소리 켜기'); }
+  // An icon-only square like the Home square it docks beside (see dock()).
+  const resting = { right: '14px', top: '14px', width: '40px', height: '40px', background: '#171b22db', color: '#fff', borderColor: '#ffffff55', borderRadius: '10px' };
+  button.style.cssText = 'position:fixed;z-index:2147483646;box-sizing:border-box;display:grid;place-items:center;padding:0;border:1px solid;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)';
+  Object.assign(button.style, resting);
+  const speaker = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/>';
+  const icons = { on: speaker + '<path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18.2 6.6a7.6 7.6 0 0 1 0 10.8"/></svg>', off: speaker + '<path d="m16 9.5 5 5"/><path d="m21 9.5-5 5"/></svg>' };
+  function render() { button.innerHTML = enabled ? icons.on : icons.off; button.title = enabled ? '소리 끄기' : '소리 켜기'; button.setAttribute('aria-pressed', String(enabled)); button.setAttribute('aria-label', enabled ? '전체 소리 끄기' : '전체 소리 켜기'); }
   function setEnabled(value, broadcast = true) {
     enabled = value; try { localStorage.setItem(key, String(value)); } catch (_) {}
     render(); if (enabled && unlocked) init(); sync();
@@ -119,16 +124,20 @@
   button.addEventListener('click', e => { e.stopPropagation(); unlocked = true; setEnabled(!enabled); });
   button.addEventListener('keydown', e => e.stopPropagation());
   document.body.append(button); render();
-  try { if (parent !== window && parent.ArtAudio) button.hidden = true; } catch (_) {}
-  // A page opened on its own shows its "메인으로" pill at the top right; sit beside it (below it on
-  // phones) rather than on top of it.
+  // Inside the hub the hub's own toggle serves every frame. Being framed at all is the test: opened from
+  // file://, a frame can't read parent.ArtAudio, and its toggle would sit right behind the hub's Home square.
+  // (The inline display would otherwise outrank [hidden].)
+  if (parent !== window) { button.hidden = true; button.style.display = 'none'; }
+  // Wherever a Home square shows (a standalone page's #goHome, or the hub's #backToShelf inside a movement), sit
+  // level with it just to its left, at its size and in its colours, so the two read as one pair of controls.
+  const shown = el => { for (let e = el; e; e = e.parentElement) { const s = getComputedStyle(e); if (e.hidden || s.display === 'none' || s.visibility === 'hidden' || Number(s.opacity) < .05) return false; } return true; };
   function dock() {
-    const home = document.getElementById('goHome');
-    const r = home && !home.hidden ? home.getBoundingClientRect() : null;
-    if (!r || !r.width) { button.style.right = '14px'; button.style.top = '14px'; return; }
-    const narrow = innerWidth <= 700;
-    button.style.right = `${Math.round(narrow ? innerWidth - r.right : innerWidth - r.left + 10)}px`;
-    button.style.top = `${Math.round(narrow ? r.bottom + 8 : r.top + (r.height - button.offsetHeight) / 2)}px`;
+    const home = [document.getElementById('goHome'), document.getElementById('backToShelf')].find(el => el && shown(el));
+    const r = home?.getBoundingClientRect();
+    if (!r || !r.width) { Object.assign(button.style, resting); return; }
+    const s = getComputedStyle(home);
+    Object.assign(button.style, { right: `${Math.round(innerWidth - r.left + 8)}px`, top: `${Math.round(r.top)}px`, width: `${Math.round(r.width)}px`, height: `${Math.round(r.height)}px`, borderRadius: s.borderTopLeftRadius });
+    if (!home.matches(':hover')) Object.assign(button.style, { background: s.backgroundColor, color: s.color, borderColor: s.borderTopColor });
   }
   addEventListener('resize', dock); document.fonts?.ready.then(dock); dock();
   const stormButton = document.getElementById('soundToggle');
@@ -141,5 +150,6 @@
   document.addEventListener('visibilitychange', sync);
   addEventListener('storage', e => { if (e.key === key) setEnabled(e.newValue !== 'false', false); });
   addEventListener('pagehide', () => { active = false; if (ctx) ctx.suspend().catch(() => {}); });
-  setInterval(sync, 200);
+  // The hub moves its Home square as scenes open and close, so the dock follows on the same beat as the audio.
+  setInterval(() => { sync(); dock(); }, 200);
 })();

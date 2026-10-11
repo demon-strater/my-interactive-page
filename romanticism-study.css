@@ -12,23 +12,12 @@ h1{font-size:clamp(28px,3.1vw,44px);margin:10px 0 0;line-height:1.2}
 .film-footer{position:absolute;left:0;right:0;bottom:0;z-index:6}
 .showing-comparison .masthead{visibility:hidden}
 .showing-comparison #dragHint{visibility:hidden}
+/* Opening painting (artwork-intro.css): only the Wanderer and the masthead until the painting is chosen. */
 .artwork-intro #filmScene,.artwork-intro .cinema-shade,.artwork-intro footer,.artwork-intro .caption{display:none}
-#paintingIntro{position:absolute;inset:140px 5% max(18px,env(safe-area-inset-bottom));display:flex;justify-content:center;align-items:center}
-#paintingIntro[hidden]{display:none}
-#paintingIntro figure{margin:0;min-height:0;min-width:0;max-width:100%;height:100%;display:grid;grid-template-rows:minmax(0,1fr) auto;gap:12px;text-align:center;justify-items:center}
-#paintingIntro img{display:block;min-height:0;width:auto;max-width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 12px 30px #0006)}
-#paintingIntro figcaption{font:15px/1.5 'Nanum Myeongjo',Georgia,serif;color:#e8dfcd}
-#paintingIntro figcaption span{display:block;font:11px/1.5 Arial,sans-serif;color:#9babac;margin-top:3px}
-#beginStudy{display:block;position:relative;padding:0;min-height:0;min-width:0;height:100%;max-width:100%;border:0;cursor:zoom-in;background:none;transition:filter .35s}
-#beginStudy:hover{filter:brightness(1.08)}
-#beginStudy:focus-visible{outline:2px solid #dec193;outline-offset:6px}
-.painting-invitation{display:block;margin-top:8px;color:#dec193;font:11px/1.5 Arial,sans-serif;letter-spacing:.06em}
-.entering-painting .masthead,.entering-painting footer{opacity:0}
 @media(max-width:600px){
  .masthead{padding:18px 5% 0}h1{font-size:25px;max-width:100%;margin-top:9px;line-height:1.25}
  .caption{font-size:14px;line-height:1.45;margin-top:7px}
  #dragHint{font-size:10px;margin-bottom:8px}
- #paintingIntro figure{width:100%;gap:10px}#paintingIntro figcaption{font-size:12px}
 }
 @media(max-height:500px){
  .masthead{padding-top:12px}h1{font-size:26px;margin-top:5px}.caption{font-size:13px;margin-top:5px}

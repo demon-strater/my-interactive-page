@@ -100,39 +100,9 @@
   function start(){last=0;if(playing&&!raf&&!document.hidden)raf=requestAnimationFrame(frame);}
   function seek(t){manual=null;holdRemaining=null;holdAt=null;time=Math.max(0,Math.min(80,t));update();draw();}
   function toggle(){if(intro)return;manual=null;playing=!playing;if(time>=80)seek(0);update();start();}
-  let entering=false;
-  $('beginStudy').addEventListener('click',async()=>{
-    if(entering||!intro)return;
-    entering=true;
-    const painting=$('beginStudy').querySelector('img'),box=painting.getBoundingClientRect();
-    // Use the painted pixels, excluding object-fit letterboxing on narrow screens.
-    const fit=Math.min(box.width/(painting.naturalWidth||box.width),box.height/(painting.naturalHeight||box.height));
-    const rw=(painting.naturalWidth||box.width)*fit,rh=(painting.naturalHeight||box.height)*fit;
-    const rect={left:box.left+(box.width-rw)/2,top:box.top+(box.height-rh)/2,width:rw,height:rh};
-    const portal=painting.cloneNode();
-    portal.removeAttribute('id');portal.alt='';portal.setAttribute('aria-hidden','true');
-    Object.assign(portal.style,{position:'fixed',left:rect.left+'px',top:rect.top+'px',width:rect.width+'px',height:rect.height+'px',objectFit:'fill',zIndex:'100',pointerEvents:'none',transformOrigin:'50% 43%'});
-    if(!reduced.matches)document.body.append(portal);
-    intro=false;$('paintingIntro').hidden=true;document.body.classList.remove('artwork-intro');
-    fitComparisons();
-    playing=false;seek(0);
-    if(!reduced.matches){
-      $('atelier').inert=true;document.body.classList.add('entering-painting');
-      const dx=innerWidth*.5-(rect.left+rect.width*.5),dy=innerHeight*.47-(rect.top+rect.height*.43);
-      const scale=Math.max(innerWidth/Math.max(1,rect.width),innerHeight/Math.max(1,rect.height))*2.1;
-      const zoom=portal.animate([
-        {transform:'translate(0,0) scale(1)',opacity:1,filter:'blur(0px)',offset:0},
-        {transform:`translate(${dx*.35}px,${dy*.35}px) scale(1.35)`,opacity:1,filter:'blur(0px)',offset:.32},
-        {transform:`translate(${dx}px,${dy}px) scale(${scale})`,opacity:1,filter:'blur(3px)',offset:.76},
-        {transform:`translate(${dx}px,${dy}px) scale(${scale*1.15})`,opacity:0,filter:'blur(12px)',offset:1}
-      ],{duration:1450,easing:'cubic-bezier(.5,0,.2,1)',fill:'forwards'});
-      const reveal=canvas.animate([{opacity:0,transform:'scale(1.16)'},{opacity:1,transform:'scale(1)'}],{duration:850,delay:600,easing:'ease-out',fill:'both'});
-      await Promise.allSettled([zoom.finished,reveal.finished]);
-      portal.remove();reveal.cancel();$('atelier').inert=false;document.body.classList.remove('entering-painting');
-    }
-    entering=false;playing=!reduced.matches;update();canvas.focus({preventScroll:true});
-    start();
-  });
+  // The film waits behind the Wanderer until the painting is chosen (artwork-intro.js).
+  addEventListener('artwork-intro:enter',()=>{intro=false;fitComparisons();playing=false;seek(0);});
+  addEventListener('artwork-intro:entered',()=>{playing=!reduced.matches;update();canvas.focus({preventScroll:true});start();});
   $('playPause').addEventListener('click',toggle);
   $('replay').addEventListener('click',()=>{if(intro)return;playing=!reduced.matches;seek(0);start();});
   $('filmSeek').addEventListener('input',e=>{playing=false;seek(Number(e.target.value));});
@@ -175,6 +145,6 @@
   addEventListener('keydown',e=>{if(e.code==='Space'&&e.target===document.body){e.preventDefault();toggle();}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf);raf=0;last=0;}else start();});
   reduced.addEventListener('change',()=>{playing=false;update();draw();});
-  function resize(){w=innerWidth;h=innerHeight;dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);$('paintingIntro').style.top=`${document.querySelector('.masthead').getBoundingClientRect().bottom+18}px`;fitComparisons();draw();}
+  function resize(){w=innerWidth;h=innerHeight;dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);fitComparisons();draw();}
   addEventListener('resize',resize);document.fonts.ready.then(resize);update();resize();start();
 })();

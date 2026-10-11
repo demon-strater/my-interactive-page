@@ -1,38 +1,39 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#d9c9ad">
-<title>초현실주의 — 빛의 제국</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#6f9bc8">
+<title>초현실주의 — 대표작 갤러리</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="home-button.css?v=1">
+<link rel="stylesheet" href="concept-finale.css?v=6">
 <style>
-/* The Dream Room's papered wall, without the room: the painting hangs on it alone. */
-:root{color-scheme:light}
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden}
-body{background:radial-gradient(ellipse at 50% 44%,#ece0cb 0,#dccbae 52%,#bfa985 100%);color:#3b2f22;font-family:Arial,'Malgun Gothic',sans-serif}
-#atelier{height:100dvh;min-height:320px;position:relative}
-.mf-eyebrow{color:#7a6242}
-.mf-title{color:#2a2016}
-.mf-sub{color:#5a4a37}
-.home-link{position:absolute;top:4%;right:5%;z-index:6;display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:0 15px;border:1px solid #5a42264d;border-radius:999px;background:#f3e9d7c7;color:#3b2f22;font:11px/1 Arial,'Malgun Gothic',sans-serif;letter-spacing:.06em;text-decoration:none}
-.home-link[hidden]{display:none}
-</style>
-<link rel="stylesheet" href="concept-finale.css?v=3">
-<style>
-/* The painting is cut out of the room photograph, so the crop sets its size and shadow. */
-.finale-stage img{object-view-box:inset(7.1% 35.1% 20% 35.6%);filter:none;box-shadow:0 3px 6px #3b2a1a33,0 22px 50px #3b2a1a55}
-.finale-stage figcaption strong{color:#2a2016}
-.finale-stage figcaption span{color:#6b5a45}
+/* The dream (concept-finale.css, dream): Magritte's daylight sky over a night street, slim black frames;
+   works wait as empty frames floating in the sky. */
+:root{--home-ink:#1d2a3a;--home-bg:#ffffffb8;--home-line:#1d2a3a33}
+body{background:#6f9bc8;color:#14202e}
+.mf-head{text-shadow:0 0 16px #cfe0ee}
+.mf-eyebrow{color:#24405f}.mf-title{color:#14202e}.mf-sub{color:#22344a}
+.museum{--label-ink:#f6eacb;--label-muted:#bdb8a8;--label-accent:#e8c77b;--label-glow:0 1px 10px #0b111c;--sky-top:#6c99c7;--sky-mid:#a3c1de;--sky-low:#d8e4ec;--night:#0f1625;--silhouette:#0b111c;--lamp:#f6d58e;--cloud-shade:#9fb1c6;--blank:transparent;--frame:#1b1712;--frame-w:7px;--frame-shadow:0 20px 44px #1d2a3a4d}
 </style>
 <link rel="stylesheet" href="movement-frame.css?v=1">
 </head>
 <body class="finale-page">
-<main id="atelier" aria-label="초현실주의 — 빛의 제국">
-<a class="home-link" id="goHome" href="index.html"><span>←</span> 메인으로</a>
-<header class="masthead mf-head"><span class="mf-eyebrow">1924 – 1966</span><h1 class="mf-title">초현실주의</h1><p class="mf-sub">한 화면에 낮과 밤을, 꿈처럼 함께 그리다</p></header>
-<section class="finale-stage overlay" aria-label="빛의 제국">
-<figure><img src="초현실1.png" alt="르네 마그리트의 빛의 제국. 낮의 푸른 하늘 아래 가로등이 켜진 밤의 집과 나무가 함께 있다" data-finale-art><figcaption><strong>빛의 제국</strong><span>르네 마그리트 · 1956</span></figcaption></figure>
+<main id="atelier" aria-label="초현실주의 — 대표작 갤러리">
+<a class="home-icon" id="goHome" href="index.html" aria-label="메인으로" title="메인으로"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.6 12 4l8 6.6"/><path d="M6.2 9v10.5h4.3v-5.6h3v5.6h4.3V9"/></svg></a>
+<header class="masthead mf-head"><span class="mf-eyebrow">1924 – 1966</span><h1 class="mf-title">초현실주의</h1><p class="mf-sub">꿈과 무의식을, 현실보다 선명하게 그리다</p></header>
+<section class="museum" data-world="dream" aria-label="초현실주의 대표작">
+<ol class="museum-wall" tabindex="0" aria-label="초현실주의 대표작 네 점. 좌우로 넘겨 감상하세요">
+<li class="work"><figure><span class="work-frame"><img src="morning.png" width="1120" height="1450" alt="르네 마그리트의 빛의 제국. 흰 구름이 뜬 밝은 낮 하늘 아래, 어두운 나무와 가로등이 켜진 밤의 집이 물 위에 비친다" decoding="async"></span><figcaption class="work-label"><strong>빛의 제국</strong><em>L'Empire des lumières</em><span>르네 마그리트 · 1956</span><p>환한 낮의 하늘 아래 가로등이 켜진 밤의 거리. 함께 있을 수 없는 두 시간이 한 화면에 놓인다.</p></figcaption></figure></li>
+<li class="work"><figure><span class="work-frame"><img src="gallery/surrealism-tanguy-dark-garden.jpg" width="1800" height="2268" alt="이브 탕기의 어두운 정원. 수평선이 보이는 어두운 바닥 위에 해초나 연기 같은 알 수 없는 형체들이 흩어져 있다" decoding="async"></span><figcaption class="work-label"><strong>어두운 정원</strong><em>Le Jardin sombre</em><span>이브 탕기 · 1928</span><p>바다인지 땅인지 모를 어둠 속에, 이름 붙일 수 없는 형체들이 꿈처럼 떠 있다.</p></figcaption></figure></li>
+<li class="work"><figure><span class="work-frame"><img src="gallery/surrealism-tanguy-indefinite-divisibility.jpg" width="1800" height="2069" alt="이브 탕기의 무한한 가분성. 안개 낀 푸른 평원 위에 뼈와 기계 부품을 닮은 형상이 탑처럼 쌓여 긴 그림자를 드리운다" loading="lazy" decoding="async"></span><figcaption class="work-label"><strong>무한한 가분성</strong><em>Divisibilité indéfinie</em><span>이브 탕기 · 1942</span><p>끝없는 평원 위, 뼈와 돌을 닮은 형상들이 긴 그림자를 드리운다. 무의식이 지은 풍경.</p></figcaption></figure></li>
+<li class="work"><figure><span class="work-frame"><img src="gallery/surrealism-tanguy-imaginary-numbers.jpg" width="1800" height="2199" alt="이브 탕기의 상상의 수. 회색빛 돌과 뼈를 닮은 수많은 형상이 계단처럼 겹겹이 쌓여 먼 지평선까지 이어진다" loading="lazy" decoding="async"></span><figcaption class="work-label"><strong>상상의 수</strong><em>Nombres imaginaires</em><span>이브 탕기 · 1954</span><p>수없이 쌓인 돌 같은 형상들이 지평선까지 이어진다. 현실에는 없는, 꿈속에서만 셀 수 있는 수.</p></figcaption></figure></li>
+</ol>
 </section>
 </main>
-<script src="concept-finale.js?v=3"></script>
+<script src="concept-finale.js?v=6"></script>
 </body>
 </html>

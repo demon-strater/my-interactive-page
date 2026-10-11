@@ -1,0 +1,19 @@
+/* Opening painting — every concept film starts on the work its movement card showed in the hub, alone with
+   its title and artist; choosing it zooms through the painting into the film (artwork-intro.js).
+   Each page hides its own film while body.artwork-intro is set, and may recolour the caption with
+   --intro-ink (title), --intro-muted (artist), --intro-accent (invitation, focus ring) and --intro-shadow. */
+#paintingIntro{--intro-caption:80px;position:absolute;inset:var(--intro-top,140px) 5% max(18px,env(safe-area-inset-bottom));display:flex;justify-content:center;align-items:center;container-type:size}
+#paintingIntro[hidden]{display:none}
+/* The painting takes the largest size that still leaves room for its caption, at its own proportions
+   (--intro-ratio, set from the image), so a wide work on a tall screen keeps its caption right beneath it. */
+#paintingIntro figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+#paintingIntro img{display:block;width:100%;height:auto;filter:drop-shadow(0 12px 30px var(--intro-shadow,#0006))}
+#paintingIntro figcaption{font:15px/1.5 'Nanum Myeongjo',Georgia,serif;color:var(--intro-ink,#e8dfcd)}
+#paintingIntro figcaption span{display:block;font:11px/1.5 Arial,sans-serif;color:var(--intro-muted,#9babac);margin-top:3px}
+#beginStudy{display:block;position:relative;padding:0;min-height:0;min-width:0;width:min(100cqw,calc((100cqh - var(--intro-caption)) * var(--intro-ratio,.75)));border:0;cursor:zoom-in;background:none;transition:filter .35s}
+#beginStudy:hover{filter:brightness(1.08)}
+#beginStudy:focus-visible{outline:2px solid var(--intro-accent,#dec193);outline-offset:6px}
+.painting-invitation{display:block;margin-top:8px;color:var(--intro-accent,#dec193);font:11px/1.5 Arial,sans-serif;letter-spacing:.06em}
+.entering-painting .masthead,.entering-painting footer{opacity:0}
+@media(max-width:600px){#paintingIntro{--intro-caption:74px}#paintingIntro figure{gap:10px}#paintingIntro figcaption{font-size:12px}}
+@media(prefers-reduced-motion:reduce){#beginStudy{transition:none}}

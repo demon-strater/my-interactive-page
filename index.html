@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Four Art Movements</title>
-    <link rel="stylesheet" href="style.css?v=frame-1">
-<script src="art-audio.js?v=1" defer></script></head>
+    <link rel="stylesheet" href="style.css?v=intro-1">
+<script src="art-audio.js?v=4" defer></script></head>
 <body class="view-hub">
     <div class="cinematic-stage" id="cinematicStage">
         <section class="hub-screen" id="hubScreen" aria-label="Interaction hub" data-movement="renaissance">
@@ -76,11 +76,8 @@
         </div>
 
         <section class="interaction-screen" id="interactionScreen" aria-label="Art movement interaction">
-            <button class="vp-next-button" id="goVanishingPoint" type="button" aria-label="Go to the vanishing-point page">
-                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 4.5 L13 10 L7.5 15.5"></path></svg>
-            </button>
-            <button class="back-button" id="backToShelf" type="button" aria-label="Return home">
-                <span class="home-label">Home</span>
+            <button class="back-button" id="backToShelf" type="button" aria-label="메인으로" title="메인으로">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.6 12 4l8 6.6"/><path d="M6.2 9v10.5h4.3v-5.6h3v5.6h4.3V9"/></svg>
             </button>
 
             <div class="interaction-content impressionism-site">
@@ -89,7 +86,7 @@
                 </header>
 
                 <main class="main-container surreal-room" aria-label="Surrealism room window">
-                    <div class="dream-room-title mf-head mf-narrow"><span class="mf-eyebrow">초현실주의 / 01</span><h2 class="mf-title">낮과 밤이<br>공존하는 방.</h2></div>
+                    <div class="dream-room-title mf-head mf-narrow"><span class="mf-eyebrow">초현실주의 / 02</span><h2 class="mf-title">낮과 밤이<br>공존하는 방.</h2></div>
                     <section class="music-player side-player" id="musicPlayer" aria-label="Music control">
                         <div class="now-playing">
                             <div>
@@ -137,6 +134,7 @@
                     <span class="side-table"></span>
                 </div>
             </main>
+            <iframe class="surreal-film-frame" title="초현실주의 — 꿈을 그리는 법" hidden></iframe>
             <iframe class="surreal-finale-frame" title="초현실주의 — 빛의 제국" hidden></iframe>
         </div>
 
@@ -159,7 +157,7 @@
 
         <div class="interaction-content renaissance-site" aria-label="Renaissance interaction">
             <main class="renaissance-stage" aria-label="Renaissance perspective stage">
-                <iframe class="renaissance-frame" data-src="renaissance.html?v=play-15" title="Renaissance — Discovering perspective and placing the vanishing point"></iframe>
+                <iframe class="renaissance-frame" data-src="renaissance.html?v=intro-1" title="Renaissance — Discovering perspective and placing the vanishing point"></iframe>
             </main>
         </div>
 
@@ -189,13 +187,13 @@
 
         <div class="interaction-content romanticism-site" aria-label="Romanticism interaction">
             <main class="romanticism-stage" aria-label="Romanticism wanderer above the sea of fog">
-                <iframe class="romanticism-frame" data-src="romanticism.html?v=cinema-5" title="Romanticism — A moving concept and landscape"></iframe>
+                <iframe class="romanticism-frame" data-src="romanticism.html?v=intro-1" title="Romanticism — A moving concept and landscape"></iframe>
             </main>
         </div>
 
         <div class="interaction-content impressionism-time-site" aria-label="Impressionism interaction">
             <main class="impressionism-time-stage" aria-label="Impressionism time and temperature stage">
-                <iframe class="impressionism-time-frame" data-src="impressionism.html?v=glass-1" title="인상주의 — 빛의 조각들"></iframe>
+                <iframe class="impressionism-time-frame" data-src="impressionism-film.html?v=intro-1" title="인상주의 — 빛으로 그린 한순간"></iframe>
             </main>
         </div>
     </section>
@@ -215,7 +213,7 @@
     </aside>
     <div class="hand-cursor" id="handCursor" aria-hidden="true"></div>
 
-    <script src="script.js?v=frame-1"></script>
+    <script src="script.js?v=intro-1"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="surreal-memory.css?v=frame-1">

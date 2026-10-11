@@ -48,17 +48,17 @@
       swipeStart = null;
       if (duration > 900 || dx > -75 || Math.abs(dx) < Math.abs(dy) * 1.7) return;
       swallowClick = true;
-      navigate('renaissance.html?v=play-15');
+      navigate('renaissance.html?v=intro-1');
     });
     document.addEventListener('pointercancel', () => { swipeStart = null; });
   } else {
     // Swiping right on the concept film moves forward into the vanishing-point page. The scene's own
     // canvas drag (moving the column or the eye) stops its pointerdown from reaching here, so it never
-    // fights with this gesture.
+    // fights with this gesture. The opening painting comes first, so there is no swiping past it.
     let swipeStart = null;
     document.addEventListener('pointerdown', e => {
       swipeStart = null;
-      if (e.button !== 0 || !e.isPrimary || e.target.closest('a,button,input,select,textarea,[contenteditable]')) return;
+      if (document.body.classList.contains('artwork-intro') || e.button !== 0 || !e.isPrimary || e.target.closest('a,button,input,select,textarea,[contenteditable]')) return;
       swipeStart = { id: e.pointerId, x: e.clientX, y: e.clientY, at: performance.now() };
     });
     document.addEventListener('pointerup', e => {

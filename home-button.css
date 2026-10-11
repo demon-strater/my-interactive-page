@@ -1,0 +1,11 @@
+/* The one Home control — a square, icon-only house at the top right of every page (the hub's own Home inside
+   the gallery frame, and #goHome on a page opened on its own). art-audio.js docks the sound toggle just left of it,
+   in the same square shape and the same colours. Each page may recolour it with --home-ink, --home-bg, --home-line. */
+.home-icon{position:absolute;top:var(--mf-top,24px);right:var(--mf-side,5%);z-index:7;box-sizing:border-box;display:inline-grid;place-items:center;width:40px;height:40px;min-width:40px;min-height:40px;margin:0;padding:0;border:1px solid var(--home-line,#ffffff38);border-radius:10px;background:var(--home-bg,#0d1420b8);color:var(--home-ink,#f2ede2);text-decoration:none;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:transform .18s ease,background .18s ease,border-color .18s ease}
+.home-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.home-icon:hover{transform:translateY(-1px);border-color:var(--home-ink,#f2ede2)}
+.home-icon:focus-visible{outline:2px solid var(--home-ink,#f2ede2);outline-offset:3px}
+.home-icon[hidden]{display:none}
+.entering-painting .home-icon{opacity:0}
+@media(max-width:700px){.home-icon{width:36px;height:36px;min-width:36px;min-height:36px;border-radius:9px}.home-icon svg{width:16px;height:16px}}
+@media(prefers-reduced-motion:reduce){.home-icon{transition:none}}

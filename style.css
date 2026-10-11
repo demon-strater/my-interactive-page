@@ -1007,50 +1007,32 @@ body.view-fluid-collision .pull-chain {
     top: clamp(16px, 2vw, 24px);
     left: clamp(16px, 2vw, 24px);
     z-index: 30;
+    width: 40px;
+    height: 40px;
     min-height: 40px;
-    padding: 0 15px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+    padding: 0;
+    display: inline-grid;
+    place-items: center;
     border: 1px solid rgba(255, 255, 255, 0.24);
-    border-radius: 999px;
+    border-radius: 10px;
     color: rgba(255, 255, 255, 0.9);
     background: rgba(8, 12, 18, 0.34);
     box-shadow: 0 12px 34px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
     cursor: pointer;
-    font-size: 0.78rem;
-    font-weight: 800;
-    letter-spacing: 0;
     transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
 }
 
-.back-button::before {
-    content: "";
-    width: 13px;
-    height: 10px;
-    border: 2px solid currentColor;
-    border-top: 0;
-    border-radius: 1px 1px 3px 3px;
-}
-
-.back-button::after {
-    content: "";
-    position: absolute;
-    left: 18px;
-    top: 12px;
-    width: 9px;
-    height: 9px;
-    border-left: 2px solid currentColor;
-    border-top: 2px solid currentColor;
-    transform: rotate(45deg);
-    transform-origin: center;
-}
-
-.home-label {
-    position: relative;
-    z-index: 1;
+/* The same house as the pages' own Home square (home-button.css). */
+.back-button svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .back-button:hover {
@@ -2297,9 +2279,6 @@ body.view-interaction.night-background .handle {
     .back-button {
         top: 16px;
         left: 16px;
-        min-height: 38px;
-        padding: 0 13px;
-        font-size: 0.86rem;
     }
 
     .site-header {
@@ -2465,26 +2444,6 @@ body.view-interaction.night-background .handle {
     padding: clamp(18px, 2.6vw, 30px);
 }
 
-.back-button {
-    min-height: 38px;
-    padding: 0 13px;
-    border-radius: var(--ui-radius);
-    font-size: 0.74rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-}
-
-.back-button::before {
-    width: 12px;
-    height: 9px;
-}
-
-.back-button::after {
-    left: 17px;
-    top: 12px;
-    width: 8px;
-    height: 8px;
-}
 
 .site-header {
     min-height: auto;
@@ -3964,63 +3923,16 @@ body:not(.view-hub) .hand-tracker-status {
     .hand-tracker-help { display: none; }
 }
 
-/* Keep Home in a reserved upper-right corner across internal scenes. */
+/* Keep Home — a 40px square house — in a reserved upper-right corner across internal scenes;
+   art-audio.js docks the sound square just to its left. */
 body.view-interaction .back-button {
     top: 16px;
     right: 16px;
     left: auto;
-    width: 96px;
-    height: 40px;
-    min-height: 40px;
-    justify-content: center;
-    padding: 0 13px;
-}
-
-/* Small forward link to the vanishing-point page, reserved just left of Home so the two never touch. */
-.vp-next-button {
-    display: none;
-}
-
-body.view-renaissance.view-interaction .vp-next-button {
-    display: flex;
-    position: absolute;
-    top: 16px;
-    right: 122px;
-    z-index: 30;
     width: 40px;
     height: 40px;
     min-height: 40px;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid rgba(249, 226, 180, 0.24);
-    border-radius: 11px;
-    color: rgba(249, 226, 180, 0.94);
-    background: rgba(44, 27, 13, 0.38);
-    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    cursor: pointer;
-    transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
-}
-
-body.view-renaissance.view-interaction .vp-next-button svg {
-    width: 16px;
-    height: 16px;
-    overflow: visible;
-}
-
-body.view-renaissance.view-interaction .vp-next-button path {
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.8;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-
-body.view-renaissance.view-interaction .vp-next-button:hover {
-    transform: translateY(-1px);
-    border-color: rgba(249, 226, 180, 0.42);
-    background: rgba(74, 47, 23, 0.48);
+    padding: 0;
 }
 
 body.view-interaction .particle-header,
@@ -4057,5 +3969,17 @@ body.view-impressionism .memory-title {
     background: #d9c9ad;
 }
 .surreal-finale-frame[hidden] { display: none; }
-body.showing-concept-finale .pull-chain,
-body.showing-concept-finale .vp-next-button { display: none !important; }
+body.showing-concept-finale .pull-chain { display: none !important; }
+
+.surreal-film-frame {
+    position: absolute;
+    inset: 0;
+    z-index: 19;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #0d1220;
+}
+.surreal-film-frame[hidden] { display: none; }
+body.showing-surreal-film .pull-chain,
+body.showing-surreal-film .memory-enter { display: none !important; }

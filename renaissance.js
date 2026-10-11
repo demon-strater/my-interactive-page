@@ -24,7 +24,8 @@
     grid.addEventListener('mouseenter',()=>{lingering=true;});
     grid.addEventListener('mouseleave',()=>{lingering=false;});
   });
-  let width=1,height=1,time=reduced.matches?7:0,playing=!reduced.matches,last=0,raf=0,currentChapter=-1;
+  const atIntro=()=>document.body.classList.contains('artwork-intro');
+  let width=1,height=1,time=reduced.matches?7:0,playing=!reduced.matches&&!atIntro(),last=0,raf=0,currentChapter=-1;
   let manual={},drag=null,targets={},view=null,artReady=false,artFailed=false,showArtLines=true;
   const artwork=new Image();
   const plane=[[-3.2,-.45,-3],[3.2,-.45,-3],[3.2,4.5,-3],[-3.2,4.5,-3]];
@@ -272,7 +273,10 @@
   [...$('progress').children].forEach((button,i)=>button.addEventListener('click',()=>seek(i,false)));
   $('playPause').addEventListener('click',()=>{if(playing)pause();else{if(time>=50){time=0;manual={};currentChapter=-1;holdRemaining=null;holdAt=null;}playing=true;last=0;invalidate();}});
   $('replay').addEventListener('click',()=>{time=0;manual={};playing=!reduced.matches;last=0;holdRemaining=null;holdAt=null;currentChapter=-1;invalidate();});
-  addEventListener('keydown',e=>{if(e.code==='Space'&&e.target===document.body){e.preventDefault();$('playPause').click();}});
+  addEventListener('keydown',e=>{if(e.code==='Space'&&e.target===document.body&&!atIntro()){e.preventDefault();$('playPause').click();}});
+  // The film waits behind the School of Athens until the painting is chosen (artwork-intro.js), then starts from the top.
+  addEventListener('artwork-intro:enter',()=>{time=reduced.matches?7:0;manual={};playing=false;last=0;holdRemaining=null;holdAt=null;currentChapter=-1;invalidate();});
+  addEventListener('artwork-intro:entered',()=>{playing=!reduced.matches;last=0;invalidate();canvas.focus({preventScroll:true});});
   function setValue(kind,value){
     if(kind==='distance')manual.distance=clamp(value,2,16);else manual.eye=clamp(value,.8,3.2);
     invalidate();
@@ -321,7 +325,8 @@
   window.addEventListener('message',e=>{
     if(e.source!==parent||e.origin!==window.location.origin)return;
     if(e.data==='renaissance:resize')resize();
-    if(e.data==='renaissance:enter')seek(0);
+    // The hub announces every entry; while the opening painting is up the film keeps waiting behind it.
+    if(e.data==='renaissance:enter'&&!atIntro())seek(0);
     if(e.data==='renaissance:leave')pause();
   });
   // Vanishing-point calibration: double-click anywhere on one of the three example artworks to move

@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const featureMeta = document.getElementById('featureMeta');
     const siteTransition = document.getElementById('siteTransition');
     const backToShelf = document.getElementById('backToShelf');
-    const goVanishingPoint = document.getElementById('goVanishingPoint');
     const pullChain = document.getElementById('pullChain');
     const leftArrow = document.getElementById('leftArrow');
     const rightArrow = document.getElementById('rightArrow');
@@ -779,7 +778,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (interaction.site === 'impressionism') {
             isNight = false;
-            // No longer auto-triggering music here
+            surrealFilmFrame.src = 'surrealism-film.html?v=1';
+            surrealFilmFrame.hidden = false;
+            body.classList.add('showing-surreal-film');
         } else {
             pauseAllMusic();
             body.classList.remove('night-background');
@@ -825,7 +826,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Pre-load iframes immediately
         if (interaction.site === 'impressionism-time' && impressionismTimeFrame && (!impressionismTimeFrame.src || impressionismTimeFrame.src.includes('-finale.html'))) {
-            impressionismTimeFrame.src = impressionismTimeFrame.dataset.src || 'impressionism.html';
+            impressionismTimeFrame.src = impressionismTimeFrame.dataset.src || 'impressionism-film.html';
         }
 
         if (interaction.site === 'impressionism') {
@@ -860,7 +861,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 isInteractionOpening = false;
 
                 // Play music only after the interaction site is fully revealed
-                if (interaction.site === 'impressionism') {
+                if (interaction.site === 'impressionism' && !body.classList.contains('showing-surreal-film')) {
                     isMusicPlaying = true;
                     updateScenes(); // This triggers managePlayback() -> audio.play()
                 }
@@ -942,27 +943,43 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // A frame last left on the closing artwork page starts over from the study itself.
+        // A frame last left on the closing artwork page starts over from its opening painting.
         if (!impressionismTimeFrame.src || impressionismTimeFrame.src.includes('-finale.html')) {
-            impressionismTimeFrame.src = impressionismTimeFrame.dataset.src || 'impressionism.html';
+            impressionismTimeFrame.src = impressionismTimeFrame.dataset.src || 'impressionism-film.html';
         }
     }
 
     const surrealFinaleFrame = document.querySelector('.surreal-finale-frame');
+    const surrealFilmFrame = document.querySelector('.surreal-film-frame');
     let openSite = null, finaleShown = false;
+
+    function hideSurrealFilm() {
+        surrealFilmFrame.hidden = true;
+        surrealFilmFrame.src = 'about:blank';
+        body.classList.remove('showing-surreal-film');
+    }
+
+    window.addEventListener('message', event => {
+        if (event.source !== surrealFilmFrame.contentWindow || event.data?.type !== 'surrealism:enter-room') return;
+        if (openSite !== 'impressionism' || surrealFilmFrame.hidden) return;
+        hideSurrealFilm();
+        isMusicPlaying = true;
+        updateScenes();
+    });
 
     // Every movement ends on its representative work, drawn in the movement's own page layout.
     // Iframe movements load it in place; Surrealism lives in the hub, so it gets a frame of its own.
     const finaleFrames = {
-        renaissance: [renaissanceFrame, 'renaissance-finale.html?v=3'],
-        impressionism: [surrealFinaleFrame, 'surrealism-finale.html?v=1'],
-        romanticism: [romanticismFrame, 'romanticism-finale.html?v=3'],
-        'impressionism-time': [impressionismTimeFrame, 'impressionism-finale.html?v=3']
+        renaissance: [renaissanceFrame, 'renaissance-finale.html?v=5'],
+        impressionism: [surrealFinaleFrame, 'surrealism-finale.html?v=5'],
+        romanticism: [romanticismFrame, 'romanticism-finale.html?v=5'],
+        'impressionism-time': [impressionismTimeFrame, 'impressionism-finale.html?v=5']
     };
 
     function showFinale(site) {
         const [frame, finalePage] = finaleFrames[site] || [];
         if (!frame) return false;
+        hideSurrealFilm();
         pauseAllMusic();
         frame.src = finalePage;
         frame.hidden = false;
@@ -986,6 +1003,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function closeInteraction() {
+        hideSurrealFilm();
         hideFinale();
         openSite = null;
         finaleShown = false;
@@ -1080,12 +1098,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     backToShelf.addEventListener('click', leaveInteraction);
-
-    goVanishingPoint?.addEventListener('click', () => {
-        // Setting the iframe's own src is a plain same-document DOM write, so it always works even
-        // when postMessage between file:// documents is unreliable (as it can be with no dev server).
-        if (renaissanceFrame) renaissanceFrame.src = 'renaissance-perspective.html?v=home-2&enter=next';
-    });
 
     window.addEventListener('message', event => {
         if (event.origin !== window.location.origin) return;

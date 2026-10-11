@@ -9,16 +9,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="renaissance.css?v=play-13">
-<link rel="stylesheet" href="renaissance-navigation.css?v=nav-2">
+<link rel="stylesheet" href="renaissance.css?v=intro-1">
+<link rel="stylesheet" href="renaissance-navigation.css?v=nav-3">
+<link rel="stylesheet" href="home-button.css?v=1">
 <link rel="stylesheet" href="concept-transport.css?v=2">
 <link rel="stylesheet" href="concept-compare.css?v=1">
+<link rel="stylesheet" href="artwork-intro.css?v=1">
 <link rel="stylesheet" href="movement-frame.css?v=1">
-<script src="art-audio.js?v=1" defer></script></head>
-<body class="visual-experience">
+<script src="art-audio.js?v=4" defer></script></head>
+<body class="visual-experience artwork-intro">
 <main id="atelier">
-  <button class="home-button" id="goHome" type="button"><span>←</span> 메인으로</button>
+  <button class="home-icon" id="goHome" type="button" aria-label="메인으로" title="메인으로"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.6 12 4l8 6.6"/><path d="M6.2 9v10.5h4.3v-5.6h3v5.6h4.3V9"/></svg></button>
   <header class="masthead mf-head mf-flow"><div class="eyebrow mf-eyebrow">르네상스 / 01</div><h1 id="sceneTitle" class="mf-title">평평한 그림 속에 깊이를 만드는 착시</h1></header>
+  <section id="paintingIntro" aria-label="그림을 살펴보기" data-reveal="#stage" data-focus=".512 .471"><figure><button id="beginStudy" type="button" aria-label="그림 속으로 들어가 르네상스를 탐구하기"><img src="아테네%20학당.jpg" alt="라파엘로의 아테네 학당. 아치형 천장 아래 철학자들이 모여 있고, 모든 선이 가운데 두 인물 사이의 소실점으로 모인다" fetchpriority="high"></button><figcaption>아테네 학당 <span>라파엘로 산치오 · 1509–1511</span><small class="painting-invitation">그림을 클릭해 들어가기</small></figcaption></figure></section>
   <section id="stage" aria-label="애니메이션 원근법 모형">
     <canvas id="scene" tabindex="0" aria-label="시각적 원근법 실험. 세 번째 장면에서는 청록색 기둥을, 네 번째 장면에서는 눈을 드래그할 수 있습니다. 방향키도 사용할 수 있습니다."></canvas>
     <span id="sceneStatus" class="sr-only" role="status"></span>
@@ -111,7 +114,8 @@
 </main>
 <script src="concept-compare.js?v=1"></script>
 <script src="renaissance-model.js?v=visual-6"></script>
-<script src="renaissance.js?v=play-15"></script>
-<script src="renaissance-navigation.js?v=nav-12"></script>
+<script src="renaissance.js?v=intro-1"></script>
+<script src="renaissance-navigation.js?v=nav-13"></script>
+<script src="artwork-intro.js?v=1"></script>
 </body>
 </html>

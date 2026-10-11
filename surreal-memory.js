@@ -12,14 +12,14 @@
       <button class="corpse-band" data-band="1" type="button"></button>
       <button class="corpse-band" data-band="2" type="button"></button>
     </div>
-    <div class="memory-title mf-head mf-narrow"><span class="mf-eyebrow">초현실주의 / 02</span><h2 class="mf-title">세 조각을 이어<br>낯선 몸을 만드세요.</h2><p class="mf-sub">초현실주의자들은 서로 보지 않고 몸을 나눠 그리는 놀이 ‘우아한 시체’(1925)로 우연이 만든 이미지를 찾았습니다.</p></div>
+    <div class="memory-title mf-head mf-narrow"><span class="mf-eyebrow">초현실주의 / 03</span><h2 class="mf-title">세 조각을 이어<br>낯선 몸을 만드세요.</h2><p class="mf-sub">초현실주의자들은 서로 보지 않고 몸을 나눠 그리는 놀이 ‘우아한 시체’(1925)로 우연이 만든 이미지를 찾았습니다.</p></div>
     <p class="corpse-caption" id="corpseCaption" aria-live="polite"></p>
     <button class="chance-meeting" id="chanceMeeting" type="button" aria-label="레버를 아래로 당기거나 눌러 무작위로 조합하기">
       <span class="lever-track" aria-hidden="true"></span><span class="lever-base" aria-hidden="true"></span>
       <span class="lever-stem" aria-hidden="true"></span><span class="lever-knob" aria-hidden="true"></span>
       <span class="lever-label" aria-hidden="true">당기기 <span>↓</span></span>
     </button>
-    <nav class="memory-nav" aria-label="조합 카드 조작"><button type="button" data-back>&larr; 뒤로</button><span>초현실주의 · 02 / 우아한 시체</span></nav>`;
+    <nav class="memory-nav" aria-label="조합 카드 조작"><button type="button" data-back>&larr; 뒤로</button><span>초현실주의 · 03 / 우아한 시체</span></nav>`;
   const enter = document.createElement('button');
   enter.type = 'button'; enter.className = 'memory-enter';
   enter.textContent = '우아한 시체 놀이 →';

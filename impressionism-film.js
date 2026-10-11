@@ -26,7 +26,8 @@
     grid.addEventListener('mouseleave', () => { lingering = false; });
   });
   if (window.parent !== window) $('goHome').hidden = true;
-  let w = 1, h = 1, dpr = 1, time = 0, playing = !reduced.matches, last = 0, raf = 0, index = -1;
+  const atIntro = () => document.body.classList.contains('artwork-intro');
+  let w = 1, h = 1, dpr = 1, time = 0, playing = !reduced.matches && !atIntro(), last = 0, raf = 0, index = -1;
   const format = t => `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
   const runtime = () => TOTAL + (compareReady ? compareWindows.reduce((s, win) => s + win.hold, 0) : 0);
   function chapterAt(t) { for (let i = 0; i < bounds.length - 1; i++) if (t < bounds[i + 1]) return i; return bounds.length - 2; }
@@ -81,7 +82,10 @@
   [...$('progress').children].forEach((b, i) => b.addEventListener('click', () => { playing = !reduced.matches; seek(bounds[i] + (reduced.matches ? (bounds[i + 1] - bounds[i]) * .55 : 0)); start(); }));
   $('playPause').addEventListener('click', () => { playing = !playing; if (time >= TOTAL) seek(0); update(); start(); });
   $('replay').addEventListener('click', () => { playing = !reduced.matches; seek(0); start(); });
-  addEventListener('keydown', e => { if (e.code === 'Space' && e.target === document.body) { e.preventDefault(); $('playPause').click(); } });
+  addEventListener('keydown', e => { if (e.code === 'Space' && e.target === document.body && !atIntro()) { e.preventDefault(); $('playPause').click(); } });
+  // The film waits behind Rouen Cathedral until the painting is chosen (artwork-intro.js).
+  addEventListener('artwork-intro:enter', () => { playing = false; seek(0); });
+  addEventListener('artwork-intro:entered', () => { playing = !reduced.matches; update(); start(); });
   document.addEventListener('visibilitychange', () => { if (document.hidden) { cancelAnimationFrame(raf); raf = 0; last = 0; } else start(); });
   reduced.addEventListener('change', () => { playing = false; update(); draw(); });
   function resize() { w = innerWidth; h = innerHeight; dpr = Math.min(devicePixelRatio || 1, 1.5); canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); draw(); }

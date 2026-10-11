@@ -3,24 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#100e0b">
-<title>르네상스 — 아테네 학당</title>
+<meta name="theme-color" content="#0b0806">
+<title>르네상스 — 대표작 갤러리</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="renaissance.css?v=play-13">
-<link rel="stylesheet" href="renaissance-navigation.css?v=nav-2">
-<link rel="stylesheet" href="concept-finale.css?v=3">
+<link rel="stylesheet" href="home-button.css?v=1">
+<link rel="stylesheet" href="concept-finale.css?v=6">
+<style>
+/* The hall (concept-finale.css, prospettiva): gold perspective lines on the film's dark umber, gilt frames;
+   works wait as sepia underdrawings (data-vp marks a work's vanishing point where it is built on one). */
+:root{--home-ink:#f7ecd0;--home-bg:#241708b0;--home-line:#e2c07f55}
+body{background:#0b0806;color:#f3ead8}
+.mf-eyebrow{color:#dfb774}.mf-title{color:#f3ead8}.mf-sub{color:#b8ab93}
+.museum{--label-ink:#f3ead8;--label-muted:#ad9f86;--label-accent:#dfb774;--label-glow:0 1px 14px #0b0806,0 0 3px #0b0806;--line:#dfb774;--glow:#2c2014;--wall:#140f0a;--ground:#0b0806;--blank:#e9dcc0;--frame:linear-gradient(140deg,#6d5023,#d9b56c 22%,#8a6a32 46%,#e7c983 70%,#6a4c1f);--frame-w:10px;--frame-shadow:0 0 0 1px #00000080,0 30px 70px #000000c8}
+</style>
 <link rel="stylesheet" href="movement-frame.css?v=1">
 </head>
-<body class="visual-experience finale-page">
-<main id="atelier">
-  <a class="home-button" id="goHome" href="index.html"><span>←</span> 메인으로</a>
-  <header class="masthead mf-head mf-flow"><div class="eyebrow mf-eyebrow">1400 – 1600</div><h1 class="mf-title">르네상스</h1><p class="hint mf-sub">그림 속에 진짜 같은 공간을 만들다</p></header>
-  <section class="finale-stage" aria-label="르네상스 — 아테네 학당">
-    <figure><img src="아테네%20학당.jpg" alt="라파엘로의 아테네 학당. 아치형 천장 아래 철학자들이 모여 있고, 모든 선이 가운데 두 인물 사이의 소실점으로 모인다" data-finale-art><figcaption><strong>아테네 학당</strong><span>라파엘로 산치오 · 1509–1511</span></figcaption></figure>
-  </section>
+<body class="finale-page">
+<main id="atelier" aria-label="르네상스 — 대표작 갤러리">
+<a class="home-icon" id="goHome" href="index.html" aria-label="메인으로" title="메인으로"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.6 12 4l8 6.6"/><path d="M6.2 9v10.5h4.3v-5.6h3v5.6h4.3V9"/></svg></a>
+<header class="masthead mf-head"><span class="mf-eyebrow">1400 – 1600</span><h1 class="mf-title">르네상스</h1><p class="mf-sub">그림 속에 진짜 같은 공간을 만들다</p></header>
+<section class="museum" data-world="prospettiva" aria-label="르네상스 대표작">
+<ol class="museum-wall" tabindex="0" aria-label="르네상스 대표작 다섯 점. 좌우로 넘겨 감상하세요">
+<li class="work" data-vp="51.2 47.1"><figure><span class="work-frame"><img src="아테네%20학당.jpg" width="1920" height="1490" alt="라파엘로의 아테네 학당. 아치형 천장 아래 철학자들이 모여 있고, 모든 선이 가운데 두 인물 사이의 소실점으로 모인다" decoding="async"></span><figcaption class="work-label"><strong>아테네 학당</strong><em>Scuola di Atene</em><span>라파엘로 산치오 · 1509–1511</span><p>아치와 바닥의 모든 선이 플라톤과 아리스토텔레스 사이의 한 점으로 모인다. 원근법으로 지은 지혜의 전당.</p></figcaption></figure></li>
+<li class="work"><figure><span class="work-frame"><img src="gallery/renaissance-birth-of-venus.jpg" width="1800" height="1130" alt="조개껍데기 위에 선 비너스가 바람의 신에게 떠밀려 해안에 닿고, 오른쪽의 여인이 꽃무늬 망토를 건네려 한다" decoding="async"></span><figcaption class="work-label"><strong>비너스의 탄생</strong><em>La nascita di Venere</em><span>산드로 보티첼리 · 1484–1486</span><p>잊혔던 고대 신화가 다시 화면 위에 피어났다. 신 대신 인간의 아름다움을 노래한 르네상스의 시작.</p></figcaption></figure></li>
+<li class="work" data-vp="50 31"><figure><span class="work-frame"><img src="원근법ㅇ.jpg" width="1280" height="640" alt="레오나르도 다 빈치의 최후의 만찬. 긴 식탁에 예수와 열두 제자가 앉아 있고, 방의 모든 선이 가운데 예수의 머리로 모인다" loading="lazy" decoding="async"></span><figcaption class="work-label"><strong>최후의 만찬</strong><em>Il Cenacolo</em><span>레오나르도 다 빈치 · 1495–1498</span><p>천장과 벽의 선이 모두 예수의 머리로 모여, 우리의 시선이 이야기의 한가운데에 닿는다.</p></figcaption></figure></li>
+<li class="work"><figure><span class="work-frame"><img src="gallery/renaissance-mona-lisa.jpg" width="1800" height="2683" alt="레오나르도 다 빈치의 모나리자. 두 손을 포개고 앉은 여인이 희미한 미소를 띠고, 뒤로 굽이진 길과 물이 있는 풍경이 펼쳐진다" loading="lazy" decoding="async"></span><figcaption class="work-label"><strong>모나리자</strong><em>La Gioconda</em><span>레오나르도 다 빈치 · 1503–1519</span><p>윤곽을 안개처럼 흐리게 녹이는 스푸마토 기법으로, 숨 쉬는 듯한 얼굴과 미소를 그렸다.</p></figcaption></figure></li>
+<li class="work"><figure><span class="work-frame"><img src="gallery/renaissance-creation-of-adam.jpg" width="1800" height="817" alt="미켈란젤로의 아담의 창조. 비스듬히 누운 아담이 손을 뻗고, 천사들에게 둘러싸인 신이 손가락을 맞대려 다가온다" loading="lazy" decoding="async"></span><figcaption class="work-label"><strong>아담의 창조</strong><em>Creazione di Adamo</em><span>미켈란젤로 부오나로티 · 1508–1512</span><p>시스티나 성당의 천장화. 닿을 듯 닿지 않는 두 손가락 사이로 생명이 건너간다.</p></figcaption></figure></li>
+</ol>
+</section>
 </main>
-<script src="concept-finale.js?v=3"></script>
+<script src="concept-finale.js?v=6"></script>
 </body>
 </html>
