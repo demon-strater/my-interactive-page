@@ -1,0 +1,24 @@
+﻿ChatGPT에 첨부할 핵심 10장 — 각 3840 × 2160px PNG
+
+패널 1 / 작품·사조·나에게 준 영향
+01_hub.png — 상단 브랜드 참고 및 작은 프리뷰.
+02_renaissance_artwork.png — A 르네상스 작품 인트로.
+12_surrealism_artwork.png — B 초현실주의 작품 모티프 인트로.
+08_romanticism_artwork.png — C 낭만주의 작품 인트로.
+
+패널 2 / 조작과 변화
+05_renaissance_scattered.png + 06_renaissance_composed.png — A 배치 전후.
+17_surrealism_chance_before.png + 18_surrealism_chance_after.png — B 조합 전후.
+10_romanticism_calm.png + 11_romanticism_storm.png — C 고요함/폭풍.
+
+추가 캡처는 screen-captures에 있습니다.
+03/04 — 투영과 눈높이 개념.
+07 — 소실점 이동의 추가 상태.
+09 — 낭만주의 안개 개념.
+13/14 — 낮과 밤, 사과의 낯선 크기.
+15/16 — 꿈의 방 전환 전후.
+19/20/21 — 각 사조 갤러리.
+
+초현실주의를 우아한 시체보다 데페이즈망 중심으로 강조하고 싶다면 13/14를 추가 첨부하세요. 단 17/18의 전후 관계와 서로 다른 체험을 혼동하지 않게 캡션을 바꿔야 합니다.
+
+캡처는 실제 사이트의 원본 화면입니다. 폰트 대체·색상 변환·크롭 시에도 기존 UI를 새로 그리거나 원작의 정확한 판본이라고 단정하지 마세요. 텍스트는 별도 활자로 조판하세요.

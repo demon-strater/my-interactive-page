@@ -1,0 +1,162 @@
+{
+  "capturedAt": "2026-10-12T05:10:38.763Z",
+  "viewport": "1920 × 1080; DPR 2",
+  "errors": [],
+  "actions": [
+    {
+      "hub": "view-hub",
+      "title": "Three Art Movements"
+    },
+    {
+      "perspective": "다른 곳을 탭해 소실점을 옮기세요",
+      "ordered": "is-ordered"
+    },
+    {
+      "romanticFilm": "보이지 않는 것: 드러난 계곡에서 가려진 계곡(으)로, 75퍼센트"
+    },
+    {
+      "romanticWeather": "1.00",
+      "mood": "폭풍"
+    },
+    {
+      "surrealApple": "사과 크기 6.4배"
+    },
+    {
+      "roomClass": "view-interaction view-impressionism night-background"
+    },
+    {
+      "chanceCaption": "유리로 된 나방이 자기 그림자를 입는다."
+    },
+    {
+      "returnedHub": "view-hub"
+    }
+  ],
+  "shots": [
+    {
+      "file": "01_hub.png",
+      "caption": "메인 브랜딩 / 르네상스 카드",
+      "url": "http://127.0.0.1:8769/index.html",
+      "size": "3840 × 2160 px"
+    },
+    {
+      "file": "02_renaissance_artwork.png",
+      "caption": "라파엘로 작품 인트로",
+      "url": "http://127.0.0.1:8769/renaissance.html",
+      "size": "3840 × 2160 px"
+    },
+    {
+      "file": "03_renaissance_projection.png",
+      "caption": "눈·그림 평면·공간의 투영 원리",
+      "url": "http://127.0.0.1:8769/renaissance.html",
+      "size": "3840 × 2160 px"
+    },
+    {
+      "file": "04_renaissance_eye_level.png",
+      "caption": "보는 사람의 눈높이와 소실점",
+      "url": "http://127.0.0.1:8769/renaissance.html",
+      "size": "3840 × 2160 px"
+    },
+    {
+      "file": "05_renaissance_scattered.png",
+      "caption": "소실점 배치 전 / 흩어진 인물",
+      "url": "http://127.0.0.1:8769/renaissance-perspective.html",
+      "size": "3840 × 2160 px"
+    },
+    {
+      "file": "06_renaissance_composed.png",
+      "caption": "소실점 배치 후 / 건축과 인물의 구성",
+      "url": "http://127.0.0.1:8769/renaissance-perspective.html",
+      "size": "3840 × 2160 px"
+    },
+    {
+      "file": "07_renaissance_shifted.png",
+      "caption": "소실점을 오른쪽 위로 옮긴 상태",
+      "url": "http://127.0.0.1:8769/renaissance-perspective.html",
+      "size": "3840 × 2160 px"
+    },
+    {
+      "file": "08_romanticism_artwork.png",
+      "caption": "프리드리히 작품 인트로",
+      "url": "http://127.0.0.1:8769/romanticism.html",
+      "size": "3840 × 2160 px"
+    },
+    {
+      "file": "09_romanticism_fog.png",
+      "caption": "개념 체험 / 보이지 않는 계곡과 상상력",
+      "url": "http://127.0.0.1:8769/romanticism.html",
+      "size": "3840 × 2160 px"
+    },
+    {
+      "file": "10_romanticism_calm.png",
+      "caption": "고요한 새벽",
+      "url": "http://127.0.0.1:8769/romanticism-experience.html",
+      "size": "3840 × 2160 px"
+    },
+    {
+      "file": "11_romanticism_storm.png",
+      "caption": "날씨를 변화시킨 폭풍",
+      "url": "http://127.0.0.1:8769/romanticism-experience.html",
+      "size": "3840 × 2160 px"
+    },
+    {
+      "file": "12_surrealism_artwork.png",
+      "caption": "빛의 제국 모티프 인트로 / 사이트 자산",
+      "url": "http://127.0.0.1:8769/surrealism-film.html",
+      "size": "3840 × 2160 px"
+    },
+    {
+      "file": "13_surrealism_day_night.png",
+      "caption": "하늘은 낮 / 거리는 밤",
+      "url": "http://127.0.0.1:8769/surrealism-film.html",
+      "size": "3840 × 2160 px"
+    },
+    {
+      "file": "14_surrealism_apple.png",
+      "caption": "데페이즈망 / 낯선 사과 크기",
+      "url": "http://127.0.0.1:8769/surrealism-film.html",
+      "size": "3840 × 2160 px"
+    },
+    {
+      "file": "15_surrealism_room_day.png",
+      "caption": "꿈의 방 / 줄을 당기기 전",
+      "url": "http://127.0.0.1:8769/index.html",
+      "size": "3840 × 2160 px"
+    },
+    {
+      "file": "16_surrealism_room_night.png",
+      "caption": "꿈의 방 / 줄을 당긴 뒤",
+      "url": "http://127.0.0.1:8769/index.html",
+      "size": "3840 × 2160 px"
+    },
+    {
+      "file": "17_surrealism_chance_before.png",
+      "caption": "우아한 시체 / 최초 조합",
+      "url": "http://127.0.0.1:8769/index.html",
+      "size": "3840 × 2160 px"
+    },
+    {
+      "file": "18_surrealism_chance_after.png",
+      "caption": "우아한 시체 / 레버로 새롭게 조합",
+      "url": "http://127.0.0.1:8769/index.html",
+      "size": "3840 × 2160 px"
+    },
+    {
+      "file": "19_surrealism_gallery.png",
+      "caption": "초현실주의 갤러리 / 이미지 로드 완료 후 직접 페이지에서 재캡처. 메인 갤러리 진입 상태도 별도 확인.",
+      "url": "http://127.0.0.1:8769/surrealism-finale.html",
+      "size": "3840 × 2160 px"
+    },
+    {
+      "file": "20_renaissance_gallery.png",
+      "caption": "르네상스 갤러리",
+      "url": "http://127.0.0.1:8769/renaissance-finale.html",
+      "size": "3840 × 2160 px"
+    },
+    {
+      "file": "21_romanticism_gallery.png",
+      "caption": "낭만주의 갤러리",
+      "url": "http://127.0.0.1:8769/romanticism-finale.html",
+      "size": "3840 × 2160 px"
+    }
+  ]
+}
