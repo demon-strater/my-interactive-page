@@ -55,7 +55,8 @@
     <div class="hint" id="hint">금빛으로 빛나는 중앙을 클릭하세요. 커서를 움직이면 조각상들이 드러나고, 스크롤하면 빛의 폭을 넓히거나 좁힐 수 있습니다.</div>
 
     <script type="module">
-        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
+        import * as THREE from './vendor/three/three.module.min.js';
+        import { enhanceScene } from './art-quality.js';
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -686,6 +687,7 @@
             renderer.render(scene, activeCamera);
         }
 
+        enhanceScene(renderer,scene,{finish:'marble',floor:null,bevel:false});
         requestAnimationFrame(animate);
     </script>
 </body>

@@ -50,9 +50,9 @@ body.finale-page > main{position:relative;height:100%}
 .work.present .work-label{opacity:1;translate:-50% 0;transition:opacity .9s ease .3s,translate 1s cubic-bezier(.22,.61,.36,1) .3s}
 .work-label strong{display:block;font:400 clamp(21px,min(2.2cqw,3.7cqh),34px)/1.3 'Nanum Myeongjo',Georgia,serif;letter-spacing:-.005em;color:var(--label-ink,#efe6d4);word-break:keep-all}
 .work-label em{display:block;margin-top:3px;font:italic 13px/1.4 Georgia,'Times New Roman',serif;color:var(--label-muted,#a39d90)}
-.work-label span{display:block;margin-top:8px;font:13px/1.5 Arial,'Malgun Gothic',sans-serif;letter-spacing:.08em;color:var(--label-ink,#efe6d4)}
+.work-label span{display:block;margin-top:8px;font:14px/1.5 Arial,'Malgun Gothic',sans-serif;letter-spacing:.08em;color:var(--label-ink,#efe6d4)}
 .work-label span::before,.work-label span::after{content:'';display:inline-block;width:22px;height:1px;margin:0 12px;vertical-align:middle;background:var(--label-accent,#d4b98a);opacity:.8}
-.work-label p{max-width:36em;margin:8px auto 0;font:13px/1.65 Arial,'Malgun Gothic',sans-serif;letter-spacing:.01em;color:var(--label-muted,#a39d90);word-break:keep-all}
+.work-label p{max-width:36em;margin:8px auto 0;font:14px/1.65 Arial,'Malgun Gothic',sans-serif;letter-spacing:.01em;color:var(--label-muted,#a39d90);word-break:keep-all}
 
 /* What concept-finale.js lays over a picture while it arrives (and, in the dream, while it leaves). */
 .reveal,.construct,.mist{position:absolute;left:var(--frame-w,0px);top:var(--frame-w,0px);z-index:2;width:var(--iw);height:var(--ih);pointer-events:none}
@@ -97,7 +97,7 @@ body.finale-page > main{position:relative;height:100%}
 
 /* Along the bottom: where you are, a mark per work to jump to it, and how to move. */
 .museum-nav{position:absolute;left:0;right:0;bottom:0;z-index:4;height:var(--nav-h);box-sizing:border-box;padding:0 5%;display:flex;align-items:center;justify-content:center;gap:22px}
-.museum-count,.museum-hint{flex:1 1 0;margin:0;font:11px/1.5 Arial,'Malgun Gothic',sans-serif;letter-spacing:.12em;color:var(--label-muted,#a39d90);text-shadow:var(--label-glow,none)}
+.museum-count,.museum-hint{flex:1 1 0;margin:0;font:14px/1.5 Arial,'Malgun Gothic',sans-serif;letter-spacing:.12em;color:var(--label-muted,#a39d90);text-shadow:var(--label-glow,none)}
 .museum-count{text-align:right;font-variant-numeric:tabular-nums}
 .museum-count b{font-weight:400;color:var(--label-ink,#efe6d4)}
 .museum-hint{letter-spacing:.03em;transition:opacity .6s}

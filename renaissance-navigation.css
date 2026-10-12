@@ -1,7 +1,7 @@
-﻿.next-experience{margin-left:auto;min-height:44px;display:flex;align-items:center;gap:12px;color:#efce93;text-decoration:none;font-size:12px;white-space:nowrap}
+﻿.next-experience{margin-left:auto;min-height:44px;display:flex;align-items:center;gap:12px;color:#efce93;text-decoration:none;font-size: 14px;white-space:nowrap}
 /* Colours for the shared Home square (home-button.css). */
 :root{--home-ink:#f7ecd0;--home-bg:#241708b0;--home-line:#e2c07f55}
-@media(max-width:700px){.next-experience{font-size:11px;min-height:34px}.perspective-experience .toolbar button{font-size:11px;min-height:40px}.perspective-experience .chapter{bottom:10%;font-size:9px}}
+@media(max-width:700px){.next-experience{font-size: 14px;min-height:34px}.perspective-experience .toolbar button{font-size: 14px;min-height:40px}.perspective-experience .chapter{bottom:10%;font-size: 14px}}
 .perspective-experience #atelier{touch-action:none}
 body[data-leave=next]{animation:experienceExitLeft 180ms ease-in both}body[data-leave=previous]{animation:experienceExitRight 180ms ease-in both}body[data-enter=next]:not([data-leave]){animation:experienceEnterRight 320ms ease-out both}body[data-enter=previous]:not([data-leave]){animation:experienceEnterLeft 320ms ease-out both}
 @keyframes experienceExitLeft{to{transform:translateX(-8%);opacity:0}}@keyframes experienceExitRight{to{transform:translateX(8%);opacity:0}}@keyframes experienceEnterRight{from{transform:translateX(8%);opacity:0}to{transform:translateX(0);opacity:1}}@keyframes experienceEnterLeft{from{transform:translateX(-8%);opacity:0}to{transform:translateX(0);opacity:1}}

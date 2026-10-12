@@ -21,11 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const durationTimeEl = document.getElementById('durationTime');
     const albumArtContainer = document.querySelector('.album-art-container');
     const playlistItems = document.querySelectorAll('.playlist-item');
-    const particleFrame = document.querySelector('.particle-frame');
     const renaissanceFrame = document.querySelector('.renaissance-frame');
-    const baroqueFrame = document.querySelector('.baroque-frame');
     const romanticismFrame = document.querySelector('.romanticism-frame');
-    const impressionismTimeFrame = document.querySelector('.impressionism-time-frame');
     const hubBgTint = document.getElementById('hubBgTint');
     const cinematicStage = document.getElementById('cinematicStage');
     const hubScreen = document.getElementById('hubScreen');
@@ -34,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const hubTintColors = {
         'renaissance-card':  'rgba(205, 158, 64, 0.22)',
         'surrealism-card':   'rgba(48, 74, 152, 0.18)',
-        'impressionism-card':'rgba(196, 148, 172, 0.20)',
         'romanticism-card':  'rgba(108, 130, 152, 0.19)',
     };
 
@@ -113,7 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const interactions = [
         { hour: 1, title: 'RENAISSANCE', meta: 'c. 1400-1600', status: 'Available', site: 'renaissance', top: '#c8a86b', bottom: '#3a2510' },
         { hour: 2, title: 'SURREALISM', meta: '1924-1966', status: 'Available', site: 'impressionism', top: '#ff7a59', bottom: '#77325f' },
-        { hour: 4, title: 'IMPRESSIONISM', meta: 'c. 1874-1886', status: 'Available', site: 'impressionism-time', top: '#a5d96a', bottom: '#4b8aa0' },
         { hour: 5, title: 'ROMANTICISM', meta: 'c. 1798-1850', status: 'Available', site: 'romanticism', top: '#6b7f99', bottom: '#07101c' }
     ];
 
@@ -439,9 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const stage = getStageRect();
         const presets = {
             renaissance: { width: 0.58, height: 0.58, x: 0.5, y: 0.48, angle: 0 },
-            romanticism: { width: 0.62, height: 0.7, x: 0.5, y: 0.5, angle: 0 },
-            particle: { width: 0.7, height: 0.72, x: 0.5, y: 0.5, angle: 0 },
-            'fluid-collision': { width: 0.7, height: 0.72, x: 0.5, y: 0.5, angle: 0 }
+            romanticism: { width: 0.62, height: 0.7, x: 0.5, y: 0.5, angle: 0 }
         };
         const preset = presets[interaction.site] || { width: 0.62, height: 0.66, x: 0.5, y: 0.5, angle: 0 };
         const bounds = {
@@ -659,29 +652,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        if (interaction.site === 'impressionism-time' && impressionismTimeFrame) {
-            try {
-                const frameRect = impressionismTimeFrame.getBoundingClientRect();
-                const imageShell = impressionismTimeFrame.contentDocument?.querySelector('.image-shell');
-
-                if (imageShell) {
-                    const imageRect = imageShell.getBoundingClientRect();
-                    return {
-                        left: frameRect.left + imageRect.left,
-                        top: frameRect.top + imageRect.top,
-                        width: imageRect.width,
-                        height: imageRect.height,
-                        angle: readElementAngle(imageShell)
-                    };
-                }
-
-                return rectToArtworkRect(frameRect, readElementAngle(impressionismTimeFrame));
-            } catch (error) {
-                const rect = impressionismTimeFrame.getBoundingClientRect();
-                return rectToArtworkRect(rect, readElementAngle(impressionismTimeFrame));
-            }
-        }
-
         if (interaction.site === 'renaissance' && renaissanceFrame) {
             const rect = renaissanceFrame.getBoundingClientRect();
             return rectToArtworkRect(rect, readElementAngle(renaissanceFrame));
@@ -771,38 +741,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         body.classList.remove('measuring');
-        body.classList.remove('view-impressionism', 'view-particle', 'view-schema-architecture', 'view-fluid-collision', 'view-renaissance', 'view-baroque', 'view-romanticism', 'view-impressionism-time');
+        body.classList.remove('view-impressionism', 'view-renaissance', 'view-romanticism');
         body.classList.add('view-interaction', `view-${interaction.site}`);
         openSite = interaction.site;
         finaleShown = false;
 
         if (interaction.site === 'impressionism') {
             isNight = false;
-            surrealFilmFrame.src = 'surrealism-film.html?v=1';
+            surrealFilmFrame.src = 'surrealism-film.html?v=4';
             surrealFilmFrame.hidden = false;
             body.classList.add('showing-surreal-film');
         } else {
             pauseAllMusic();
             body.classList.remove('night-background');
 
-            if (interaction.site === 'particle') {
-                resetParticleFrame();
-            }
-
             if (interaction.site === 'renaissance') {
                 resetRenaissanceFrame();
             }
 
-            if (interaction.site === 'baroque') {
-                resetBaroqueFrame();
-            }
-
             if (interaction.site === 'romanticism') {
                 resetRomanticismFrame();
-            }
-
-            if (interaction.site === 'impressionism-time') {
-                resetImpressionismTimeFrame();
             }
         }
     }
@@ -823,11 +781,6 @@ document.addEventListener('DOMContentLoaded', () => {
         isInteractionOpening = true;
         card.classList.add('transition-source');
         updateSiteTransition(interaction);
-
-        // Pre-load iframes immediately
-        if (interaction.site === 'impressionism-time' && impressionismTimeFrame && (!impressionismTimeFrame.src || impressionismTimeFrame.src.includes('-finale.html'))) {
-            impressionismTimeFrame.src = impressionismTimeFrame.dataset.src || 'impressionism-film.html';
-        }
 
         if (interaction.site === 'impressionism') {
             isNight = false;
@@ -908,45 +861,12 @@ document.addEventListener('DOMContentLoaded', () => {
         requestAnimationFrame(sendResize);
     }
 
-    function resetParticleFrame() {
-        if (!particleFrame) {
-            return;
-        }
-
-        requestAnimationFrame(() => {
-            try {
-                particleFrame.contentWindow?.postMessage({ type: 'particle:reset' }, '*');
-            } catch (error) {
-                console.error('Particle reset failed:', error);
-            }
-        });
-    }
-
-    function resetBaroqueFrame() {
-        if (!baroqueFrame) {
-            return;
-        }
-
-        baroqueFrame.src = baroqueFrame.dataset.src || 'baroque.html';
-    }
-
     function resetRomanticismFrame() {
         if (!romanticismFrame) {
             return;
         }
 
         romanticismFrame.src = romanticismFrame.dataset.src || 'romanticism.html';
-    }
-
-    function resetImpressionismTimeFrame() {
-        if (!impressionismTimeFrame) {
-            return;
-        }
-
-        // A frame last left on the closing artwork page starts over from its opening painting.
-        if (!impressionismTimeFrame.src || impressionismTimeFrame.src.includes('-finale.html')) {
-            impressionismTimeFrame.src = impressionismTimeFrame.dataset.src || 'impressionism-film.html';
-        }
     }
 
     const surrealFinaleFrame = document.querySelector('.surreal-finale-frame');
@@ -972,8 +892,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const finaleFrames = {
         renaissance: [renaissanceFrame, 'renaissance-finale.html?v=5'],
         impressionism: [surrealFinaleFrame, 'surrealism-finale.html?v=5'],
-        romanticism: [romanticismFrame, 'romanticism-finale.html?v=5'],
-        'impressionism-time': [impressionismTimeFrame, 'impressionism-finale.html?v=5']
+        romanticism: [romanticismFrame, 'romanticism-finale.html?v=5']
     };
 
     function showFinale(site) {
@@ -1009,7 +928,7 @@ document.addEventListener('DOMContentLoaded', () => {
         finaleShown = false;
         pauseAllMusic();
         renaissanceFrame?.contentWindow?.postMessage('renaissance:leave', window.location.origin);
-        body.classList.remove('view-interaction', 'view-impressionism', 'view-particle', 'view-schema-architecture', 'view-fluid-collision', 'view-renaissance', 'view-baroque', 'view-romanticism', 'view-impressionism-time', 'night-background');
+        body.classList.remove('view-interaction', 'view-impressionism', 'view-renaissance', 'view-romanticism', 'night-background');
         body.classList.remove('artwork-opening', 'artwork-arrived');
         body.classList.add('view-hub');
         isNight = false;
@@ -1383,9 +1302,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 handDidDrag = true;
                 document.getElementById('handCursor')?.classList.add('is-dragging');
 
-                const supportsWheelGesture = body.classList.contains('view-romanticism') ||
-                    body.classList.contains('view-baroque') ||
-                    body.classList.contains('view-fluid-collision');
+                const supportsWheelGesture = body.classList.contains('view-romanticism');
                 const verticalDelta = handScrollLastY === null ? 0 : detail.y - handScrollLastY;
                 if (supportsWheelGesture && Math.abs(verticalDelta) > 2.5 && currentTarget?.target) {
                     const WheelConstructor = currentTarget.view.WheelEvent || window.WheelEvent;

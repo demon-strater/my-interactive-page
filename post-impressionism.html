@@ -7,7 +7,7 @@
 <script src="art-audio.js?v=4" defer></script></head>
 <body><div id="app"></div><div class="actions" onpointerdown="event.stopPropagation()" onclick="event.stopPropagation()"><button id="clearBtn" type="button">필드 지우기</button><button id="burstBtn" type="button">물감 폭발</button></div><section class="hud"><h1>후기인상주의</h1><p>격렬하게 드래그하면 영구적인 감정의 흐름이 새겨집니다. 물감 입자는 당신의 예전 몸짓을 영원히 따릅니다. 스크롤하면 점성이 바뀝니다.</p></section>
 <script type="module">
-import * as THREE from 'https://unpkg.com/three@0.164.1/build/three.module.js';
+import * as THREE from './vendor/three/three.module.min.js';
 const clearBtn=document.getElementById('clearBtn');
 const burstBtn=document.getElementById('burstBtn');
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x07130d);const camera=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,.1,80);camera.position.z=24;

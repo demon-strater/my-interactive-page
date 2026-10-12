@@ -179,26 +179,24 @@
 
   // ── The film's canvas. ──
   window.createSurrealRenderer=(canvas,assets)=>{
-    const ctx=canvas.getContext('2d'),studio=createStudio(),gold='#edca8d',cream='#efe6d4',sky='#a8cbe4',muted='#a7b8c5';
+    const ctx=canvas.getContext('2d'),studio=createStudio(),streetStudio=window.createSurrealStreetStudio?.(),objectStudio=window.createSurrealObjectStudio?.(),gold='#edca8d',cream='#efe6d4',sky='#a8cbe4',muted='#a7b8c5';
     const buffers=new Map();let width=1,height=1,target={};
-    function buffer(name,wide,tall){let layer=buffers.get(name);if(!layer){layer=document.createElement('canvas');buffers.set(name,layer);}const pixelRatio=Math.min(devicePixelRatio||1,1.5);if(layer.width!==Math.round(wide*pixelRatio)||layer.height!==Math.round(tall*pixelRatio)){layer.width=Math.max(1,Math.round(wide*pixelRatio));layer.height=Math.max(1,Math.round(tall*pixelRatio));}return layer;}
+    function buffer(name,wide,tall){let layer=buffers.get(name);if(!layer){layer=document.createElement('canvas');buffers.set(name,layer);}const pixelRatio=Math.min(devicePixelRatio||1,name==='street'?2:1.5);if(layer.width!==Math.round(wide*pixelRatio)||layer.height!==Math.round(tall*pixelRatio)){layer.width=Math.max(1,Math.round(wide*pixelRatio));layer.height=Math.max(1,Math.round(tall*pixelRatio));}return layer;}
     function path(points){ctx.beginPath();points.forEach((point,index)=>index?ctx.lineTo(...point):ctx.moveTo(...point));}
     function line(points,color='#d9c39c80',weight=1){ctx.save();path(points);ctx.strokeStyle=color;ctx.lineWidth=weight;ctx.stroke();ctx.restore();}
-    function text(value,left,top,size=12,color=cream,align='left',serif=false){ctx.save();ctx.font=`${size}px ${serif?"'Nanum Myeongjo',Georgia":"Arial,'Malgun Gothic'"},sans-serif`;ctx.textAlign=align;ctx.textBaseline='middle';ctx.fillStyle=color;ctx.fillText(value,left,top);ctx.restore();}
-    function chip(value,left,top,color=cream,strong=false){ctx.save();ctx.font=`${strong?13:11}px Arial,'Malgun Gothic',sans-serif`;const wide=ctx.measureText(value).width+(strong?30:24),tall=strong?34:30;left=clamp(left,wide/2+8,width-wide/2-8);ctx.fillStyle='#0b1420e6';ctx.beginPath();ctx.roundRect(left-wide/2,top-tall/2,wide,tall,tall/2);ctx.fill();ctx.strokeStyle=strong?color+'88':'#d6c5a026';ctx.stroke();text(value,left,top,strong?13:11,color,'center');ctx.restore();return {left:left-wide/2,right:left+wide/2};}
+    function text(value,left,top,size=14,color=cream,align='left',serif=false){ctx.save();ctx.font=`${size}px ${serif?"'Nanum Myeongjo',Georgia":"Arial,'Malgun Gothic'"},sans-serif`;ctx.textAlign=align;ctx.textBaseline='middle';ctx.fillStyle=color;ctx.fillText(value,left,top);ctx.restore();}
+    function chip(value,left,top,color=cream,strong=false){ctx.save();ctx.font=`${strong?15:14}px Arial,'Malgun Gothic',sans-serif`;const wide=ctx.measureText(value).width+(strong?30:24),tall=strong?36:34;left=clamp(left,wide/2+8,width-wide/2-8);ctx.fillStyle='#0b1420e6';ctx.beginPath();ctx.roundRect(left-wide/2,top-tall/2,wide,tall,tall/2);ctx.fill();ctx.strokeStyle=strong?color+'88':'#d6c5a026';ctx.stroke();text(value,left,top,strong?15:14,color,'center');ctx.restore();return {left:left-wide/2,right:left+wide/2};}
     function shadow(left,top,wide,tall,opacity=.45){ctx.save();ctx.translate(left,top);ctx.scale(wide,tall);const shade=ctx.createRadialGradient(0,0,0,0,0,1);shade.addColorStop(0,`rgba(0,0,0,${opacity})`);shade.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=shade;ctx.fillRect(-1,-1,2,2);ctx.restore();}
     function glow(left,top,radius,color,opacity){ctx.save();ctx.globalAlpha*=opacity;const light=ctx.createRadialGradient(left,top,0,left,top,radius);light.addColorStop(0,color);light.addColorStop(1,color+'00');ctx.fillStyle=light;ctx.fillRect(left-radius,top-radius,radius*2,radius*2);ctx.restore();}
     function imageCover(image,box,source=null){if(!image.naturalWidth)return;const crop=source||{x:0,y:0,width:image.naturalWidth,height:image.naturalHeight},scale=Math.max(box.width/crop.width,box.height/crop.height),sourceWidth=box.width/scale,sourceHeight=box.height/scale;ctx.drawImage(image,crop.x+(crop.width-sourceWidth)/2,crop.y+(crop.height-sourceHeight)/2,sourceWidth,sourceHeight,box.x,box.y,box.width,box.height);}
     function frame(box,fill='#e9deca'){ctx.save();ctx.shadowColor='#0009';ctx.shadowBlur=28;ctx.shadowOffsetY=12;ctx.fillStyle=fill;ctx.fillRect(box.x,box.y,box.width,box.height);ctx.shadowBlur=0;ctx.shadowOffsetY=0;ctx.strokeStyle='#e4c6945c';ctx.strokeRect(box.x+.5,box.y+.5,box.width-1,box.height-1);ctx.restore();}
     function atmosphere(){const light=ctx.createRadialGradient(width*.57,height*.3,0,width*.57,height*.3,width*.65);light.addColorStop(0,'#7894aa21');light.addColorStop(.55,'#293d5420');light.addColorStop(1,'#07101a00');ctx.fillStyle=light;ctx.fillRect(0,0,width,height);}
-    // The note at the left of a chapter: a kicker, two or three lines in the serif, a line of detail under them.
-    function sideNote(kicker,lines,detail,left,top){text(kicker,left,top,11,gold);lines.forEach((value,index)=>text(value,left,top+35+index*34,25,cream,'left',true));if(detail)(Array.isArray(detail)?detail:[detail]).forEach((value,index)=>text(value,left,top+52+lines.length*34+index*19,12,muted));}
     // A slider drawn on the canvas: its track, the part already travelled in gold, a word at each end.
     function slider(from,to,value,ends,vertical=false){
       const at=lerp(vertical?from.y:from.x,vertical?to.y:to.x,value),knob=vertical?{x:from.x,y:at}:{x:at,y:from.y};
       line([[from.x,from.y],[to.x,to.y]],'#d9c39c40',2);line([[from.x,from.y],[knob.x,knob.y]],gold+'cc',2);
-      if(vertical){text(ends[0],from.x,from.y-30,11,muted,'center');text(ends[1],to.x,to.y+30,11,muted,'center');}
-      else{text(ends[0],from.x,from.y+36,11,value<.5?cream:muted,'left');text(ends[1],to.x,to.y+36,11,value>=.5?cream:muted,'right');}
+      if(vertical){text(ends[0],from.x,from.y-30,14,muted,'center');text(ends[1],to.x,to.y+30,14,muted,'center');}
+      else{text(ends[0],from.x,from.y+36,14,value<.5?cream:muted,'left');text(ends[1],to.x,to.y+36,14,value>=.5?cream:muted,'right');}
       return knob;
     }
     function fallbackRoom(box,scene){
@@ -210,8 +208,15 @@
       return {apple:{x:left,y:top,radius},clock:{x:box.x+box.width*.7,y:box.y+box.height*.3},cloud:{x:box.x+box.width*.4,y:box.y+box.height*.2},table:{x:box.x+box.width*.7,y:box.y+box.height*.7},lamp:{x:box.x+box.width*.6,y:box.y+box.height*.5},sky:{x:box.x+box.width*.3,y:box.y+box.height*.15},house:{x:box.x+box.width*.45,y:box.y+box.height*.6}};
     }
     function studioImage(box,scene,mode='apple',name='studio'){
-      const rendered=studio?.render(box.width,box.height,scene,mode);
-      if(!rendered)return fallbackRoom(box,scene);
+      const rendered=(mode==='street'?streetStudio?.render(box.width,box.height,scene):objectStudio?.render(box.width,box.height,scene,mode))||studio?.render(box.width,box.height,scene,mode);
+      if(!rendered){
+        if(mode==='street'){
+          imageCover(assets.artwork,box);
+          const shade=ctx.createLinearGradient(0,box.y,0,box.y+box.height*.4);shade.addColorStop(0,`rgba(3,10,25,${scene.sky*.9})`);shade.addColorStop(1,'rgba(3,10,25,0)');ctx.fillStyle=shade;ctx.fillRect(box.x,box.y,box.width,box.height*.4);
+          return {};
+        }
+        return fallbackRoom(box,scene);
+      }
       const layer=buffer(name,box.width,box.height),drawing=layer.getContext('2d');drawing.clearRect(0,0,layer.width,layer.height);drawing.drawImage(rendered.canvas,0,0,layer.width,layer.height);ctx.drawImage(layer,box.x,box.y,box.width,box.height);
       const out={};for(const [key,point] of Object.entries(rendered))if(key!=='canvas')out[key]={...point,x:box.x+point.x,y:box.y+point.y};
       return out;
@@ -220,62 +225,42 @@
     // ── 1 · 꿈의 논리: the room, awake, drifts into a dream as the slider moves; each change is named where it happens. ──
     function dream(scene,geometry){
       const narrow=geometry.narrow,d=scene.dream,trackRoom=narrow?74:84,wide=Math.min(width*(narrow?.98:.66),(height-trackRoom)*1.62),tall=wide/1.62;
-      const box={x:width*(narrow?.5:.63)-wide/2,y:Math.max(narrow?36:0,(height-trackRoom-tall)/2),width:wide,height:tall};
+      const box={x:width*.5-wide/2,y:Math.max(narrow?36:0,(height-trackRoom-tall)/2),width:wide,height:tall};
       const spots=studioImage(box,scene,'dream','dream');
       const changes=[['① 시계가 녹아내린다',spots.clock,.25],['② 구름이 방 안으로 들어온다',spots.cloud,.5],['③ 탁자가 공중에 뜬다',spots.table,.72]];
       // Each change is named where it happens; on a phone the scene gets only its number and the names go under the slider.
       changes.forEach(([label,point,from],index)=>{const show=smooth(from,from+.18,d);if(!show||!point)return;ctx.save();ctx.globalAlpha*=show;ctx.fillStyle=gold;ctx.beginPath();ctx.arc(point.x,point.y,3,0,TAU);ctx.fill();
-        if(narrow){ctx.fillStyle='#0b1420e6';ctx.beginPath();ctx.arc(point.x,point.y-18,11,0,TAU);ctx.fill();text(label[0],point.x,point.y-17,13,gold,'center');text(label,box.x+box.width*.12,box.y+box.height+102+index*22,12,cream);}
+        if(narrow){ctx.fillStyle='#0b1420e6';ctx.beginPath();ctx.arc(point.x,point.y-18,11,0,TAU);ctx.fill();text(label[0],point.x,point.y-17,14,gold,'center');text(label,box.x+box.width*.12,box.y+box.height+102+index*22,14,cream);}
         else chip(label,point.x,point.y-28,gold);ctx.restore();});
       const knob=slider({x:box.x+box.width*.12,y:box.y+box.height+34},{x:box.x+box.width*.88,y:box.y+box.height+34},d,['깨어 있는 방','꿈속의 방']);
-      if(!narrow){
-        const awake=d<.5;
-        sideNote('꿈의 논리',awake?['평범한 방.','모든 것이','제자리에 있다.']:['꿈속에서는','이상한 일도','당연하다.'],awake?['시계는 제 속도로 가고,','구름은 창밖에 있다.']:['녹는 시계, 방 안의 구름 —','꿈꾸는 동안엔 이상하지 않다.'],width*.055,height*.18);
-        text('초현실주의는 이 꿈의 세계를 그렸다',width*.055,height*.18+52+3*34+58,13,gold);
-      }else chip(d<.5?'평범한 방 · 모든 것이 제자리':'꿈속에서는 이상한 일도 당연하다',width*.5,18,gold);
+      chip(d<.5?'평범한 방 · 모든 것이 제자리에 있다':'꿈속에서는 이상한 일도 당연하다',width*.5,narrow?18:24,gold,!narrow);
       target={kind:'x',key:'dream',x:knob.x,y:knob.y,from:box.x+box.width*.12,to:box.x+box.width*.88,value:d};
     }
 
     // ── 2 · 데페이즈망: the same apple, grown until it fills the room. ──
     function apple(scene,geometry){
       const narrow=geometry.narrow,wide=Math.min(width*(narrow?.98:.66),height*1.55),tall=Math.min(height*.94,wide/(narrow?.93:1.45));
-      const box={x:width*(narrow?.5:.63)-wide/2,y:(height-tall)/2,width:wide,height:tall};
+      const box={x:width*.5-wide/2,y:(height-tall)/2,width:wide,height:tall};
       shadow(box.x+wide*.5,box.y+tall*.9,wide*.45,tall*.08,.3);
       const rendered=studioImage(box,scene,'apple','apple');target={kind:'apple',...rendered.apple};
       const times=(scene.apple/.18).toFixed(1);
-      if(!narrow){
-        sideNote('데페이즈망 · 낯설게 하기',['사과도, 방도 평범하다.','이상한 건 크기 하나.'],['익숙한 물건을 엉뚱한 크기나 자리에 두면','평범한 방이 꿈처럼 낯설어진다.'],width*.055,height*.12);
-        const inset={x:width*.055,y:height*.47,width:width*.18,height:height*.27};frame(inset,'#15232e');studioImage(inset,{...scene,apple:.18,appleX:.5,appleY:.53},'apple','ordinary');
-        text('평소의 크기',inset.x+inset.width/2,inset.y+inset.height+20,11,muted,'center');
-        text('× '+times,width*.055,height*.88,36,gold,'left',true);text('크기만 바뀌었다',width*.055+104,height*.885,11,muted);
-      }else{chip('같은 사과 · 크기만 '+times+'배',width*.5,23,gold);text('크기 하나로, 방이 낯설어진다',width*.5,height-20,12,'#b9c8d0','center');}
+      chip('같은 사과 · 크기만 '+times+'배',width*.5,narrow?23:28,gold,true);
     }
 
-    // ── 3 · 낮과 밤: a street at dusk. Reality's rule (sky and street darken together), then Magritte's (the sky
-    // turns back to noon while the street stays at midnight). The viewer moves the sky; the street stays dark. ──
-    function rules(scene,left,top,wide){
-      const cards=[['현실의 규칙','하늘이 저물면 거리도 함께 저문다',1-scene.rule,sky],['마그리트의 규칙','하늘은 정오인데, 거리는 한밤',scene.rule,gold]];
-      cards.forEach(([title,body,on,color],index)=>{
-        const y=top+index*96;ctx.save();ctx.globalAlpha*=.35+.65*on;ctx.fillStyle='#0b1420cc';ctx.beginPath();ctx.roundRect(left,y,wide,78,10);ctx.fill();
-        ctx.strokeStyle=on>.5?color+'aa':'#d6c5a022';ctx.lineWidth=on>.5?1.4:1;ctx.stroke();
-        text(title,left+18,y+24,12,color);text(body,left+18,y+51,16,cream,'left',true);ctx.restore();
-      });
-    }
+    // ── 1 · 빛의 제국: the opening work becomes a street. The sky moves; the street stays at midnight. ──
     function street(scene,geometry){
-      const narrow=geometry.narrow,wide=Math.min(width*(narrow?.98:.62),height*1.5),tall=Math.min(height*.96,wide/(narrow?.95:1.3));
-      const box={x:width*(narrow?.46:.6)-wide/2,y:(height-tall)/2,width:wide,height:tall};
+      const narrow=geometry.narrow||height<340,wide=width*(narrow?.86:.655),tall=height-(narrow?62:24);
+      const box={x:width*.5-wide/2,y:narrow?42:12,width:wide,height:Math.max(80,tall)};
       ctx.save();ctx.beginPath();ctx.roundRect(box.x,box.y,box.width,box.height,6);ctx.clip();
       const spots=studioImage(box,scene,'street','street');
       const lit=smooth(.3,.9,scene.night);
-      if(spots.lamp){glow(spots.lamp.x,spots.lamp.y,box.width*.09,'#ffd98a',.9*lit);glow(spots.lamp.x,spots.lamp.y+box.height*.3,box.width*.16,'#f2b860',.25*lit);}
+      if(spots.lamp&&!streetStudio){glow(spots.lamp.x,spots.lamp.y,box.width*.07,'#ffd98a',.65*lit);}
       ctx.restore();
       const skyWord=scene.sky<.5?'하늘 · 낮':'하늘 · 밤',streetWord=scene.night<.5?'거리 · 낮':'거리 · 밤';
-      chip(skyWord,box.x+box.width*.3,box.y+28,scene.sky<.5?gold:sky,true);chip(streetWord,box.x+box.width*.3,box.y+box.height-30,scene.night<.5?gold:sky,true);
-      const rail=narrow?box.x+box.width-22:box.x+box.width+34,knob=slider({x:rail,y:box.y+40},{x:rail,y:box.y+box.height*.55},scene.sky,['☀ 낮','☾ 밤'],true);
-      if(!narrow){text('하늘의 시간',rail,box.y+box.height*.55+54,11,muted,'center');rules(scene,width*.055,height*.2,Math.min(width*.23,300));
-        text(scene.rule>.5?'이 규칙으로 그린 그림이 「빛의 제국」이다':'',width*.055,height*.2+212,12,gold);}
-      else chip(scene.rule>.5?'마그리트의 규칙 · 하늘은 낮, 거리는 밤':'현실 · 하늘과 거리가 함께 저문다',width*.5,14,scene.rule>.5?gold:sky);
-      target={kind:'y',key:'sky',x:knob.x,y:knob.y,from:box.y+40,to:box.y+box.height*.55,value:scene.sky};
+      chip(skyWord,box.x+70,box.y+28,scene.sky<.5?gold:sky);chip(streetWord,box.x+70,box.y+box.height-26,sky);
+      const rail=width*(narrow?.945:.98),knob=slider({x:rail,y:box.y+58},{x:rail,y:box.y+box.height*.68},scene.sky,['☀ 낮','☾ 밤'],true);
+      chip(scene.rule>.5?'빛의 제국 · 하늘은 낮, 거리는 밤':'현실의 규칙 · 하늘도 거리도 밤',width*.5,narrow?17:28,scene.rule>.5?gold:sky,!narrow);
+      target={kind:'y',key:'sky',x:knob.x,y:knob.y,from:box.y+58,to:box.y+box.height*.68,value:scene.sky};
     }
 
     // ── 4 · 우아한 시체: three players draw on paper folded so that none sees what came before; then it unfolds. ──
@@ -296,49 +281,23 @@
         // The fold: a flap of the same paper comes down over the finished part, so the next player can't see it.
         if(state.fold>0){const cover=band*state.fold;ctx.save();const flap=ctx.createLinearGradient(0,top,0,top+cover);flap.addColorStop(0,'#d9ccb1');flap.addColorStop(1,'#efe4cf');ctx.fillStyle=flap;ctx.fillRect(sheet.x,top,sheet.width,cover);
           ctx.shadowColor='#3b2a1a55';ctx.shadowBlur=10;ctx.shadowOffsetY=4;line([[sheet.x,top+cover],[sheet.x+sheet.width,top+cover]],'#8a7754',1.2);ctx.restore();
-          if(state.fold>.9)text('접힘 · 다음 사람은 볼 수 없다',sheet.x+sheet.width/2,top+band/2,12,'#8a7754','center');}
+          if(state.fold>.9)text('접힘 · 다음 사람은 볼 수 없다',sheet.x+sheet.width/2,top+band/2,14,'#8a7754','center');}
         // Who is drawing which part.
         const active=scene.player===index,done=state.draw>=1;
         if(!narrow){const x=sheet.x+sheet.width+28,y=top+band/2;ctx.save();ctx.globalAlpha*=active?1:done?.75:.4;
-          ctx.fillStyle=active?gold:'#0b1420';ctx.strokeStyle=gold+'88';ctx.beginPath();ctx.arc(x+14,y,14,0,TAU);ctx.fill();ctx.stroke();text(String(index+1),x+14,y+1,13,active?'#0b1420':gold,'center');
-          text(`${index+1}번 사람 · ${names[index]}`,x+38,y-9,14,cream,'left',true);text(active?(index?'앞사람 그림은 접혀서 보이지 않는다':'아무 머리나 그리고, 접는다'):done?(index<2?'그리고, 접었다':'그렸다'):'차례를 기다린다',x+38,y+13,11,muted);ctx.restore();}
+          ctx.fillStyle=active?gold:'#0b1420';ctx.strokeStyle=gold+'88';ctx.beginPath();ctx.arc(x+14,y,14,0,TAU);ctx.fill();ctx.stroke();text(String(index+1),x+14,y+1,14,active?'#0b1420':gold,'center');
+          text(`${index+1}번 · ${names[index]}`,x+38,y+1,15,cream,'left',true);ctx.restore();}
       });
-      if(scene.reveal>0){ctx.save();ctx.globalAlpha*=scene.reveal;ctx.strokeStyle=gold;ctx.lineWidth=1.5;ctx.strokeRect(sheet.x-6,sheet.y-6,sheet.width+12,sheet.height+12);ctx.restore();
-        if(!narrow)chip('펼치면 — 아무도 계획하지 않은 생물',sheet.x+sheet.width/2,sheet.y-26,gold,true);}
-      if(!narrow)sideNote('우아한 시체 · 1925',['보지 않고','이어 그리기.'],['종이를 접어 앞 그림을 가린 채','셋이 머리·몸통·다리를 그린다.','','계획 대신 우연에 맡기면','무의식이 드러난다고 믿었다.'],width*.055,height*.18);
-      else chip(scene.player>=0?`${scene.player+1}번 사람이 ${names[scene.player]}를 그린다 · 앞 그림은 접혀 있다`:'펼치면 — 아무도 계획하지 않은 생물',width*.5,height*.08,gold);
+      if(scene.reveal>0){ctx.save();ctx.globalAlpha*=scene.reveal;ctx.strokeStyle=gold;ctx.lineWidth=1.5;ctx.strokeRect(sheet.x-6,sheet.y-6,sheet.width+12,sheet.height+12);ctx.restore();}
+      chip(scene.reveal>0?'펼치면 — 아무도 계획하지 않은 생물':scene.player>=0?`${scene.player+1}번 사람이 ${names[scene.player]}를 그린다`:'우아한 시체 · 보지 않고 이어 그리기',width*.5,narrow?height*.08:28,gold,!narrow);
       target={kind:'chance',x:sheet.x+sheet.width/2,y:Math.min(height-24,sheet.y+sheet.height+34)};
     }
 
-    // ── 5 · 또렷한 꿈: the painting from a dream's blur to photographic sharpness; then what makes it believable. ──
-    function artBox(geometry,room=0){const tall=Math.min(height-58-room,width*(geometry.narrow?1.05:.72)),wide=tall*1120/1450;return {x:width*(geometry.narrow?.5:.6)-wide/2,y:Math.max(8,(height-room-tall)/2),width:wide,height:tall};}
-    function clarity(scene,geometry){
-      const image=assets.artwork;if(!image.naturalWidth)return;
-      const art=artBox(geometry,62),c=scene.clarity;frame(art,'#121b23');
-      ctx.save();ctx.beginPath();ctx.rect(art.x,art.y,art.width,art.height);ctx.clip();
-      ctx.filter=`blur(${((1-c)*art.width/34).toFixed(1)}px) saturate(${lerp(.55,1,c).toFixed(2)}) brightness(${lerp(1.08,1,c).toFixed(2)})`;
-      const bleed=(1-c)*art.width*.06;ctx.drawImage(image,art.x-bleed,art.y-bleed,art.width+bleed*2,art.height+bleed*2);ctx.filter='none';
-      if(c<1){ctx.globalAlpha=(1-c)*.35;ctx.fillStyle='#c9d6e6';ctx.fillRect(art.x,art.y,art.width,art.height);}
-      ctx.restore();
-      if(scene.notes>0){
-        ctx.save();ctx.globalAlpha*=scene.notes;
-        const anchors=[{label:'나뭇잎 하나하나까지',horizontal:.33,vertical:.3,at:.2},{label:'켜진 가로등과 그 불빛',horizontal:.475,vertical:.73,at:.55},{label:'물에 비친 불빛',horizontal:.53,vertical:.91,at:.85}];
-        anchors.forEach(anchor=>{const left=art.x+art.width*anchor.horizontal,top=art.y+art.height*anchor.vertical;ctx.fillStyle=gold;ctx.beginPath();ctx.arc(left,top,3,0,TAU);ctx.fill();
-          if(geometry.narrow)chip(anchor.label,left,top-24,gold);else{const edge=art.x+art.width+40,labelY=art.y+art.height*anchor.at;line([[left,top],[edge-12,labelY]],gold+'99');chip(anchor.label,edge+70,labelY,gold);}});
-        ctx.restore();
-      }
-      const knob=slider({x:art.x,y:art.y+art.height+30},{x:art.x+art.width,y:art.y+art.height+30},c,['흐릿한 꿈','또렷한 그림']);
-      if(!geometry.narrow){
-        sideNote('꿈을 사진처럼',c<.5?['꿈은 보통','흐릿하게 남는다.']:['초현실주의는 꿈을','사진처럼 그렸다.'],c<.5?['깨고 나면 장면이 흐려진다.']:['불가능한 장면인데도 너무 또렷해서,','우리는 그것을 진짜처럼 믿게 된다.'],width*.055,height*.24);
-        text('빛의 제국 · 르네 마그리트 · 1956',width*.055,height*.24+52+2*34+56,12,gold);
-      }else chip(c<.5?'꿈은 보통 흐릿하다':'초현실주의는 꿈을 사진처럼 그렸다',width*.5,14,gold);
-      target={kind:'x',key:'clarity',x:knob.x,y:knob.y,from:art.x,to:art.x+art.width,value:c};
-    }
     function draw(scene,geometry){
       width=geometry.width;height=geometry.height;const pixelRatio=Math.min(devicePixelRatio||1,2);ctx.setTransform(pixelRatio,0,0,pixelRatio,0,0);ctx.clearRect(0,0,width,height);atmosphere();target={};
-      [dream,apple,street,corpse,clarity].forEach((render,index)=>{if(scene.layers[index]<=0)return;ctx.save();ctx.globalAlpha=scene.layers[index];render(scene,geometry);ctx.restore();});
+      [street,dream,apple,corpse].forEach((render,index)=>{if(scene.layers[index]<=0)return;ctx.save();ctx.globalAlpha=scene.layers[index];render(scene,geometry);ctx.restore();});
       return target;
     }
-    return {draw,threeDimensional:Boolean(studio)};
+    return {draw,threeDimensional:Boolean(studio||streetStudio)};
   };
 })();

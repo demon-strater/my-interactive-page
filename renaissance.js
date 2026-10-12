@@ -30,6 +30,7 @@
   const artwork=new Image();
   const plane=[[-3.2,-.45,-3],[3.2,-.45,-3],[3.2,4.5,-3],[-3.2,4.5,-3]];
   let hallCache={length:0,mesh:null};
+  const studio=window.createRenaissanceStudio?.();
 
   function path(points,close=true){ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));if(close)ctx.closePath();}
   function line(a,b,color,alpha=1,weight=1,dash=[]){
@@ -108,7 +109,9 @@
     if(s.turn>.05)polygon([plane[1],plane[2],[3.2,4.5,-2.94],[3.2,-.45,-2.94]].map(project),'#a48856','#dbc58d',1,.8);
     ctx.save();path(p);ctx.clip();
     const toPlane=p=>project(imprint(p,s.eye));
-    drawMesh(room,toPlane,1,true);drawMesh(columns,toPlane,1,true);
+    const image=studio?.renderPicture(s);
+    if(image){const dest=[p[3],p[2],p[1],p[0]],uv=[{x:0,y:0},{x:image.width,y:0},{x:image.width,y:image.height},{x:0,y:image.height}];imageTriangle(image,[dest[0],dest[1],dest[2]],[uv[0],uv[1],uv[2]],1);imageTriangle(image,[dest[0],dest[2],dest[3]],[uv[0],uv[2],uv[3]],1);}
+    else{drawMesh(room,toPlane,1,true);drawMesh(columns,toPlane,1,true);}
     if(s.horizon>0&&s.art<.95){
       const a=project([-3.2,s.eye,-3]),b=project([3.2,s.eye,-3]);
       line(a,b,gold,s.horizon*(1-s.art),1,[5,6]);
@@ -161,7 +164,8 @@
     const p2=p=>({x:r.x+(p[0]+3.2)/6.4*r.w,y:r.y+(4.5-p[1])/4.95*r.h,z:p[2]});
     ctx.shadowColor='#000';ctx.shadowBlur=28;ctx.fillStyle='#14120d';ctx.fillRect(r.x,r.y,r.w,r.h);ctx.shadowBlur=0;
     ctx.save();ctx.beginPath();ctx.rect(r.x,r.y,r.w,r.h);ctx.clip();
-    const project=p=>p2(imprint(p,s.eye));drawMesh(room,project,1,true);drawMesh(columns,project,1,true);
+    const project=p=>p2(imprint(p,s.eye)),image=studio?.renderPicture(s);
+    if(image)ctx.drawImage(image,r.x,r.y,r.w,r.h);else{drawMesh(room,project,1,true);drawMesh(columns,project,1,true);}
     const vp=p2([0,s.eye,-3]);
     if(s.horizon){
       line({x:r.x,y:vp.y},{x:r.x+r.w,y:vp.y},gold,s.horizon,1,[5,4]);
@@ -217,7 +221,7 @@
     const dpr=Math.min(devicePixelRatio||1,2);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);
     const room=hall(s.length),columns=[...column([],-1.25,2,gold),...column([],1.25,s.distance,cyan)];
     if(s.room){
-      drawMesh(room,view,.62*s.room);drawMesh(columns,view,s.room);
+      if(!studio?.drawSpace(ctx,width,height,s,r.main)){drawMesh(room,view,.62*s.room);drawMesh(columns,view,s.room);}
       const baseA=view([-4,0,-8]),baseB=view([-4,0,s.length]);line(baseA,baseB,'#b8a17b',.16*s.room,1,[2,5]);
       const pos=view([0,5.4,10]);label('Space',pos,'#c2ae8c',s.room);
     }

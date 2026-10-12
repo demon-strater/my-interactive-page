@@ -6,7 +6,7 @@ body.view-impressionism .surreal-room{translate:var(--memory-slide,0%) 0;transit
 .memory-title{text-shadow:0 2px 25px #243b4350}
 /* The card starts right of centre, so the masthead may run a little wider than the shared narrow frame. */
 @media(min-width:701px){body .memory-scene .memory-title.mf-head{max-width:28%}}
-.memory-caption,.memory-nav,.memory-enter,.chance-meeting,.corpse-caption{font:10px/1.8 system-ui,sans-serif;letter-spacing:.2em}
+.memory-caption,.memory-nav,.memory-enter,.chance-meeting,.corpse-caption{font:14px/1.8 system-ui,sans-serif;letter-spacing:.2em}
 .memory-nav{position:absolute;bottom:4%;left:7%;right:7%;display:flex;justify-content:space-between;gap:12px;align-items:center;z-index:3}
 .corpse-hit{position:absolute;left:var(--card-x,50%);top:var(--card-y,50%);width:var(--card-w,280px);height:var(--card-h,480px);transform:translate(-50%,-50%);display:flex;flex-direction:column;z-index:2}
 .corpse-band{flex:1;border:0;background:transparent;padding:0;margin:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -18,7 +18,7 @@ body.view-impressionism .surreal-room{translate:var(--memory-slide,0%) 0;transit
 .lever-base{position:absolute;left:19px;top:112px;width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 35% 28%,#dbc191,#917049 62%,#48301f);box-shadow:0 6px 10px #0006,inset 0 0 0 4px #e7c99055}
 .lever-stem{position:absolute;left:37px;top:25px;width:10px;height:110px;border-radius:8px;background:linear-gradient(90deg,#715336,#f4dfb7 45%,#b28e5c 72%,#63482e);transform-origin:center bottom;transform:scaleY(calc(1 - var(--lever-pull)*.72));transition:transform .38s cubic-bezier(.2,.8,.2,1)}
 .lever-knob{position:absolute;left:18px;top:0;width:48px;height:48px;border-radius:50%;background:radial-gradient(circle at 32% 26%,#ffb5a0 0%,#d77762 25%,#a64446 65%,#612e3d 100%);box-shadow:inset 0 0 0 1px #ffe3bc66,0 7px 12px #0006;transform:translateY(calc(var(--lever-pull)*80px));transition:transform .38s cubic-bezier(.2,.8,.2,1),filter .2s}
-.lever-label{position:absolute;top:176px;left:0;width:100%;font:9px/1.8 system-ui,sans-serif;letter-spacing:.22em;text-align:center;color:#e6cca2aa}
+.lever-label{position:absolute;top:176px;left:0;width:100%;font:14px/1.8 system-ui,sans-serif;letter-spacing:.22em;text-align:center;color:#e6cca2aa}
 .lever-label span{display:block;font-size:20px;line-height:1.1}
 .chance-meeting:hover .lever-knob{filter:brightness(1.12)}
 .chance-meeting.is-pulling{cursor:grabbing}
@@ -35,5 +35,5 @@ body.night-background .room-clock-music{top:24%;height:50%;border-radius:48% 48%
 .room-clock-music:focus-visible{outline:2px solid #f6dfaa;outline-offset:5px;box-shadow:0 0 24px #f6dfaa55}
 .dream-room-title{z-index:5;color:#fff3dc;text-shadow:0 2px 18px #24182baa}
 .memory-nav button:focus-visible,.memory-enter:focus-visible,.chance-meeting:focus-visible{outline:2px solid #f9eed5;outline-offset:6px}
-@media(max-width:600px){body.view-impressionism{--stage-width:100vw;--stage-height:100svh}.memory-nav{bottom:4%;font-size:8px;letter-spacing:.08em}.memory-enter{font-size:9px}.corpse-caption{bottom:12%;left:12%;max-width:76%;width:76%;text-align:center;font-size:12px!important}.chance-meeting{transform:translate(-50%,-50%) scale(.66)}.lever-label{font-size:12px}}
+@media(max-width:600px){body.view-impressionism{--stage-width:100vw;--stage-height:100svh}.memory-nav{bottom:4%;font-size: 14px;letter-spacing:.08em}.memory-enter{font-size: 14px}.corpse-caption{bottom:12%;left:12%;max-width:76%;width:76%;text-align:center;font-size: 14px!important}.chance-meeting{transform:translate(-50%,-50%) scale(.66)}.lever-label{font-size: 14px}}
 @media(prefers-reduced-motion:reduce){.memory-scene,body.view-impressionism .surreal-room,.lever-knob,.lever-stem{transition:none}}

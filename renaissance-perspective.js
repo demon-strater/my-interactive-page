@@ -5,6 +5,7 @@
   const figures = document.getElementById('figures'), svg = document.getElementById('guides');
   const rays = document.getElementById('rays'), depths = document.getElementById('depths'), focus = document.getElementById('focus');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const studio=window.createRenaissanceStudio?.();
   const names = ['Plato','Aristotle','Socrates','Pythagoras','Euclid','Diogenes','Heraclitus','Ptolemy'];
   const figureFiles = [
     'ChatGPT Image 2026년 9월 7일 오후 02_07_49 (1).png',
@@ -141,6 +142,7 @@
     const glow=ctx.createRadialGradient(vx,vy,0,vx,vy,Math.max(width,height)*.7);
     glow.addColorStop(0,'#caa0521f');glow.addColorStop(.5,'#3a2b1226');glow.addColorStop(1,'#020100a8');
     ctx.fillStyle=glow;ctx.fillRect(0,0,width,height);
+    if(studio?.drawHall(ctx,width,height,vanishing,lineAmount))return;
     // A distant apse frames the vanishing point, giving the hall a terminus to converge on.
     const nH=height*.24*(.4+lineAmount*.6),nW=nH*.5;
     ctx.beginPath();

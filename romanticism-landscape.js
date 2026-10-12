@@ -58,7 +58,7 @@ function render(c,w,h,time,index,amount,settings={}){
  const bg=c.createLinearGradient(0,0,w,h);bg.addColorStop(0,'#101a1f');bg.addColorStop(.55,'#111b20');bg.addColorStop(1,'#070d12');c.fillStyle=bg;c.fillRect(0,0,w,h);
  const glow=c.createRadialGradient(cx,cy-h*.16,0,cx,cy-h*.16,w*.38);glow.addColorStop(0,'rgba(110,136,132,.12)');glow.addColorStop(1,'transparent');c.fillStyle=glow;c.fillRect(0,0,w,h);
  const height=v=>v.y*mix(1,vast,ease((v.z+.2)/1.2));
- const gpu=terrain?.(c,w,h,{cx,cy,scale:s*zoom,yaw,vast,warmth,fog});
+ const gpu=terrain?.(c,w,h,{cx,cy,scale:s*zoom,yaw,vast,warmth,fog,personScale:index===2?mix(1.5,.55,p):index===0?zoom:1,crowd:index===4?p:undefined});
  if(!gpu)for(let j=NZ-1;j>=0;j--)for(let i=0;i<NX;i++){
   const a=grid[j][i],b=grid[j][i+1],d=grid[j+1][i],e=grid[j+1][i+1];
   const fade=1-ease((Math.hypot(a.x/7,(a.z-.8)/5.5)-.83)/.17);if(fade<=0)continue;
@@ -78,7 +78,7 @@ function render(c,w,h,time,index,amount,settings={}){
   for(let k=0;k<4;k++){const z=-1.5+k*1.3,x=Math.sin(z*1.2)*1.25,v=project(x,elevation(x,z)+.08,z);c.beginPath();c.arc(v.x,v.y,3,0,TAU);c.fillStyle=gold;c.fill();}
  }
  // Small trees give the mountains a readable scale without a rectangular pedestal.
- for(let i=0;i<70;i++){const x=-5.5+hash(i,22)*11,z=-1.8+hash(i,23)*3.2,y=elevation(x,z);if(y>.95||y<.16)continue;const v=project(x,y,z),size=s*(.045+hash(i,24)*.06);line(c,[v,{x:v.x,y:v.y-size*2.5}],'#162b2b',.7);for(let k=0;k<3;k++)poly(c,[{x:v.x,y:v.y-size*(3-k*.55)},{x:v.x-size*(.4+k*.18),y:v.y-size*(1.5-k*.55)},{x:v.x+size*(.4+k*.18),y:v.y-size*(1.5-k*.55)}],'#203836');}
+ if(!terrain?.detailed)for(let i=0;i<70;i++){const x=-5.5+hash(i,22)*11,z=-1.8+hash(i,23)*3.2,y=elevation(x,z);if(y>.95||y<.16)continue;const v=project(x,y,z),size=s*(.045+hash(i,24)*.06);line(c,[v,{x:v.x,y:v.y-size*2.5}],'#162b2b',.7);for(let k=0;k<3;k++)poly(c,[{x:v.x,y:v.y-size*(3-k*.55)},{x:v.x-size*(.4+k*.18),y:v.y-size*(1.5-k*.55)},{x:v.x+size*(.4+k*.18),y:v.y-size*(1.5-k*.55)}],'#203836');}
  // Soft volumes can drift beyond the terrain: no clipping path and no hard fog edge.
  c.save();
  for(let i=0;i<48;i++){
@@ -86,7 +86,7 @@ function render(c,w,h,time,index,amount,settings={}){
   c.save();c.translate(v.x,v.y);c.scale(1,.36);const r=s*(1.05+hash(i,2)*.8),g=c.createRadialGradient(0,0,0,0,0,r);g.addColorStop(0,'rgba(206,221,211,'+fog*.38*edge+')');g.addColorStop(.5,'rgba(190,208,201,'+fog*.16*edge+')');g.addColorStop(1,'rgba(190,208,201,0)');c.fillStyle=g;c.fillRect(-r,-r,r*2,r*2);c.restore();
  }c.restore();
  const foot=project(-.45,elevation(-.45,-2.9)+.02,-2.9),ps=s/40*(index===2?mix(1.5,.55,p):index===0?zoom:1);
- if(index===4)for(let i=0;i<15;i++){const x=(i%5-2)*1.55,z=-2+Math.floor(i/5)*.9,v=project(x,elevation(x,z),z),depart=ease(p/.65);person(c,v.x+(i%2?1:-1)*depart*s*6,v.y-depart*s*.6,s/45,1-depart);}
+ if(index===4&&!terrain?.detailed)for(let i=0;i<15;i++){const x=(i%5-2)*1.55,z=-2+Math.floor(i/5)*.9,v=project(x,elevation(x,z),z),depart=ease(p/.65);person(c,v.x+(i%2?1:-1)*depart*s*6,v.y-depart*s*.6,s/45,1-depart);}
  // Weather is a spatial event: slanting rain gives way to long shafts of light.
  if(index===3){
   c.save();
@@ -100,7 +100,7 @@ function render(c,w,h,time,index,amount,settings={}){
  if(index===4){
   c.save();c.globalAlpha=ease(p/.6);const radius=s*(2.8-1.7*p);c.beginPath();c.ellipse(foot.x,foot.y+3,radius,radius*.3,0,0,TAU);c.strokeStyle='#e6c59099';c.lineWidth=1.3;c.stroke();c.restore();
  }
- person(c,foot.x,foot.y,ps);const head={x:foot.x,y:foot.y-46*ps};
+ if(!terrain?.detailed)person(c,foot.x,foot.y,ps);const head={x:foot.x,y:foot.y-46*ps};
  // Reserve a separate two-column annotation row, measured below the model and above controls.
  const leftX=w*(compact?.035:.06),leftY=compact?area.top+stageHeight*.66:stageBottom+16,rightX=w*(compact?.755:.54),rightY=leftY;
  if(index===0){const target=project(.6,2.7,4.6);c.save();const beam=c.createLinearGradient(head.x,head.y,target.x,target.y);beam.addColorStop(0,'#dfc79b55');beam.addColorStop(1,'#dfc79b00');poly(c,[head,{x:target.x-75*s/50,y:target.y-25},{x:target.x+75*s/50,y:target.y-25}],beam);c.setLineDash([4,6]);line(c,[head,target],'#e8d1a48c',.8);c.restore();callout(c,head,leftX,leftY,'인물','그의 시선을 빌려 본다.');callout(c,target,rightX,rightY,'시선','얼굴은 보이지 않는다.');

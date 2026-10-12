@@ -1,19 +1,18 @@
 (() => {
   'use strict';
-  // The Surrealism concept film: five chapters of 12 seconds (surrealism-scene.js), each showing something ordinary and
-  // then one rule of reality broken, with one control the viewer can take over — a slider (dream, sky, clarity), the
+  // The Surrealism concept film: four chapters of 12 seconds (surrealism-scene.js), each showing something ordinary and
+  // then one rule of reality broken, with one control the viewer can take over — a slider (dream, sky), the
   // apple, or a button that deals a new round of the corpse game. Two pauses show real paintings between chapters.
   const model=window.SurrealScene,{clamp,END}=model,$=id=>document.getElementById(id);
   const canvas=$('filmScene'),ctx=canvas.getContext('2d'),control=$('sceneControl'),reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  const titles=['꿈속에서는 이상한 일도 당연하다','익숙한 물건을 낯선 크기로 — 데페이즈망','하늘은 낮, 거리는 밤 — 불가능한 조합',"우연이 그린 그림 — '우아한 시체' 놀이",'불가능한 장면을 사진처럼 또렷하게'];
+  const titles=['하늘은 낮, 거리는 밤 — 불가능한 조합','꿈속에서는 이상한 일도 당연하다','익숙한 물건을 낯선 크기로 — 데페이즈망',"우연이 그린 그림 — '우아한 시체' 놀이"];
   const descriptions=[
+    '현실에서는 하늘이 어두워지면 거리도 함께 어두워진다. 마그리트는 이 규칙을 깨고, 하늘은 정오인데 거리는 한밤인 장면을 그렸다. 그 그림이 「빛의 제국」이다.',
     "초현실주의(超現實主義)는 '현실을 넘어선 현실'이라는 뜻이다. 꿈속에서는 시계가 녹고 구름이 방으로 들어와도 이상하다고 느끼지 않는다. 1924년 앙드레 브르통과 화가들은 이런 꿈과 무의식의 세계를 그림으로 옮기려 했다.",
     "사과도 방도 평범한데, 크기 하나만 바꾸자 방이 꿈처럼 낯설어진다. 익숙한 물건을 엉뚱한 크기나 자리에 두어 낯설게 만드는 방법을 '데페이즈망(dépaysement)'이라고 한다.",
-    '현실에서는 하늘이 어두워지면 거리도 함께 어두워진다. 마그리트는 이 규칙을 깨고, 하늘은 정오인데 거리는 한밤인 장면을 그렸다. 그 그림이 「빛의 제국」이다.',
-    "종이를 접어 앞사람의 그림을 가린 채, 세 사람이 머리·몸통·다리를 차례로 그린다. 펼치면 아무도 계획하지 않은 생물이 나타난다. 초현실주의자들은 이런 우연 속에서 무의식이 드러난다고 믿었다.",
-    '꿈은 보통 흐릿하게 기억된다. 그런데 초현실주의 화가들은 불가능한 장면을 사진처럼 또렷하게 그렸다. 너무 정확해서, 우리는 그 꿈을 진짜처럼 믿게 된다.'];
-  const hints=['손잡이를 끌어 방을 꿈속으로 데려가 보세요','사과를 끌어 크기를 바꿔 보세요','하늘의 시간을 위아래로 끌어 보세요 — 거리는 계속 밤이에요','다시 그려 보기를 눌러 새 생물을 만들어 보세요','손잡이를 끌어 흐릿한 꿈을 또렷하게 만들어 보세요'];
-  const panels=[$('compareOne'),$('compareTwo')],windows=[{start:11.8,end:12,hold:8000,panel:0},{start:35.8,end:36,hold:8000,panel:1}];
+    "종이를 접어 앞사람의 그림을 가린 채, 세 사람이 머리·몸통·다리를 차례로 그린다. 펼치면 아무도 계획하지 않은 생물이 나타난다. 초현실주의자들은 이런 우연 속에서 무의식이 드러난다고 믿었다."];
+  const hints=['하늘의 시간을 위아래로 끌어 보세요 — 거리는 계속 밤이에요','손잡이를 끌어 방을 꿈속으로 데려가 보세요','사과를 끌어 크기를 바꿔 보세요','다시 그려 보기를 눌러 새 생물을 만들어 보세요'];
+  const panels=[$('compareOne'),$('compareTwo')],windows=[{start:11.8,end:12,hold:8000,panel:1},{start:23.8,end:24,hold:8000,panel:0}];
   const atIntro=()=>document.body.classList.contains('artwork-intro');
   const clock=seconds=>`${Math.floor(seconds/60)}:${String(Math.floor(seconds%60)).padStart(2,'0')}`;
   let width=1,height=1,time=0,playing=false,last=0,raf=0,currentChapter=-1,manual={},drag=null,hold=null,lingering=false,dealing=false,target={};
@@ -24,6 +23,7 @@
   document.body.dataset.renderer=renderer.threeDimensional?'webgl':'canvas';
   const glyphs={x:'↔',y:'↕',apple:'↔',chance:'다시 그려 보기 ↻'};
   function render(){
+    if(hold){control.hidden=true;return;}
     const scene=model.state(time,manual);target=renderer.draw(scene,model.layout(width,height));
     const kind=target.kind;
     control.hidden=!kind||Boolean(hold)||atIntro()||scene.layers[scene.chapter]<.7;
@@ -37,10 +37,11 @@
   function updateUI(){
     const chapter=model.chapter(time);document.body.dataset.chapter=chapter;document.body.classList.toggle('film-playing',playing);document.body.classList.toggle('film-ended',time>=END);
     if(chapter!==currentChapter){
-      currentChapter=chapter;$('sceneTitle').textContent=titles[chapter];$('sceneStatus').textContent=descriptions[chapter];$('sceneCaption').textContent=descriptions[chapter];$('sceneHint').textContent=hints[chapter];
+      currentChapter=chapter;$('sceneTitle').textContent=titles[chapter];$('sceneStatus').textContent=descriptions[chapter];$('sceneHint').textContent=hints[chapter];
+      document.querySelector('.mf-eyebrow').textContent=`초현실주의 / ${String(chapter+1).padStart(2,'0')}`;
       canvas.setAttribute('aria-label',titles[chapter]);control.setAttribute('aria-label',hints[chapter]);
       const slider=chapter!==3;control.setAttribute('role',slider?'slider':'button');
-      if(slider){control.setAttribute('aria-orientation',chapter===2?'vertical':'horizontal');control.setAttribute('aria-valuemin','0');control.setAttribute('aria-valuemax','100');}
+      if(slider){control.setAttribute('aria-orientation',chapter===0?'vertical':'horizontal');control.setAttribute('aria-valuemin','0');control.setAttribute('aria-valuemax','100');}
       else['aria-orientation','aria-valuemin','aria-valuemax','aria-valuenow','aria-valuetext'].forEach(name=>control.removeAttribute(name));
     }
     $('playPause').textContent=playing?'Ⅱ':'▷';$('playPause').setAttribute('aria-label',playing?'영상 일시정지':'영상 재생');$('filmTime').textContent=`${clock(time)} / ${clock(END)}`;$('filmFill').style.width=time/END*100+'%';
@@ -59,7 +60,7 @@
   }
   function invalidate(){if(!raf)raf=requestAnimationFrame(frame);}
   function pause(){playing=false;last=0;invalidate();}
-  function reset(chapter=0,autoplay=false){time=(reduced.matches?[9,21,34,46.5,59]:[0,13.3,25.3,37.3,49.3])[chapter];manual={};hold=null;drag=null;dealing=false;playing=autoplay&&!reduced.matches;last=0;currentChapter=-1;invalidate();}
+  function reset(chapter=0,autoplay=false){time=(reduced.matches?[10,21,34,46.5]:[0,13.3,25.3,37.3])[chapter];manual={};hold=null;drag=null;dealing=false;playing=autoplay&&!reduced.matches;last=0;currentChapter=-1;invalidate();}
   function toggle(){if(atIntro())return;if(playing)pause();else{if(time>=END)reset();playing=true;last=0;invalidate();}}
   // A new round of the corpse game: a new head, body and legs, drawn and folded again from the start.
   function deal(){if(model.chapter(time)!==3||hold)return;pause();manual.seed=(manual.seed??0)+1;manual.age=reduced.matches?9:0;dealing=!reduced.matches;invalidate();}
@@ -75,7 +76,7 @@
     if(event.key==='Enter'&&target.kind==='chance'){event.preventDefault();deal();return;}
     if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)||!target.kind||target.kind==='chance')return;
     event.preventDefault();pause();const step=['ArrowRight','ArrowDown'].includes(event.key)?.05:-.05;
-    if(target.kind==='apple'){manual.apple=clamp(model.state(time,manual).apple+step*2,.15,1.15);invalidate();}else setValue(target.key,target.value+step);
+    if(target.kind==='apple'){manual.apple=clamp(model.state(time,manual).apple+step*2,.15,1.15);invalidate();}else setValue(target.key,(manual[target.key]??target.value)+step);
   });
   control.addEventListener('click',()=>{if(target.kind==='chance')deal();});
   function local(event){const bounds=canvas.getBoundingClientRect();return {x:event.clientX-bounds.left,y:event.clientY-bounds.top};}

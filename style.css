@@ -208,7 +208,7 @@ body.artwork-opening.view-interaction .hub-screen {
 
 .clock-readout span {
     display: none;
-    font-size: 0.82rem;
+    font-size: 0.95rem;
     font-weight: 700;
 }
 
@@ -345,7 +345,7 @@ body.artwork-opening.view-interaction .hub-screen {
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 999px;
     background: rgba(0, 0, 0, 0.14);
-    font-size: 0.78rem;
+    font-size: 0.95rem;
     font-weight: 700;
 }
 
@@ -398,7 +398,6 @@ body.artwork-opening.view-interaction .hub-screen {
 }
 
 .timeline-card.surrealism-card,
-.timeline-card.impressionism-card,
 .timeline-card.renaissance-card,
 .timeline-card.romanticism-card {
     --art-image: url('morning.png');
@@ -409,10 +408,6 @@ body.artwork-opening.view-interaction .hub-screen {
     filter: saturate(1.02) contrast(1);
 }
 
-.timeline-card.impressionism-card {
-    --art-image: url('1.png');
-    --artwork-left: 60%;
-}
 
 .timeline-card.renaissance-card {
     --art-image: url('아테네 학당.jpg');
@@ -424,7 +419,6 @@ body.artwork-opening.view-interaction .hub-screen {
 }
 
 .timeline-card.surrealism-card,
-.timeline-card.impressionism-card,
 .timeline-card.romanticism-card {
     background-image: var(--art-image) !important;
     background-size: var(--art-bg-size, auto 85%) !important;
@@ -433,28 +427,24 @@ body.artwork-opening.view-interaction .hub-screen {
 }
 
 .timeline-card.surrealism-card::before,
-.timeline-card.impressionism-card::before,
 .timeline-card.romanticism-card::before {
     display: none !important;
 }
 
 
 .timeline-card.surrealism-card .card-hour,
-.timeline-card.impressionism-card .card-hour,
 .timeline-card.renaissance-card .card-hour,
 .timeline-card.romanticism-card .card-hour {
     display: none;
 }
 
 .timeline-card.surrealism-card strong,
-.timeline-card.impressionism-card strong,
 .timeline-card.renaissance-card strong,
 .timeline-card.romanticism-card strong {
     display: none;
 }
 
 .timeline-card.surrealism-card small,
-.timeline-card.impressionism-card small,
 .timeline-card.renaissance-card small,
 .timeline-card.romanticism-card small {
     display: none;
@@ -561,9 +551,6 @@ body.artwork-opening.artwork-arrived.view-impressionism .site-header {
     animation: surrealRoomReveal 920ms cubic-bezier(0.18, 0.86, 0.25, 1) both;
 }
 
-body.artwork-opening.artwork-arrived.view-impressionism-time .impressionism-time-frame {
-    animation: impressionistLightReveal 980ms cubic-bezier(0.22, 0.8, 0.22, 1) both;
-}
 
 body.artwork-opening.artwork-arrived.view-romanticism .romanticism-frame {
     animation: stormReveal 1050ms cubic-bezier(0.2, 0.72, 0.22, 1) both;
@@ -573,10 +560,6 @@ body.artwork-opening.artwork-arrived.view-renaissance .renaissance-frame {
     animation: perspectiveReveal 950ms cubic-bezier(0.18, 0.86, 0.25, 1) both;
 }
 
-body.artwork-opening.artwork-arrived.view-fluid-collision .fluid-site,
-body.artwork-opening.artwork-arrived.view-particle .particle-site {
-    animation: opticalReveal 900ms cubic-bezier(0.18, 0.86, 0.25, 1) both;
-}
 
 @keyframes surrealRoomReveal {
     0% { opacity: 0; transform: translateY(18px) scale(0.985); filter: blur(12px) saturate(0.82); }
@@ -801,9 +784,7 @@ body.view-impressionism.night-background .interaction-screen {
     background: #000;
 }
 
-body.view-impressionism .impressionism-site,
-body.view-particle .particle-site,
-body.view-schema-architecture .schema-site {
+body.view-impressionism .impressionism-site {
     display: flex;
 }
 
@@ -817,39 +798,10 @@ body.view-impressionism .impressionism-site {
     transform: none;
 }
 
-body.view-particle .particle-site,
-body.view-schema-architecture .schema-site {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    max-width: none;
-    gap: 0;
-    transform: none;
-}
 
-body.view-particle .interaction-screen {
-    background: #020617;
-    padding: 0;
-}
 
-body.view-particle .pull-chain {
-    display: none;
-}
 
-body.view-fluid-collision .fluid-site {
-    display: flex;
-}
 
-body.view-fluid-collision .fluid-site {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    max-width: none;
-    gap: 0;
-    transform: none;
-}
 
 body.view-renaissance .renaissance-site {
     display: flex;
@@ -912,46 +864,11 @@ body.view-romanticism .pull-chain {
     background: #02050a;
 }
 
-.impressionism-time-site {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    max-width: none;
-    gap: 0;
-    transform: none;
-}
 
-body.view-impressionism-time .impressionism-time-site {
-    display: flex;
-}
 
-body.view-impressionism-time .interaction-screen {
-    background: #111;
-    padding: 0;
-}
 
-body.view-impressionism-time .pull-chain {
-    display: none;
-}
 
-.impressionism-time-stage {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-}
 
-.impressionism-time-frame {
-    position: absolute;
-    inset: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-    border: 0;
-    background: #111;
-}
 
 .renaissance-stage {
     position: absolute;
@@ -979,28 +896,9 @@ body.view-impressionism-time .pull-chain {
     background-color: var(--poster-paper, #eee8db) !important;
 }
 
-body.view-schema-architecture .interaction-screen {
-    background:
-        linear-gradient(135deg, #f8f7f2, #dfe8e5 48%, #a9b9b2),
-        repeating-linear-gradient(90deg, rgba(24, 38, 36, 0.08) 0 1px, transparent 1px 42px),
-        repeating-linear-gradient(0deg, rgba(24, 38, 36, 0.06) 0 1px, transparent 1px 42px);
-    padding: 0;
-}
 
-body.view-schema-architecture .pull-chain {
-    display: none;
-}
 
-body.view-fluid-collision .interaction-screen {
-    background:
-        radial-gradient(circle at 50% 50%, rgba(103, 58, 183, 0.28), transparent 32%),
-        linear-gradient(135deg, #08020c, #11051a 48%, #050311);
-    padding: 0;
-}
 
-body.view-fluid-collision .pull-chain {
-    display: none;
-}
 
 .back-button {
     position: absolute;
@@ -1049,19 +947,12 @@ body.view-impressionism .back-button {
 }
 
 body.view-impressionism.night-background .back-button,
-body.view-romanticism .back-button,
-body.view-fluid-collision .back-button,
-body.view-particle .back-button {
+body.view-romanticism .back-button {
     color: rgba(245, 248, 255, 0.92);
     border-color: rgba(255, 255, 255, 0.2);
     background: rgba(5, 9, 18, 0.42);
 }
 
-body.view-impressionism-time .back-button {
-    color: rgba(255, 240, 205, 0.94);
-    border-color: rgba(255, 224, 163, 0.22);
-    background: rgba(27, 20, 15, 0.42);
-}
 
 body.view-renaissance .back-button {
     color: rgba(249, 226, 180, 0.94);
@@ -1349,7 +1240,7 @@ body.view-impressionism.night-background .curtain {
 }
 
 .album-tag {
-    font-size: 0.78rem;
+    font-size: 0.95rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0;
@@ -1388,7 +1279,7 @@ body.view-interaction.night-background .music-player {
 .track-info {
     margin: 4px 0 0;
     color: rgba(247, 229, 205, 0.62);
-    font-size: 0.82rem;
+    font-size: 0.95rem;
     line-height: 1.4;
 }
 
@@ -1425,7 +1316,7 @@ body.view-interaction.night-background .track-info {
     justify-content: space-between;
     margin-bottom: 8px;
     color: rgba(21, 34, 45, 0.58);
-    font-size: 0.76rem;
+    font-size: 0.95rem;
     font-weight: 600;
 }
 
@@ -1474,7 +1365,7 @@ body.view-interaction.night-background .progress-track {
     color: inherit;
     background: transparent;
     cursor: pointer;
-    font-size: 0.82rem;
+    font-size: 0.95rem;
     font-weight: 700;
     transition: background 180ms ease, color 180ms ease, box-shadow 180ms ease;
 }
@@ -1660,25 +1551,6 @@ body.view-interaction.night-background .handle {
     transform: translateY(17px);
 }
 
-.schema-header h1 {
-    color: #1a2927;
-}
-
-.schema-header {
-    position: absolute;
-    left: 50%;
-    top: 24px;
-    z-index: 4;
-    transform: translateX(-50%);
-    pointer-events: none;
-}
-
-.schema-header h1 {
-    color: #eafff6;
-    font-size: clamp(2rem, 5.2vw, 4.6rem);
-    text-shadow: 0 18px 36px rgba(0, 0, 0, 0.45);
-}
-
 .schema-stage {
     position: absolute;
     inset: 0;
@@ -1716,7 +1588,7 @@ body.view-interaction.night-background .handle {
     place-items: center;
     border: 1px solid rgba(255, 255, 255, 0.24);
     border-radius: 999px;
-    font-size: 0.76rem;
+    font-size: 0.95rem;
     font-weight: 700;
 }
 
@@ -1728,7 +1600,7 @@ body.view-interaction.night-background .handle {
 .schema-panel small {
     display: block;
     color: rgba(234, 255, 246, 0.66);
-    font-size: 0.72rem;
+    font-size: 0.95rem;
     font-weight: 700;
     text-transform: uppercase;
 }
@@ -1762,48 +1634,10 @@ body.view-interaction.night-background .handle {
     background: #000;
 }
 
-.particle-header {
-    position: absolute;
-    left: 50%;
-    top: 24px;
-    z-index: 4;
-    transform: translateX(-50%);
-    pointer-events: none;
-}
 
-.particle-header h1 {
-    color: rgba(255, 255, 255, 0.86);
-    font-size: clamp(2rem, 5.2vw, 4.6rem);
-    text-shadow: 0 18px 36px rgba(0, 0, 0, 0.45);
-}
 
-.particle-stage,
-.particle-canvas {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-}
 
-.particle-canvas {
-    overflow: hidden;
-    border: 0;
-    border-radius: 0;
-    background: #020617;
-    box-shadow: none;
-    z-index: 2;
-}
 
-.particle-frame {
-    position: absolute;
-    inset: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-    border: 0;
-    background: #020617;
-}
 
 .schema-index {
     left: 24px;
@@ -1897,85 +1731,14 @@ body.view-interaction.night-background .handle {
     bottom: 24%;
 }
 
-.fluid-header h1 {
-    color: #f4edff;
-    text-shadow: 0 18px 36px rgba(0, 0, 0, 0.45);
-}
 
-.fluid-header {
-    position: absolute;
-    left: 50%;
-    top: 24px;
-    z-index: 4;
-    transform: translateX(-50%);
-    pointer-events: none;
-}
 
-.fluid-header h1 {
-    font-size: clamp(2rem, 5.2vw, 4.6rem);
-}
 
-.fluid-stage {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-}
 
-.fluid-canvas {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    border: 0;
-    border-radius: 0;
-    background: #02020a;
-    box-shadow: none;
-}
 
-.fluid-frame {
-    position: absolute;
-    inset: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-    border: 0;
-    background: #02020a;
-}
 
-.fluid-panel {
-    position: absolute;
-    right: 24px;
-    bottom: 24px;
-    z-index: 3;
-    width: 190px;
-    min-height: 124px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    color: #f7edff;
-    background: rgba(9, 4, 18, 0.56);
-    box-shadow: 0 22px 54px rgba(0, 0, 0, 0.28);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-}
 
-.fluid-panel strong {
-    font-size: clamp(1.1rem, 2vw, 1.7rem);
-    line-height: 1;
-}
 
-.fluid-panel small {
-    color: rgba(247, 237, 255, 0.68);
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-}
 
 @media (max-width: 900px) {
     :root {
@@ -2105,7 +1868,7 @@ body.view-interaction.night-background .handle {
         left: 16px;
         right: 24px;
         bottom: 22px;
-        font-size: 0.58rem;
+        font-size: 0.95rem;
     }
 
     .interaction-screen {
@@ -2148,16 +1911,7 @@ body.view-interaction.night-background .handle {
         padding: 13px;
     }
 
-    .fluid-stage {
-        height: 100%;
-        min-height: 0;
-    }
 
-    .fluid-panel {
-        width: 164px;
-        min-height: 104px;
-        padding: 13px;
-    }
 }
 
 @media (max-width: 900px) and (max-height: 820px) {
@@ -2200,7 +1954,7 @@ body.view-interaction.night-background .handle {
 
     .track-info {
         margin-top: 4px;
-        font-size: 0.84rem;
+        font-size: 0.95rem;
     }
 
     .player-button {
@@ -2224,31 +1978,16 @@ body.view-interaction.night-background .handle {
     }
 
     .schema-panel strong {
-        font-size: 0.9rem;
+        font-size: 0.95rem;
     }
 
     .schema-panel small {
-        font-size: 0.6rem;
+        font-size: 0.95rem;
     }
 
-    .fluid-stage {
-        height: 100%;
-        min-height: 0;
-    }
 
-    .fluid-panel {
-        width: 146px;
-        min-height: 90px;
-        padding: 11px;
-    }
 
-    .fluid-panel strong {
-        font-size: 0.9rem;
-    }
 
-    .fluid-panel small {
-        font-size: 0.6rem;
-    }
 }
 
 @media (max-width: 520px) {
@@ -2319,12 +2058,12 @@ body.view-interaction.night-background .handle {
     }
 
     .track-info {
-        font-size: 0.86rem;
+        font-size: 0.95rem;
     }
 
     .playlist-item {
         min-height: 34px;
-        font-size: 0.78rem;
+        font-size: 0.95rem;
     }
 }
 
@@ -2401,7 +2140,6 @@ body.view-interaction.night-background .handle {
 }
 
 .timeline-card.surrealism-card,
-.timeline-card.impressionism-card,
 .timeline-card.renaissance-card,
 .timeline-card.romanticism-card {
     border: 0;
@@ -2410,7 +2148,6 @@ body.view-interaction.night-background .handle {
 }
 
 .timeline-card.surrealism-card,
-.timeline-card.impressionism-card,
 .timeline-card.romanticism-card {
     background-image: var(--art-image) !important;
     background-size: var(--art-bg-size, auto 85%) !important;
@@ -2419,7 +2156,6 @@ body.view-interaction.night-background .handle {
 }
 
 .timeline-card.surrealism-card::after,
-.timeline-card.impressionism-card::after,
 .timeline-card.renaissance-card::after,
 .timeline-card.romanticism-card::after {
     display: none;
@@ -2460,8 +2196,7 @@ body.view-interaction.night-background .handle {
 .window-reveal,
 .window-frame,
 .window-sill,
-.album-overlay,
-.fluid-panel {
+.album-overlay {
     border-radius: var(--ui-radius);
 }
 
@@ -2477,21 +2212,13 @@ body.view-interaction.night-background .handle {
     margin-top: 12px;
 }
 
-.particle-canvas,
-.fluid-canvas,
 .renaissance-stage,
-.baroque-stage,
-.romanticism-stage,
-.impressionism-time-stage {
+.romanticism-stage {
     background: #050505;
 }
 
-.particle-frame,
-.fluid-frame,
 .renaissance-frame,
-.baroque-frame,
-.romanticism-frame,
-.impressionism-time-frame {
+.romanticism-frame {
     display: block;
     width: 100%;
     height: 100%;
@@ -2536,7 +2263,6 @@ body.view-interaction.night-background .handle {
     }
 
     .timeline-card.surrealism-card::after,
-    .timeline-card.impressionism-card::after,
     .timeline-card.renaissance-card::after,
     .timeline-card.romanticism-card::after {
         display: none;
@@ -2716,7 +2442,6 @@ body.view-interaction.night-background .handle {
 }
 
 .timeline-card.surrealism-card,
-.timeline-card.impressionism-card,
 .timeline-card.renaissance-card,
 .timeline-card.romanticism-card {
     background-color: var(--poster-paper) !important;
@@ -2743,7 +2468,6 @@ body.view-interaction.night-background .handle {
 }
 
 .timeline-card.surrealism-card::after,
-.timeline-card.impressionism-card::after,
 .timeline-card.renaissance-card::after,
 .timeline-card.romanticism-card::after {
     content: "";
@@ -2907,7 +2631,6 @@ body.view-interaction.night-background .handle {
     }
 
     .timeline-card.surrealism-card,
-    .timeline-card.impressionism-card,
     .timeline-card.renaissance-card,
     .timeline-card.romanticism-card {
         background-position: 50% 34% !important;
@@ -2915,7 +2638,6 @@ body.view-interaction.night-background .handle {
     }
 
     .timeline-card.surrealism-card::after,
-    .timeline-card.impressionism-card::after,
     .timeline-card.renaissance-card::after,
     .timeline-card.romanticism-card::after {
         background:
@@ -2995,7 +2717,6 @@ body.view-interaction.night-background .handle {
 }
 
 .timeline-card.surrealism-card::before,
-.timeline-card.impressionism-card::before,
 .timeline-card.renaissance-card::before,
 .timeline-card.romanticism-card::before {
     display: block !important;
@@ -3014,7 +2735,6 @@ body.view-interaction.night-background .handle {
 }
 
 .timeline-card.surrealism-card::after,
-.timeline-card.impressionism-card::after,
 .timeline-card.renaissance-card::after,
 .timeline-card.romanticism-card::after {
     display: block !important;
@@ -3028,7 +2748,6 @@ body.view-interaction.night-background .handle {
 }
 
 .timeline-card.surrealism-card .card-artwork,
-.timeline-card.impressionism-card .card-artwork,
 .timeline-card.renaissance-card .card-artwork,
 .timeline-card.romanticism-card .card-artwork {
     left: 64%;
@@ -3051,7 +2770,6 @@ body.view-interaction.night-background .handle {
 }
 
 .timeline-card.surrealism-card .card-artwork *,
-.timeline-card.impressionism-card .card-artwork *,
 .timeline-card.renaissance-card .card-artwork *,
 .timeline-card.romanticism-card .card-artwork * {
     position: relative;
@@ -3062,7 +2780,6 @@ body.view-interaction.night-background .handle {
 }
 
 .timeline-card.surrealism-card .card-artwork span:first-child,
-.timeline-card.impressionism-card .card-artwork span:first-child,
 .timeline-card.renaissance-card .card-artwork span:first-child,
 .timeline-card.romanticism-card .card-artwork span:first-child {
     align-self: start;
@@ -3070,7 +2787,6 @@ body.view-interaction.night-background .handle {
 }
 
 .timeline-card.surrealism-card .card-artwork em,
-.timeline-card.impressionism-card .card-artwork em,
 .timeline-card.renaissance-card .card-artwork em,
 .timeline-card.romanticism-card .card-artwork em {
     align-self: center;
@@ -3092,7 +2808,6 @@ body.view-interaction.night-background .handle {
 }
 
 .timeline-card.surrealism-card .card-artwork span:last-child,
-.timeline-card.impressionism-card .card-artwork span:last-child,
 .timeline-card.renaissance-card .card-artwork span:last-child,
 .timeline-card.romanticism-card .card-artwork span:last-child {
     align-self: end;
@@ -3107,7 +2822,6 @@ body.view-interaction.night-background .handle {
     }
 
     .timeline-card.surrealism-card::before,
-    .timeline-card.impressionism-card::before,
     .timeline-card.renaissance-card::before,
     .timeline-card.romanticism-card::before {
         left: var(--card-pad-x);
@@ -3118,7 +2832,6 @@ body.view-interaction.night-background .handle {
     }
 
     .timeline-card.surrealism-card::after,
-    .timeline-card.impressionism-card::after,
     .timeline-card.renaissance-card::after,
     .timeline-card.romanticism-card::after {
         inset: auto var(--card-pad-x) var(--card-pad-y) var(--card-pad-x);
@@ -3129,7 +2842,6 @@ body.view-interaction.night-background .handle {
     }
 
     .timeline-card.surrealism-card .card-artwork,
-    .timeline-card.impressionism-card .card-artwork,
     .timeline-card.renaissance-card .card-artwork,
     .timeline-card.romanticism-card .card-artwork {
         left: var(--card-pad-x);
@@ -3142,7 +2854,6 @@ body.view-interaction.night-background .handle {
     }
 
     .timeline-card.surrealism-card .card-artwork em,
-    .timeline-card.impressionism-card .card-artwork em,
     .timeline-card.renaissance-card .card-artwork em,
     .timeline-card.romanticism-card .card-artwork em {
         font-size: clamp(0.86rem, 5.4vw, 1.45rem);
@@ -3186,11 +2897,9 @@ body.view-interaction.night-background .handle {
 }
 
 .timeline-card.surrealism-card .card-artwork,
-.timeline-card.impressionism-card .card-artwork,
 .timeline-card.renaissance-card .card-artwork,
 .timeline-card.romanticism-card .card-artwork,
 .timeline-card.surrealism-card .card-artwork *,
-.timeline-card.impressionism-card .card-artwork *,
 .timeline-card.renaissance-card .card-artwork *,
 .timeline-card.romanticism-card .card-artwork * {
     white-space: normal !important;
@@ -3290,7 +2999,6 @@ body.view-interaction.night-background .handle {
 
 /* Text safety layer: metadata must never be covered, clipped, or distorted. */
 .timeline-card.surrealism-card::after,
-.timeline-card.impressionism-card::after,
 .timeline-card.renaissance-card::after,
 .timeline-card.romanticism-card::after {
     inset: var(--card-pad-y) var(--card-pad-x) var(--card-pad-y) 60% !important;
@@ -3301,14 +3009,12 @@ body.view-interaction.night-background .handle {
 }
 
 .timeline-card.surrealism-card::before,
-.timeline-card.impressionism-card::before,
 .timeline-card.renaissance-card::before,
 .timeline-card.romanticism-card::before {
     z-index: 1 !important;
 }
 
 .timeline-card.surrealism-card .card-artwork,
-.timeline-card.impressionism-card .card-artwork,
 .timeline-card.renaissance-card .card-artwork,
 .timeline-card.romanticism-card .card-artwork {
     left: calc(60% + clamp(12px, 1.5vw, 22px)) !important;
@@ -3328,7 +3034,6 @@ body.view-interaction.night-background .handle {
 }
 
 .timeline-card.surrealism-card .card-artwork *,
-.timeline-card.impressionism-card .card-artwork *,
 .timeline-card.renaissance-card .card-artwork *,
 .timeline-card.romanticism-card .card-artwork * {
     max-width: 100% !important;
@@ -3349,7 +3054,6 @@ body.view-interaction.night-background .handle {
 }
 
 .timeline-card.surrealism-card .card-artwork em,
-.timeline-card.impressionism-card .card-artwork em,
 .timeline-card.renaissance-card .card-artwork em,
 .timeline-card.romanticism-card .card-artwork em {
     font-size: clamp(0.98rem, 1.72vw, 2.05rem) !important;
@@ -3358,7 +3062,6 @@ body.view-interaction.night-background .handle {
 
 @media (max-width: 520px) {
     .timeline-card.surrealism-card::after,
-    .timeline-card.impressionism-card::after,
     .timeline-card.renaissance-card::after,
     .timeline-card.romanticism-card::after {
         inset: auto var(--card-pad-x) var(--card-pad-y) var(--card-pad-x) !important;
@@ -3368,7 +3071,6 @@ body.view-interaction.night-background .handle {
     }
 
     .timeline-card.surrealism-card .card-artwork,
-    .timeline-card.impressionism-card .card-artwork,
     .timeline-card.renaissance-card .card-artwork,
     .timeline-card.romanticism-card .card-artwork {
         left: calc(var(--card-pad-x) + 8px) !important;
@@ -3380,7 +3082,6 @@ body.view-interaction.night-background .handle {
     }
 
     .timeline-card.surrealism-card .card-artwork em,
-    .timeline-card.impressionism-card .card-artwork em,
     .timeline-card.renaissance-card .card-artwork em,
     .timeline-card.romanticism-card .card-artwork em {
         font-size: clamp(0.78rem, 4.6vw, 1.18rem) !important;
@@ -3884,7 +3585,7 @@ body:not(.view-hub) .hand-tracker-status {
     right: 5px;
     bottom: 5px;
     padding: 4px 5px;
-    font-size: 7px;
+    font-size: 14px;
     letter-spacing: 0.06em;
 }
 
@@ -3913,7 +3614,7 @@ body:not(.view-hub) .hand-tracker-status {
 .hand-tracker-help {
     margin: 0 1px 0 0;
     color: rgba(243, 238, 228, 0.62);
-    font-size: 8px;
+    font-size: 14px;
     text-shadow: 0 1px 4px #000;
 }
 
@@ -3933,15 +3634,6 @@ body.view-interaction .back-button {
     height: 40px;
     min-height: 40px;
     padding: 0;
-}
-
-body.view-interaction .particle-header,
-body.view-interaction .fluid-header,
-body.view-interaction .schema-header {
-    top: 72px;
-    width: 100%;
-    padding-top: 0;
-    overflow-wrap: anywhere;
 }
 
 body.view-impressionism .memory-title {
