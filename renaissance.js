@@ -28,7 +28,7 @@
   let width=1,height=1,time=reduced.matches?7:0,playing=!reduced.matches&&!atIntro(),last=0,raf=0,currentChapter=-1;
   let manual={},drag=null,targets={},view=null,artReady=false,artFailed=false,showArtLines=true;
   const artwork=new Image();
-  const plane=[[-3.2,-.45,-3],[3.2,-.45,-3],[3.2,4.5,-3],[-3.2,4.5,-3]];
+  const plane=[[-4,0,M.PLANE_Z],[4,0,M.PLANE_Z],[4,M.PLANE_HEIGHT,M.PLANE_Z],[-4,M.PLANE_HEIGHT,M.PLANE_Z]];
   let hallCache={length:0,mesh:null};
   const studio=window.createRenaissanceStudio?.();
 
@@ -37,10 +37,10 @@
     ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=color;ctx.lineWidth=weight;ctx.setLineDash(dash);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.restore();
   }
   function dot(p,color,r=3,alpha=1){ctx.save();ctx.globalAlpha=alpha;ctx.fillStyle=color;ctx.shadowColor=color;ctx.shadowBlur=r*3;ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fill();ctx.restore();}
-  function label(text,p,color=ink,alpha=1,align='center',size=11){
-    ctx.save();ctx.globalAlpha=alpha;ctx.font=`${size}px Arial, 'Malgun Gothic', sans-serif`;ctx.textAlign=align;ctx.textBaseline='middle';
-    const w=ctx.measureText(text).width;let x=p.x-w/2;if(align==='left')x=p.x;if(align==='right')x=p.x-w;
-    ctx.fillStyle='#120f0ce8';ctx.fillRect(x-7,p.y-11,w+14,22);ctx.fillStyle=color;ctx.fillText(text,p.x,p.y);ctx.restore();
+  // A label is plain words with a soft shadow for contrast — no box behind it — and never smaller than the site's 14px.
+  function label(text,p,color=ink,alpha=1,align='center',size=14){
+    ctx.save();ctx.globalAlpha=alpha;ctx.font=`${Math.max(14,size)}px Arial, 'Malgun Gothic', sans-serif`;ctx.textAlign=align;ctx.textBaseline='middle';
+    ctx.shadowColor='#000e';ctx.shadowBlur=6;ctx.fillStyle=color;ctx.fillText(text,p.x,p.y);ctx.restore();
   }
   function polygon(points,fill,stroke,alpha=1,weight=.7){ctx.save();ctx.globalAlpha=alpha;path(points);if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=weight;ctx.stroke();}ctx.restore();}
   function face(mesh,points,fill,stroke='#a68b5c'){mesh.push({points,fill,stroke});}
@@ -97,27 +97,25 @@
     return {main:{x:0,y:0,w:width*(1-.36*shown),h:height},inset:{x:width-iw-60,y:(height-ih)/2,w:iw,h:ih}};
   }
   function makeView(s,r){
-    const frontScale=Math.min(r.w*.76/6.4,r.h*.82/4.95);
-    const sideScale=Math.min(r.w*.9/29,r.h*.74/10);
-    const scale=lerp(frontScale,sideScale,s.turn);
-    return M.camera(mix([0,2.025,-3],[0,1.5,7],s.turn),-1.12*s.turn,.24*s.turn,scale,r.x+r.w*.5,r.y+r.h*.51);
+    const {center,yaw,pitch,scale,cx,cy}=M.view(s,r);
+    return M.camera(center,yaw,pitch,scale,cx,cy);
   }
   function planeImage(s,project,room,columns){
     const p=plane.map(project);
     polygon(p,'#17150f',gold,1,1.1);
     // A second parallel edge makes the thinness of the painted surface visible.
-    if(s.turn>.05)polygon([plane[1],plane[2],[3.2,4.5,-2.94],[3.2,-.45,-2.94]].map(project),'#a48856','#dbc58d',1,.8);
+    if(s.turn>.05)polygon([plane[1],plane[2],[4,M.PLANE_HEIGHT,M.PLANE_Z+.09],[4,0,M.PLANE_Z+.09]].map(project),'#a48856','#dbc58d',1,.8);
     ctx.save();path(p);ctx.clip();
     const toPlane=p=>project(imprint(p,s.eye));
-    const image=studio?.renderPicture(s);
+    const image=s.chapter<2&&artReady?artwork:studio?.renderPicture(s);
     if(image){const dest=[p[3],p[2],p[1],p[0]],uv=[{x:0,y:0},{x:image.width,y:0},{x:image.width,y:image.height},{x:0,y:image.height}];imageTriangle(image,[dest[0],dest[1],dest[2]],[uv[0],uv[1],uv[2]],1);imageTriangle(image,[dest[0],dest[2],dest[3]],[uv[0],uv[2],uv[3]],1);}
     else{drawMesh(room,toPlane,1,true);drawMesh(columns,toPlane,1,true);}
     if(s.horizon>0&&s.art<.95){
-      const a=project([-3.2,s.eye,-3]),b=project([3.2,s.eye,-3]);
+      const a=project([-4,s.eye,M.PLANE_Z]),b=project([4,s.eye,M.PLANE_Z]);
       line(a,b,gold,s.horizon*(1-s.art),1,[5,6]);
     }
     ctx.restore();
-    if(s.turn>.4){const top=project([0,4.5,-3]);label('그림의 평면',{x:top.x,y:top.y-20},gold,s.turn);}
+    if(s.turn>.4){const top=project([0,M.PLANE_HEIGHT,M.PLANE_Z]);label(s.chapter<2?'아테네 학당 · 그림의 평면':'그림의 평면',{x:top.x,y:top.y-24},gold,s.turn);}
     return p;
   }
   function rays(s,project){
@@ -138,7 +136,7 @@
     label('눈(시점)',{x:E.x,y:E.y+28},gold,a);
     targets.eye={x:E.x,y:E.y,r:28};
     if(s.chapter===3){
-      const lo=project([0,.8,-8]),hi=project([0,3.2,-8]);line(lo,hi,gold,.5,1,[3,4]);
+      const lo=project([0,M.EYE_HEIGHT-1.2,-8]),hi=project([0,M.EYE_HEIGHT+1.2,-8]);line(lo,hi,gold,.5,1,[3,4]);
       arrow({x:hi.x,y:hi.y-14},-Math.PI/2,gold);arrow({x:lo.x,y:lo.y+14},Math.PI/2,gold);
     }
   }
@@ -161,12 +159,12 @@
   function inset(s,r,room,columns){
     if(s.inset<.01)return;
     ctx.save();ctx.globalAlpha=s.inset;
-    const p2=p=>({x:r.x+(p[0]+3.2)/6.4*r.w,y:r.y+(4.5-p[1])/4.95*r.h,z:p[2]});
+    const p2=p=>({x:r.x+(p[0]+4)/M.PLANE_WIDTH*r.w,y:r.y+(M.PLANE_HEIGHT-p[1])/M.PLANE_HEIGHT*r.h,z:p[2]});
     ctx.shadowColor='#000';ctx.shadowBlur=28;ctx.fillStyle='#14120d';ctx.fillRect(r.x,r.y,r.w,r.h);ctx.shadowBlur=0;
     ctx.save();ctx.beginPath();ctx.rect(r.x,r.y,r.w,r.h);ctx.clip();
     const project=p=>p2(imprint(p,s.eye)),image=studio?.renderPicture(s);
     if(image)ctx.drawImage(image,r.x,r.y,r.w,r.h);else{drawMesh(room,project,1,true);drawMesh(columns,project,1,true);}
-    const vp=p2([0,s.eye,-3]);
+    const vp=p2([0,s.eye,M.PLANE_Z]);
     if(s.horizon){
       line({x:r.x,y:vp.y},{x:r.x+r.w,y:vp.y},gold,s.horizon,1,[5,4]);
       // All depth-parallel rays converge to the vanishing point for the fixed plane.
@@ -223,12 +221,12 @@
     if(s.room){
       if(!studio?.drawSpace(ctx,width,height,s,r.main)){drawMesh(room,view,.62*s.room);drawMesh(columns,view,s.room);}
       const baseA=view([-4,0,-8]),baseB=view([-4,0,s.length]);line(baseA,baseB,'#b8a17b',.16*s.room,1,[2,5]);
-      const pos=view([0,5.4,10]);label('Space',pos,'#c2ae8c',s.room);
+      const pos=view([0,5.7,12]);label('그림 뒤로 이어지는 공간',pos,'#c2ae8c',s.room);
     }
     const corners=planeImage(s,view,room,columns);
     rays(s,view);sameSize(s,view);inset(s,r.inset,room,columns);art(s,corners);
-    if(s.chapter===0&&time>3.8){const p=view([0,-.45,-3]);label('하나의 평평한 면',{x:p.x,y:p.y+25},gold,smooth(3.8,5,time));}
-    if(s.chapter===4&&time<45){const p=view([0,-.45,-3]);label('원리에서 실제 그림으로',{x:p.x,y:p.y+24},gold,1-s.art);}
+    if(s.chapter===0&&time>3.8){const p=view([0,0,M.PLANE_Z]);label('하나의 평평한 면',{x:p.x,y:p.y+25},gold,smooth(3.8,5,time));}
+    if(s.chapter===4&&time<45){const p=view([0,0,M.PLANE_Z]);label('원리에서 실제 그림으로',{x:p.x,y:p.y+24},gold,1-s.art);}
   }
   function updateUI(){
     const c=M.chapter(time);
@@ -282,7 +280,7 @@
   addEventListener('artwork-intro:enter',()=>{time=reduced.matches?7:0;manual={};playing=false;last=0;holdRemaining=null;holdAt=null;currentChapter=-1;invalidate();});
   addEventListener('artwork-intro:entered',()=>{playing=!reduced.matches;last=0;invalidate();canvas.focus({preventScroll:true});});
   function setValue(kind,value){
-    if(kind==='distance')manual.distance=clamp(value,2,16);else manual.eye=clamp(value,.8,3.2);
+    if(kind==='distance')manual.distance=clamp(value,2,16);else manual.eye=clamp(value,M.EYE_HEIGHT-1.2,M.EYE_HEIGHT+1.2);
     invalidate();
   }
   function local(event){const r=canvas.getBoundingClientRect();return {x:event.clientX-r.left,y:event.clientY-r.top};}
@@ -299,7 +297,7 @@
     if(!drag||drag.id!==e.pointerId||!view)return;
     const p=local(e);let value=0;
     // Orthographic scene projection: nearest point on the visible movement rail is the exact inverse.
-    const lo=drag.kind==='distance'?2:.8,hi=drag.kind==='distance'?16:3.2;
+    const lo=drag.kind==='distance'?2:M.EYE_HEIGHT-1.2,hi=drag.kind==='distance'?16:M.EYE_HEIGHT+1.2;
     const a=view(drag.kind==='distance'?[1.25,1.3,lo]:[0,lo,-8]);
     const b=view(drag.kind==='distance'?[1.25,1.3,hi]:[0,hi,-8]);
     const dx=b.x-a.x,dy=b.y-a.y;

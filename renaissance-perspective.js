@@ -84,14 +84,14 @@
     svg.style.opacity=String(Math.min(1,lineAmount*2));
     for(let i=-4;i<=12;i++) {
       const x=i/8*width;
-      makeLine(rays,vx,vy,lerp(vx,x,reveal),lerp(vy,height,reveal),i%2!==0);
+      makeLine(rays,vx,vy,lerp(vx,x,reveal),lerp(vy,height*.9,reveal),i%2!==0);
     }
     for(const [x,y] of [[0,0],[width,0],[0,height*.38],[width,height*.38]])makeLine(rays,vx,vy,lerp(vx,x,reveal),lerp(vy,y,reveal),true);
     makeLine(depths,0,vy,width,vy,true);
     // Each floor row spans only the hall's own width at that depth, so it stops at the walls instead of
     // slicing across a nearer column's shaft.
     for(let i=0;i<=9;i++) {
-      const s=roomDepth(i),y=vy+(height-vy)*s,half=hallHalf(s);
+      const s=roomDepth(i),y=vy+(height*.9-vy)*s,half=hallHalf(s);
       const expansion=clamp((lineAmount-.2-i*.035)*2.5,0,1)*half;
       makeLine(depths,vx-expansion,y,vx+expansion,y,true);
     }
@@ -116,7 +116,7 @@
     const rows=[{y:vy,half:0}];
     for(let i=9;i>=0;i--) {
       const s=roomDepth(i);
-      rows.push({y:vy+(height-vy)*s,half:hallHalf(s)});
+      rows.push({y:vy+(height*.9-vy)*s,half:hallHalf(s)});
     }
     const grout=`rgba(212,178,112,${.05+lineAmount*.14})`;
     const cols=8;
@@ -160,7 +160,7 @@
     for(const i of levels) {
       const s=roomDepth(i),half=hallHalf(s);
       // Raised well past the apse's crown so even the farthest arch clears the door it frames.
-      const base=vy+(height-vy)*s,top=vy-height*1.5*s,archTop=vy-height*.42*s;
+      const lift=height*.1*s,base=vy+(height-vy)*s-lift,top=vy-height*1.5*s-lift,archTop=vy-height*.42*s-lift;
       ctx.beginPath();ctx.moveTo(vx-half,base);ctx.lineTo(vx-half,archTop);
       ctx.bezierCurveTo(vx-half,top,vx+half,top,vx+half,archTop);ctx.lineTo(vx+half,base);
       ctx.strokeStyle=i%2?'#7c6539':'#392a13';ctx.lineWidth=Math.max(1,12*s);ctx.stroke();

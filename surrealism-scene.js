@@ -2,7 +2,7 @@
   'use strict';
   // The film's timeline: a pure function of time (0–60 s) and of what the viewer has set by hand. Each chapter shows
   // something ordinary first, then breaks one rule of reality in front of the viewer:
-  //   0  낮과 밤        enter The Empire of Light; only the sky cycles through night and back to noon
+  //   0  낮과 밤        enter The Empire of Light; sky and street exchange day and night
   //   1  꿈의 논리      an ordinary room drifts into a dream: the clock melts, clouds come in, the table lifts
   //   2  데페이즈망     the same apple, grown until it fills the room
   //   3  우아한 시체    three players draw head, body and legs on paper folded so none sees the others; then it unfolds
@@ -28,7 +28,7 @@
     return {time:t,chapter:chapter(t),layers,
       dream:clamp(manual.dream??smooth(14.5,20.5,t)),
       apple:clamp(manual.apple??lerp(.18,1,smooth(26,32.5,t)),.15,1.15),appleX:clamp(manual.appleX??.5,.28,.72),appleY:clamp(manual.appleY??.53,.35,.67),orbit:lerp(-.05,.055,smooth(25,33,t)),
-      night:1,rule:1-smooth(.65,1,sky),sky,
+      night:1-sky,rule:1,sky,
       parts:corpse(manual.seed??0),...game(manual.age??t-36.8)};
   }
   function layout(width,height){return {width,height,narrow:width<650};}

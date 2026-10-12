@@ -12,7 +12,7 @@
 .img-wrap img{display:block;background:var(--cmp-bg,#0b1418);box-shadow:var(--cmp-shadow,0 12px 32px #0004)}
 .compare-tag{margin:0;font:14px/1.45 Arial,'Malgun Gothic',sans-serif;letter-spacing:.03em;text-align:center;color:var(--cmp-tag,#d4b98a);opacity:0;transition:opacity .5s ease}
 .art-compare.visible .compare-tag{opacity:1;transition-delay:3s}
-.compare-credit{margin:0;font:10.5px/1.5 Arial,'Malgun Gothic',sans-serif;letter-spacing:.03em;text-align:center;color:var(--cmp-credit,#a9a696);opacity:0;transition:opacity .5s ease}
+.compare-credit{margin:0;font:14px/1.5 Arial,'Malgun Gothic',sans-serif;letter-spacing:.03em;text-align:center;color:var(--cmp-credit,#a9a696);opacity:0;transition:opacity .5s ease}
 .art-compare.visible .compare-credit{opacity:1;transition-delay:.58s}
 .compare-note{margin:0;text-align:center;font:400 clamp(14px,1.5vw,18px)/1.5 'Nanum Myeongjo',Georgia,serif;word-break:keep-all;color:var(--cmp-ink,#eee9db);opacity:0;transform:translateY(6px);transition:opacity .6s ease,transform .6s ease}
 .art-compare.visible .compare-note{opacity:1;transform:none;transition-delay:4s}

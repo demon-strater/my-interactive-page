@@ -16,17 +16,13 @@ for(let j=0;j<=NZ;j++){const row=[];for(let i=0;i<=NX;i++){const x=-7+i*14/NX,z=
 const terrain=window.createRomanticTerrain?.(elevation);function line(c,pts,color,width=1){c.beginPath();pts.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.strokeStyle=color;c.lineWidth=width;c.stroke();}
 function poly(c,pts,color,seam=false){c.beginPath();pts.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(seam){c.strokeStyle=color;c.lineWidth=.65;c.stroke();}}
 function text(c,s,x,y,size=10,color=gold,align='left'){c.font=size+'px Arial, sans-serif';c.textAlign=align;c.fillStyle=color;c.fillText(s,x,y);}
-function wrappedText(c,value,x,y,width,size,color){
- c.font=size+'px Arial, sans-serif';const words=value.split(' ');let row='',lineY=y;
- for(const word of words){const next=row?row+' '+word:word;if(row&&c.measureText(next).width>width){text(c,row,x,lineY,size,color);row=word;lineY+=size*1.45;}else row=next;}
- if(row)text(c,row,x,lineY,size,color);
-}
+// A callout is only its short label, in the reserved text row under the spot it names, joined to it by a plain
+// vertical leader (on a phone the label keeps its own column). The longer sentence (detail) is no longer drawn.
 function callout(c,a,x,y,title,detail,color=gold){
- const size=c.studySmall?13:15,width=c.studyNoteWidth;
- // Both leaders finish above the reserved text row; neither crosses another caption.
- line(c,[a,{x:x+12,y:y-27},{x:x+12,y:y-17}],color+'88',.8);
+ const size=c.studySmall?14:15,left=c.studySmall?x:a.x-12;
+ line(c,[a,{x:left+12,y:y-17}],color+'88',.8);
  c.beginPath();c.arc(a.x,a.y,3,0,TAU);c.fillStyle=color;c.fill();
- text(c,title,x,y,size,color);wrappedText(c,detail,x,y+24,width,size,'#c0cdcc');
+ text(c,title,left,y,size,color);
 }
 function person(c,x,y,s=1,alpha=1){
  c.save();c.translate(x,y);c.scale(s,s);c.globalAlpha*=alpha;c.fillStyle='#080f12';c.strokeStyle='#bbad8c';c.lineWidth=.6;
@@ -52,7 +48,7 @@ function render(c,w,h,time,index,amount,settings={}){
  }
  const s=Math.max(1,Math.min(w*(compact?.53:.94)/(maxX-minX),stageHeight*.94/(maxY-minY)));
  const cx=w*.5-(minX+maxX)*s*.5,cy=area.top+stageHeight*.5-(minY+maxY)*s*.5;
- c.studySmall=w<500||compact;c.studyNoteWidth=w*(compact?.21:.40);
+ c.studySmall=w<500||compact;
  const zoom=index===0?mix(.86,1,p):1;
  const project=(x,y,z)=>({x:cx+(x*Math.cos(yaw)-z*Math.sin(yaw))*s*zoom*1.18,y:cy-y*s*zoom+(x*Math.sin(yaw)+z*Math.cos(yaw))*s*-.47*zoom});
  const bg=c.createLinearGradient(0,0,w,h);bg.addColorStop(0,'#101a1f');bg.addColorStop(.55,'#111b20');bg.addColorStop(1,'#070d12');c.fillStyle=bg;c.fillRect(0,0,w,h);

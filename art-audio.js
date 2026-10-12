@@ -103,9 +103,9 @@
   }
   const button = document.createElement('button');
   button.id = 'artSoundToggle'; button.type = 'button';
-  // An icon-only square like the Home square it docks beside (see dock()).
-  const resting = { right: '14px', top: '14px', width: '40px', height: '40px', background: '#171b22db', color: '#fff', borderColor: '#ffffff55', borderRadius: '10px' };
-  button.style.cssText = 'position:fixed;z-index:2147483646;box-sizing:border-box;display:grid;place-items:center;padding:0;border:1px solid;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)';
+  // A bare icon like the Home icon it docks beside (see dock()); alone (the hub's light home screen) it is dark ink.
+  const resting = { right: '14px', top: '14px', width: '40px', height: '40px', background: 'transparent', color: '#2b2620', borderColor: 'transparent', borderRadius: '0', filter: 'none' };
+  button.style.cssText = 'position:fixed;z-index:2147483646;box-sizing:border-box;display:grid;place-items:center;padding:0;border:0;cursor:pointer';
   Object.assign(button.style, resting);
   const speaker = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/>';
   const icons = { on: speaker + '<path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18.2 6.6a7.6 7.6 0 0 1 0 10.8"/></svg>', off: speaker + '<path d="m16 9.5 5 5"/><path d="m21 9.5-5 5"/></svg>' };
@@ -137,7 +137,7 @@
     if (!r || !r.width) { Object.assign(button.style, resting); return; }
     const s = getComputedStyle(home);
     Object.assign(button.style, { right: `${Math.round(innerWidth - r.left + 8)}px`, top: `${Math.round(r.top)}px`, width: `${Math.round(r.width)}px`, height: `${Math.round(r.height)}px`, borderRadius: s.borderTopLeftRadius });
-    if (!home.matches(':hover')) Object.assign(button.style, { background: s.backgroundColor, color: s.color, borderColor: s.borderTopColor });
+    if (!home.matches(':hover')) Object.assign(button.style, { background: s.backgroundColor, color: s.color, borderColor: s.borderTopColor, filter: s.filter });
   }
   addEventListener('resize', dock); document.fonts?.ready.then(dock); dock();
   const stormButton = document.getElementById('soundToggle');

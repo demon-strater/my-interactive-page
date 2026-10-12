@@ -275,6 +275,9 @@ function createStreetStudio() {
   const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:haloTexture(),color:0xffd39b,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false}));
   glow.position.copy(lampPosition);glow.position.y=3.27;glow.scale.set(2.4,2.4,1);scene.add(glow);
   const hemi=new THREE.HemisphereLight(0x8eafdb,0x182522,.47);scene.add(hemi);
+  // Daylight fill belongs to the street, independently of the impossible night sky.
+  const daylightAmbient=new THREE.AmbientLight(0xfff3db,0);scene.add(daylightAmbient);
+  const daylightFill=new THREE.DirectionalLight(0xe9f3ff,0);daylightFill.position.set(7,9,12);scene.add(daylightFill);
   const moon=new THREE.DirectionalLight(0xa6bed5,.85);moon.position.set(-6,11,7);moon.castShadow=true;
   moon.shadow.mapSize.set(2048,2048);Object.assign(moon.shadow.camera,{left:-12,right:12,top:12,bottom:-9,near:1,far:35});moon.shadow.normalBias=.045;moon.shadow.bias=-.0002;scene.add(moon);
   const lamp=new THREE.PointLight(0xffcd8c,16,10,2);lamp.position.set(.8,3.24,1.88);scene.add(lamp);
@@ -285,18 +288,21 @@ function createStreetStudio() {
   const reflectionShader={
     uniforms:THREE.UniformsUtils.clone(Reflector.ReflectorShader.uniforms),
     vertexShader:Reflector.ReflectorShader.vertexShader,
-    fragmentShader:`uniform sampler2D tDiffuse;uniform float time;varying vec4 vUv;
+    fragmentShader:`uniform sampler2D tDiffuse;uniform float time;uniform float daylight;varying vec4 vUv;
       void main(){vec2 uv=vUv.xy/vUv.w;float wave=sin(uv.y*380.+sin(uv.x*57.)*1.8+time*.7);
         vec2 offset=vec2(wave*.0008,sin(uv.y*170.+time*.4)*.0004);
         vec3 reflected=texture2D(tDiffuse,uv+offset).rgb;
         reflected+=texture2D(tDiffuse,uv+offset+vec2(.0015,0.)).rgb;reflected*=.5;
         float glint=pow(.5+.5*sin(uv.y*690.+uv.x*27.),14.)*.012;
-        gl_FragColor=vec4(reflected*vec3(.19,.25,.28)+vec3(.004,.009,.013)+glint,1.);
+        vec3 tint=mix(vec3(.19,.25,.28),vec3(.62,.74,.78),daylight);
+        vec3 ambient=mix(vec3(.004,.009,.013),vec3(.045,.095,.105),daylight);
+        gl_FragColor=vec4(reflected*tint+ambient+glint*(1.+daylight*2.),1.);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }`
   };
   reflectionShader.uniforms.time={value:0};
+  reflectionShader.uniforms.daylight={value:0};
   const water=new Reflector(new THREE.PlaneGeometry(100,55),{textureWidth:1024,textureHeight:1024,clipBias:.003,shader:reflectionShader,multisample:0});
   water.rotation.x=-Math.PI/2;water.position.set(0,-.03,30.3);scene.add(water);
 
@@ -318,7 +324,21 @@ function createStreetStudio() {
       camera.position.set(5.6*retreat,4.3*retreat,20*retreat);camera.lookAt(0,3.45,-.4);camera.updateProjectionMatrix();
     }
     skyUniforms.night.value=state.sky;
+    // The street moves toward daylight as the sky moves toward night.
+    const night=state.night,day=1-night;
+    renderer.toneMappingExposure=1.12+day*.65;
+    hemi.intensity=.47+day*7.5;
+    hemi.color.setHex(0x8eafdb).lerp(new THREE.Color(0xc9e5ff),day);
+    hemi.groundColor.setHex(0x182522).lerp(new THREE.Color(0x96937b),day);
+    moon.intensity=.85+day*7.2;
+    moon.color.setHex(0xa6bed5).lerp(new THREE.Color(0xffedce),day);
+    daylightAmbient.intensity=day*2.4;daylightFill.intensity=day*4.5;
+    lamp.intensity=16*night;pool.intensity=30*night;doorway.intensity=2.5*night;
+    warmGlass.emissiveIntensity=.85*night;curtain.emissiveIntensity=.26*night;
+    lanternGlass.emissiveIntensity=2.4*night;glow.material.opacity=night;
+    lanternGlass.color.setHex(0xffe6aa).lerp(new THREE.Color(0x667578),day);
     water.material.uniforms.time.value=state.time;
+    water.material.uniforms.daylight.value=day;
     renderer.shadowMap.autoUpdate=!shadowReady;
     renderer.render(scene,camera);shadowReady=true;
     const project=point=>{const v=point.clone().project(camera);return {x:(v.x*.5+.5)*width,y:(.5-v.y*.5)*height};};

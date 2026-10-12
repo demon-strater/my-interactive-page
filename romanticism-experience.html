@@ -19,8 +19,9 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
 .tag span{font:14px/1.6 Arial,sans-serif;letter-spacing:.18em;color:#c9d6f088}
 .tag strong{font:italic 15px Georgia,serif;font-weight:400;color:#f3e6c8;letter-spacing:.02em}
 .tag i{width:26px;height:1px;background:#c9d6f044;display:block;font-style:normal}
-.rom-back{position:absolute;bottom:5.5%;right:5%;z-index:6;display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:0 15px;border:1px solid #cfe0ff2b;border-radius:999px;background:#111c33c2;color:#e7ecfb;font:14px/1 Arial,sans-serif;letter-spacing:.06em;text-decoration:none;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.rom-back:hover{background:#1a2843d0}
+/* The way back is an underlined phrase, like every other link out of a scene — no pill behind it. */
+.rom-back{position:absolute;bottom:5.5%;right:5%;z-index:6;display:inline-flex;align-items:center;gap:10px;min-height:36px;padding:8px 0;border:0;border-bottom:1px solid #cfe0ff66;border-radius:0;background:none;color:#e7ecfb;font:14px/1 Arial,sans-serif;letter-spacing:.06em;text-decoration:none;text-shadow:0 1px 6px #000c}
+.rom-back:hover{color:#ffdf9e;border-color:#ffdf9e}
 .rom-back:focus-visible{outline:2px solid #ffdf9e;outline-offset:3px}
 .mood{position:absolute;left:4.5%;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:12px;z-index:3}
 .mood-icon{width:14px;height:14px;display:block}
@@ -32,7 +33,8 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
 #temperament::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#fff6e2;border:1px solid #caa15a}
 #temperament:focus-visible{outline:none}
 #temperament:focus-visible::-webkit-slider-thumb{outline:2px solid #ffdf9e;outline-offset:3px}
-.mood small{writing-mode:vertical-rl;font-size:14px;letter-spacing:.24em;color:#c9d6f077}
+/* The slider's two ends are named at its ends, reading across like every other label. */
+.mood small{font-size:14px;letter-spacing:.12em;color:#c9d6f0aa;white-space:nowrap}
 .wanderer-speech{position:absolute;left:53.5%;bottom:41%;transform:translateX(-50%) translateY(9px);width:min(288px,64vw);z-index:4;background:linear-gradient(180deg,#111c33e6,#0b1524ee);color:#e7ecfb;border:1px solid #cfe0ff2b;border-radius:13px;padding:12px 15px 14px;box-shadow:0 16px 40px #00000078,0 0 0 1px #ffffff10 inset;backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);font:12.5px/1.72 "Nanum Myeongjo",Georgia,serif;letter-spacing:.004em;opacity:0;transition:opacity .5s ease,transform .5s ease;pointer-events:none}
 .wanderer-speech.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .wanderer-speech::after{content:"";position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);border:9px solid transparent;border-bottom:0;border-top-color:#0b1524ee}
@@ -42,7 +44,7 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
   header{top:6%;max-width:82%}
   header h1{font-size:27px}
   .tag{bottom:13%}
-  .rom-back{bottom:12.5%;font-size:14px;padding:0 12px;min-height:32px;gap:5px}
+  .rom-back{bottom:12.5%;font-size:14px;padding:6px 0;min-height:32px;gap:8px}
   .mood{left:3%}
   .slider-wrap{width:30px;height:124px}
   #temperament{width:124px;height:30px}
@@ -55,15 +57,15 @@ header h1{font:italic clamp(24px,4.2vw,58px)/1.03 Georgia,serif;font-weight:400;
 <link rel="stylesheet" href="movement-frame.css?v=1">
 <script src="art-audio.js?v=4" defer></script></head>
 <body class="experience-chapter">
-<button class="sound-toggle" id="soundToggle" aria-pressed="true">소리 켜짐</button><div class="experience-hint">화면을 클릭하면 폭풍으로 넘어갑니다<br>누른 채 커서를 움직이면 비바람이 커서를 따라옵니다</div>
+<button class="sound-toggle" id="soundToggle" aria-pressed="true">소리 켜짐</button><div class="experience-hint">클릭하면 폭풍으로 · 누른 채 움직이면 비바람이 따라옵니다</div>
 <canvas id="scene" tabindex="0" aria-label="안개 바다 위의 방랑자. 화면을 클릭하면 고요한 새벽에서 폭풍으로 넘어갑니다. 누른 채 커서를 움직이면 비바람의 방향이 따라오고, 스크롤이나 왼쪽 슬라이더로 직접 날씨를 조절할 수도 있습니다."></canvas>
 <a class="rom-back" id="romBack" href="romanticism.html?v=1"><span>←</span> 개념 설명</a>
 <header class="mf-head"><span class="mf-eyebrow">낭만주의 / 02</span><h1 class="mf-title">안개 위의<br>방랑자.</h1></header>
-<div class="tag"><span>낭만주의 · 02</span><i></i><strong id="moodLabel">새벽</strong></div>
+<div class="tag"><strong id="moodLabel">새벽</strong></div>
 <div class="mood">
+<small aria-hidden="true">고요함</small>
 <div class="slider-wrap"><input id="temperament" type="range" min="0" max="1" step=".001" value=".16" aria-label="하늘을 고요한 새벽에서 폭풍으로 바꾸기"></div>
-<svg class="mood-icon" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 9.4a2.6 2.6 0 0 1 4.9-1.3A2.1 2.1 0 0 1 9.4 9.4H2Z" fill="#9fb2d8"/><path d="M5.6 10.4 4.4 13l1.7-.3-1 2.3" stroke="#dbe4f7" stroke-width=".9" fill="none" stroke-linecap="round"/></svg>
-<small>고요함&nbsp;—&nbsp;폭풍</small>
+<small aria-hidden="true">폭풍</small>
 </div>
 <div class="wanderer-speech" id="wandererSpeech" role="status" hidden>
 <span class="ws-kicker">낭만주의</span>

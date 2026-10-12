@@ -27,9 +27,11 @@ body.view-impressionism .surreal-room{translate:var(--memory-slide,0%) 0;transit
 .is-rolling .lever-base{box-shadow:0 0 20px #e7bc7955,inset 0 0 0 4px #e7c99088}
 .memory-nav button:disabled{opacity:.4;cursor:default}
 .memory-nav button,.memory-enter{color:inherit;border:0;border-bottom:1px solid #eadcc65c;background:transparent;padding:10px 0;cursor:pointer}
-.memory-enter{position:absolute;bottom:5%;right:6%;z-index:5;color:#fff;text-shadow:0 2px 8px #000;transition:opacity .3s}
+.memory-enter{position:absolute;bottom:5%;right:5%;z-index:5;color:#fff;text-shadow:0 2px 8px #000;transition:opacity .3s}
 .memory-open .memory-enter{opacity:0;pointer-events:none}
-.memory-enter{padding:12px 20px;border:1px solid #ffffff60;border-radius:999px;background:#080e1b66;backdrop-filter:blur(8px);letter-spacing:.1em}
+/* Forward to the corpse game is an underlined phrase like the way back (style.css .surreal-concept-back) — no pill. */
+.memory-enter{border-bottom-color:#ffffffa0;letter-spacing:.1em}
+.memory-enter:hover{color:#f6dfaa;border-bottom-color:#f6dfaa}
 .room-clock-music{position:absolute;z-index:4;left:6.3%;top:23%;width:18.5%;height:32%;border:0;border-radius:50%;padding:0;background:transparent;cursor:pointer;touch-action:none}
 body.night-background .room-clock-music{top:24%;height:50%;border-radius:48% 48% 45% 45%}
 .room-clock-music:focus-visible{outline:2px solid #f6dfaa;outline-offset:5px;box-shadow:0 0 24px #f6dfaa55}

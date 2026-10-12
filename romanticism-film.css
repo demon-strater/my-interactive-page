@@ -8,9 +8,13 @@ h1{word-break:keep-all}
 .img-wrap{overflow:hidden}
 .spot{position:absolute;border:1.4px solid var(--gold);border-radius:7px;box-shadow:0 0 0 1000px #050c1466;opacity:0;transition:opacity .6s ease;transition-delay:0s;pointer-events:none}
 .art-compare.visible .spot{opacity:.9;transition-delay:3.15s}
-.spot-label{position:absolute;transform:translate(-50%,-100%) translateY(-8px);font-family:'Nanum Myeongjo',Georgia,serif;font-size: 14px;letter-spacing:.02em;color:#fff1cf;background:#0c1520d9;padding:3px 9px;border:1px solid #d4b98a55;border-radius:3px;white-space:nowrap;text-align:center;opacity:0;transition:opacity .6s ease;transition-delay:0s;pointer-events:none}
+.spot-label{position:absolute;transform:translate(-50%,-100%) translateY(-8px);font-family:'Nanum Myeongjo',Georgia,serif;font-size: 14px;letter-spacing:.02em;color:#fff1cf;padding:0 2px;text-shadow:0 1px 2px #000,0 0 12px #000d;white-space:nowrap;text-align:center;opacity:0;transition:opacity .6s ease;transition-delay:0s;pointer-events:none}
 .art-compare.visible .spot-label{opacity:1;transition-delay:3.5s}
 @media(max-width:700px){.caption{font-size: 14px;margin-top:10px}}
 /* Phones: the caption beside the painting carries the point, so the on-painting label is dropped. */
 @media(max-width:600px){.spot-label{display:none}}
 @media(prefers-reduced-motion:reduce){.spot,.spot-label{transition:none!important}}@media(max-width:700px){.concept-control{top:145px;bottom:auto;width:260px;background:#07101b38;padding:10px 12px;backdrop-filter:blur(4px);border-radius:3px}.concept-control label{margin-bottom:7px}.concept-control span{color:#f1eee6}}
+/* The chapter sentence under the title is read to screen readers only: the scene shows the title and short labels. */
+#sceneStatus{position:absolute;width:1px;height:1px;margin:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+/* The three concept films share one title size (also in surrealism-film.css), a notch under the movement pages' headings. */
+body{--mf-title:clamp(22px,2.1vw,32px)}

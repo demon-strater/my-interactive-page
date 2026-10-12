@@ -15,7 +15,7 @@
      --label-ink, --label-muted, --label-accent, --label-glow   the caption (and the marks under it)
      --frame, --frame-w, --frame-shadow, --blank                each work's frame and what shows inside it while it waits
      the world's own: --line (prospettiva), --air (plein-air), --fog, --rock (sublime), --sky-*, --night (dream)
-   The arrows wear the Home square's colours (--home-ink, --home-bg, --home-line from home-button.css). */
+   The arrows are bare chevrons in the Home icon's colour (--home-ink from home-button.css), with no square behind them. */
 body.finale-page{margin:0;height:100dvh;min-height:320px;overflow:hidden;font-family:Arial,'Malgun Gothic',sans-serif}
 body.finale-page > main{position:relative;height:100%}
 .museum{--nav-h:60px;--cap-gap:18px;--cap-w:min(640px,88cqw);--base:70cqh;position:absolute;inset:0;z-index:0;container-type:size;isolation:isolate;overflow:hidden}
@@ -109,9 +109,9 @@ body.finale-page > main{position:relative;height:100%}
 .museum-marks button[aria-current=true]::before{width:26px;opacity:1;background:var(--label-ink,#efe6d4)}
 .museum-marks button:focus-visible{outline:2px solid var(--label-ink,#efe6d4);outline-offset:-4px}
 
-/* Side arrows, in the same square as Home, level with the works; at either end the one leading nowhere goes away. */
-.museum-step{position:absolute;top:var(--arrow-y,50%);z-index:5;box-sizing:border-box;display:grid;place-items:center;width:44px;height:44px;min-width:0;min-height:0;margin:-22px 0 0;padding:0;border:1px solid var(--home-line,#ffffff38);border-radius:10px;background:var(--home-bg,#0d1420b8);color:var(--home-ink,#f2ede2);cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:opacity .3s,transform .18s}
-.museum-step svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+/* Side arrows, bare chevrons like the Home icon, level with the works; at either end the one leading nowhere goes away. */
+.museum-step{position:absolute;top:var(--arrow-y,50%);z-index:5;box-sizing:border-box;display:grid;place-items:center;width:44px;height:44px;min-width:0;min-height:0;margin:-22px 0 0;padding:0;border:0;border-radius:0;background:none;color:var(--home-ink,#f2ede2);cursor:pointer;filter:drop-shadow(0 1px 3px #000000a6);transition:opacity .3s,transform .18s}
+.museum-step svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .museum-step.prev{left:max(14px,2.2cqw)}
 .museum-step.next{right:max(14px,2.2cqw)}
 .museum-step:hover{transform:translateY(-1px)}

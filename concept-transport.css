@@ -1,7 +1,10 @@
 /* Shared compact controls keep both concept studies anchored to the bottom. */
-.film-footer{margin:0 4.5%;padding:8px 0 max(12px,env(safe-area-inset-bottom));}
-/* A one-line "where am I" caption stays visible even while a comparison hides the masthead. */
+.film-footer{margin:0 5%;padding:8px 0 max(12px,env(safe-area-inset-bottom));}
+/* The chapter's title is already the masthead and the active chapter number is lit below, so the old one-line caption
+   repeating the title stays hidden; the row remains only where it carries a hint (Romanticism's drag hint). */
 .footer-meta{display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin:0 0 9px;min-height:15px}
+.footer-meta #sceneCaption{display:none}
+.footer-meta:not(:has(#dragHint)){display:none}
 .footer-meta #sceneCaption{margin:0;font:14px/1.4 Arial,'Malgun Gothic',sans-serif;letter-spacing:.02em;color:#a4b4b3;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .footer-meta #sceneCaption b{font-weight:400;color:#d4b98a;margin-right:8px}
 .footer-meta #dragHint{margin:0;flex:none}
@@ -9,14 +12,21 @@
 .film-footer #filmFill{height:1px;background:#d4b98a}
 .film-footer .transport{display:flex;align-items:center;gap:12px;flex-wrap:nowrap;min-height:38px}
 .film-footer .transport button{font:14px Arial,sans-serif;padding:4px;min-width:32px;min-height:36px;color:#b9c7c6}
-.film-footer .transport #playPause{width:36px;min-width:36px;height:36px;border:1px solid #d9d2bd50;border-radius:50%;font-size:15px;letter-spacing:0}
-.film-footer .transport #replay{font-size:22px}
+/* Play, pause and replay are drawn as icons with no ring, the same in all three concept films. The films still write a
+   glyph into the button; it is hidden, and the state is read from the label they set ("…일시정지" while playing,
+   "…다시 재생" once Romanticism's film has ended). */
+.film-footer .transport #playPause,.film-footer .transport #replay{display:grid;place-items:center;width:36px;min-width:36px;height:36px;padding:0;border:0;border-radius:0;font-size:0;color:#ecdfc5}
+.film-footer .transport #playPause::before{content:"";width:12px;height:14px;background:currentColor;clip-path:polygon(10% 0,100% 50%,10% 100%)}
+.film-footer .transport #playPause[aria-label$="일시정지"]::before{width:11px;clip-path:none;background:linear-gradient(90deg,currentColor 0 35%,transparent 35% 65%,currentColor 65%)}
+.film-footer .transport #replay::before,.film-footer .transport #playPause[aria-label$="다시 재생"]::before{content:"";width:19px;height:19px;clip-path:none;background:currentColor;-webkit-mask:var(--replay-icon) center/contain no-repeat;mask:var(--replay-icon) center/contain no-repeat}
+.film-footer .transport{--replay-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12a7 7 0 1 0 2.05-4.95'/%3E%3Cpath d='M5 4.5v4h4'/%3E%3C/svg%3E")}
+.film-footer .transport #playPause:hover,.film-footer .transport #replay:hover{color:#f5ddb0}
 .film-footer #filmTime{font:14px monospace;color:#9aacad;white-space:nowrap}
 .film-footer #progress,.film-footer .study-chapters{display:flex;flex:1;justify-content:center;align-items:center;gap:18px;margin:0;max-width:none;order:0;flex-basis:auto}
 .film-footer #progress button,.film-footer .study-chapters button{font-size: 14px;letter-spacing:.06em}
 .film-footer .study-chapters button.active::before{content:none}
 .film-footer .transport button.active{color:#f5ddb0}
-.film-footer .next-experience,.film-footer .rom-next{position:static;margin:0;font:14px Arial,sans-serif;white-space:nowrap;color:#ecdfc5;text-decoration:none;border:0;border-bottom:1px solid #dfc59b55;padding:9px 0}
+.film-footer .next-experience,.film-footer .rom-next{position:static;display:inline-flex;align-items:center;gap:10px;margin:0;font:14px Arial,sans-serif;white-space:nowrap;color:#ecdfc5;text-decoration:none;border:0;border-bottom:1px solid #dfc59b55;padding:9px 0}
 @media(max-width:700px){
  .film-footer{margin:0 5%;padding-bottom:max(10px,env(safe-area-inset-bottom))}
  .film-footer .transport{gap:5px;flex-wrap:nowrap}

@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const siteTransition = document.getElementById('siteTransition');
     const backToShelf = document.getElementById('backToShelf');
     const pullChain = document.getElementById('pullChain');
+    const hubPagerIndex = document.getElementById('hubPagerIndex');
+    const hubPagerTotal = document.getElementById('hubPagerTotal');
     const leftArrow = document.getElementById('leftArrow');
     const rightArrow = document.getElementById('rightArrow');
     const playPauseBtn = document.getElementById('playPauseBtn');
@@ -288,6 +290,10 @@ document.addEventListener('DOMContentLoaded', () => {
         featureHour.textContent = interaction.hour.toString().padStart(2, '0');
         featureTitle.textContent = interaction.title;
         featureMeta.textContent = interaction.meta;
+        if (hubPagerIndex) {
+            hubPagerIndex.textContent = String(activeIndex + 1).padStart(2, '0');
+            hubPagerTotal.textContent = String(cardCount).padStart(2, '0');
+        }
         if (hubScreen) {
             hubScreen.dataset.movement = movementKey(interaction.title);
         }
@@ -748,9 +754,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (interaction.site === 'impressionism') {
             isNight = false;
-            surrealFilmFrame.src = 'surrealism-film.html?v=4';
-            surrealFilmFrame.hidden = false;
-            body.classList.add('showing-surreal-film');
+            showSurrealFilm();
         } else {
             pauseAllMusic();
             body.classList.remove('night-background');
@@ -872,6 +876,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const surrealFinaleFrame = document.querySelector('.surreal-finale-frame');
     const surrealFilmFrame = document.querySelector('.surreal-film-frame');
     let openSite = null, finaleShown = false;
+
+    function showSurrealFilm(enterStudy = false) {
+        pauseAllMusic();
+        surrealFilmFrame.src = 'surrealism-film.html?v=concept-restore-1' + (enterStudy ? '&study=1' : '');
+        surrealFilmFrame.hidden = false;
+        body.classList.add('showing-surreal-film');
+    }
+
+    document.getElementById('surrealConceptBack').addEventListener('click', () => {
+        if (openSite === 'impressionism' && !finaleShown) showSurrealFilm(true);
+    });
 
     function hideSurrealFilm() {
         surrealFilmFrame.hidden = true;
@@ -1529,6 +1544,14 @@ document.addEventListener('DOMContentLoaded', () => {
     [morningMusic, nightMusic].forEach(audio => {
         audio.addEventListener('loadedmetadata', updateProgress);
         audio.addEventListener('timeupdate', updateProgress);
+    });
+
+    // The pager under the card steps the orbit one movement at a time: down brings the card below to the front.
+    document.querySelectorAll('.hub-pager-step').forEach(button => {
+        button.addEventListener('click', () => {
+            carouselTargetOffset += Number(button.dataset.step);
+            requestTimelineState();
+        });
     });
 
     if (leftArrow) leftArrow.addEventListener('click', goLeft);
